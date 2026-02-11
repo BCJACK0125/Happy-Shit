@@ -1,0 +1,736 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Happy Shit | 登入</title>
+  <style>
+    :root {
+      --primary: #6B4F3F;
+      --bg: #FFF7E9;
+      --accent: #FFD166;
+      --mint: #4ECDC4;
+      --text: #1f1f1f;
+      --muted: #8A8A8A;
+      --card: #ffffff;
+      --shadow: 0 10px 30px rgba(0,0,0,0.08);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Inter", "Noto Sans TC", "SF Pro Text", "Segoe UI", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .app {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    header {
+      padding: 18px 18px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      font-weight: 800;
+      letter-spacing: 0.2px;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .pill {
+      font-size: 12px;
+      color: var(--primary);
+      background: rgba(107, 79, 63, 0.12);
+      padding: 6px 10px;
+      border-radius: 999px;
+      user-select: none;
+    }
+
+    main {
+      flex: 1;
+      padding: 0 18px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      max-width: 520px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+
+    .animWrap {
+      height: 220px;
+      display: grid;
+      place-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .toilet {
+      width: 210px;
+      height: 110px;
+      border-radius: 22px;
+      background: linear-gradient(180deg, #ffffff, #f2f2f2);
+      border: 2px solid rgba(0,0,0,0.06);
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.10);
+    }
+
+    .toilet:before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 16px;
+      transform: translateX(-50%);
+      width: 150px;
+      height: 62px;
+      border-radius: 999px;
+      background: #fff;
+      border: 2px solid rgba(0,0,0,0.05);
+      box-shadow: inset 0 8px 18px rgba(0,0,0,0.06);
+    }
+
+    .poop {
+      width: 84px;
+      height: 84px;
+      border-radius: 26px;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.35), rgba(255,255,255,0) 40%),
+        linear-gradient(180deg, #7a5643, #5e4032);
+      position: absolute;
+      left: 50%;
+      top: -100px;
+      transform: translateX(-50%);
+      display: grid;
+      place-items: center;
+      animation: drop 1.6s ease-in-out forwards;
+    }
+
+    .poop .face {
+      width: 48px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 6px;
+    }
+
+    .eye {
+      width: 10px;
+      height: 10px;
+      background: rgba(0,0,0,0.55);
+      border-radius: 999px;
+    }
+
+    .smile {
+      width: 22px;
+      height: 10px;
+      border-bottom: 3px solid rgba(0,0,0,0.50);
+      border-radius: 0 0 16px 16px;
+      margin: 0 auto;
+    }
+
+    @keyframes drop {
+      0% { top: -120px; transform: translateX(-50%) scale(0.9); }
+      65% { top: 88px; transform: translateX(-50%) scale(1.02); }
+      78% { top: 70px; transform: translateX(-50%) scale(0.98); }
+      100% { top: 84px; transform: translateX(-50%) scale(1.0); }
+    }
+
+    .fadeIn {
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 320ms ease, transform 320ms ease;
+    }
+    .fadeIn.ready {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .sectionTitle {
+      font-weight: 800;
+      color: var(--primary);
+      margin: 0 0 10px;
+      font-size: 16px;
+    }
+
+    .muted { color: var(--muted); font-size: 13px; }
+
+    .carousel {
+      position: relative;
+      overflow: hidden;
+      padding: 12px 0 4px;
+    }
+
+    .track {
+      display: flex;
+      gap: 12px;
+      touch-action: pan-y;
+      will-change: transform;
+    }
+
+    .roleCard {
+      flex: 0 0 76%;
+      background: #fff;
+      border-radius: 20px;
+      padding: 14px;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.10);
+      border: 2px solid rgba(107, 79, 63, 0.10);
+      transform: scale(0.94);
+      transition: transform 200ms ease, border-color 200ms ease;
+    }
+
+    .roleCard.active {
+      transform: scale(1);
+      border-color: rgba(78, 205, 196, 0.65);
+    }
+
+    .roleTop {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .avatar {
+      width: 54px;
+      height: 54px;
+      border-radius: 16px;
+      background: rgba(78, 205, 196, 0.18);
+      display: grid;
+      place-items: center;
+      font-size: 28px;
+      border: 2px solid rgba(78,205,196,0.35);
+      user-select: none;
+    }
+
+    .roleName {
+      font-weight: 900;
+      font-size: 16px;
+      line-height: 1.2;
+    }
+
+    .salary {
+      font-variant-numeric: tabular-nums;
+      color: rgba(107,79,63,0.85);
+      font-weight: 700;
+      margin-top: 4px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-weight: 900;
+      font-size: 14px;
+      cursor: pointer;
+      width: 100%;
+      min-height: 44px;
+    }
+
+    .btnPrimary {
+      background: var(--accent);
+      color: #2b231c;
+      box-shadow: 0 10px 22px rgba(255, 209, 102, 0.45);
+    }
+
+    .btnGhost {
+      background: transparent;
+      color: var(--primary);
+      border: 2px solid rgba(107,79,63,0.25);
+    }
+
+    .sheet {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      transform: translateY(110%);
+      transition: transform 240ms ease;
+      background: rgba(255, 247, 233, 0.98);
+      border-top-left-radius: 22px;
+      border-top-right-radius: 22px;
+      box-shadow: 0 -18px 40px rgba(0,0,0,0.15);
+      padding: 14px 18px 18px;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    .sheet.open { transform: translateY(0); }
+
+    .sheetHeader {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding-bottom: 10px;
+    }
+
+    .sheetHeader .title {
+      font-weight: 900;
+      color: var(--primary);
+    }
+
+    .xBtn {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: rgba(107,79,63,0.10);
+      color: var(--primary);
+      font-weight: 900;
+    }
+
+    .gridAvatars {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      margin: 10px 0 12px;
+    }
+
+    .avaPick {
+      height: 52px;
+      border-radius: 16px;
+      background: #fff;
+      border: 2px solid rgba(0,0,0,0.06);
+      display: grid;
+      place-items: center;
+      font-size: 26px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .avaPick.selected {
+      border-color: rgba(78,205,196,0.9);
+      box-shadow: 0 10px 22px rgba(78,205,196,0.25);
+    }
+
+    label { display: block; font-size: 12px; color: var(--muted); margin-top: 10px; }
+    input, select, textarea {
+      width: 100%;
+      padding: 12px 12px;
+      border-radius: 14px;
+      border: 2px solid rgba(0,0,0,0.08);
+      background: #fff;
+      outline: none;
+      min-height: 44px;
+      font-size: 14px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .hint { font-size: 12px; color: var(--muted); margin-top: 8px; }
+    .error { font-size: 12px; color: #b00020; margin-top: 8px; }
+
+    .footerSafe {
+      padding: 10px 18px 20px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    @media (max-width: 420px) {
+      .roleCard { flex-basis: 84%; }
+      .gridAvatars { grid-template-columns: repeat(4, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="brand">
+        <span style="font-size:18px;">💩</span>
+        <span>Happy Shit</span>
+      </div>
+      <div class="pill">屎地圖 v0</div>
+    </header>
+
+    <main>
+      <section class="card animWrap">
+        <div class="poop" aria-label="poop animation">
+          <div class="face">
+            <div class="eye"></div>
+            <div class="eye"></div>
+          </div>
+          <div class="smile"></div>
+        </div>
+        <div class="toilet" aria-hidden="true"></div>
+      </section>
+
+      <section id="roleSection" class="card fadeIn">
+        <p class="sectionTitle">選擇角色</p>
+        <p class="muted" style="margin:0 0 10px;">左右滑動卡片，畫面中央的角色會被選取。</p>
+
+        <div class="carousel" id="carousel">
+          <div class="track" id="track"></div>
+        </div>
+
+        <div class="actions">
+          <button class="btnPrimary" id="btnLogin">以此角色登入</button>
+          <button class="btnGhost" id="btnNew">新增角色</button>
+        </div>
+        <div class="hint" id="hint"></div>
+      </section>
+    </main>
+
+    <div class="footerSafe">資料儲存在本機 LocalStorage；清除瀏覽器資料會消失。</div>
+
+    <section class="sheet" id="sheet" aria-hidden="true">
+      <div class="sheetHeader">
+        <div class="title">新增角色</div>
+        <button class="xBtn" id="btnClose" aria-label="close">✕</button>
+      </div>
+
+      <div>
+        <div class="muted">步驟 1：選擇頭像</div>
+        <div class="gridAvatars" id="avatarGrid"></div>
+
+        <div class="muted" style="margin-top:8px;">步驟 2：輸入基本資料</div>
+        <label for="roleId">角色 ID（必填）</label>
+        <input id="roleId" placeholder="例如：社畜小王" maxlength="20" />
+
+        <div class="row">
+          <div>
+            <label for="salary">月薪（必填）</label>
+            <input id="salary" type="number" inputmode="numeric" placeholder="45000" min="0" />
+          </div>
+          <div>
+            <label for="currency">幣別</label>
+            <select id="currency">
+              <option value="NT$">NT$</option>
+              <option value="$">$</option>
+              <option value="¥">¥</option>
+              <option value="€">€</option>
+            </select>
+          </div>
+        </div>
+
+        <label for="note">備註（選填）</label>
+        <input id="note" placeholder="例如：咖啡社畜" maxlength="30" />
+
+        <div class="error" id="formError" style="display:none;"></div>
+        <div style="margin-top:12px;">
+          <button class="btnPrimary" id="btnCreate">完成建立</button>
+        </div>
+        <div class="hint">建立後會回到角色輪播列表。</div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const LS_KEYS = {
+      characters: 'happyshit.characters.v1',
+      records: 'happyshit.records.v1',
+      lastRole: 'happyshit.lastRoleId.v1'
+    };
+
+    const AVATARS = ['🧑\u200d💼','🧑\u200d🎓','🧑\u200d🦾','🧑\u200d🍳','🧑\u200d💻','🧑\u200d🚀','🧑\u200d🎨','🧑\u200d🏃','🧑\u200d🌾','🧑\u200d🔧'];
+
+    function nowTs() { return Date.now(); }
+    function uid() { return Math.random().toString(16).slice(2) + '-' + Date.now().toString(16); }
+
+    function loadJson(key, fallback) {
+      try {
+        const raw = localStorage.getItem(key);
+        if (!raw) return fallback;
+        return JSON.parse(raw);
+      } catch {
+        return fallback;
+      }
+    }
+
+    function saveJson(key, value) {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+
+    function formatMoney(currency, amount) {
+      const num = Number(amount);
+      if (!Number.isFinite(num)) return `${currency} 0`;
+      const rounded = Math.round(num);
+      return `${currency} ${rounded.toLocaleString('en-US')}`;
+    }
+
+    function ensureSeed() {
+      let characters = loadJson(LS_KEYS.characters, null);
+      if (Array.isArray(characters) && characters.length) return;
+
+      characters = [
+        { id: '社畜小王', avatar: '🧑\u200d💼', monthlySalary: 45000, currency: 'NT$', note: '咖啡社畜', createdAt: nowTs() },
+        { id: '健身小美', avatar: '🧑\u200d🦾', monthlySalary: 52000, currency: 'NT$', note: '健身少女', createdAt: nowTs() },
+        { id: '學生阿哲', avatar: '🧑\u200d🎓', monthlySalary: 12000, currency: 'NT$', note: '被期末追殺', createdAt: nowTs() }
+      ];
+      saveJson(LS_KEYS.characters, characters);
+      saveJson(LS_KEYS.records, []);
+      localStorage.setItem(LS_KEYS.lastRole, characters[0].id);
+    }
+
+    const elRoleSection = document.getElementById('roleSection');
+    const elTrack = document.getElementById('track');
+    const elHint = document.getElementById('hint');
+    const elSheet = document.getElementById('sheet');
+
+    const elBtnLogin = document.getElementById('btnLogin');
+    const elBtnNew = document.getElementById('btnNew');
+    const elBtnClose = document.getElementById('btnClose');
+
+    const elAvatarGrid = document.getElementById('avatarGrid');
+    const elRoleId = document.getElementById('roleId');
+    const elSalary = document.getElementById('salary');
+    const elCurrency = document.getElementById('currency');
+    const elNote = document.getElementById('note');
+    const elBtnCreate = document.getElementById('btnCreate');
+    const elFormError = document.getElementById('formError');
+
+    let characters = [];
+    let selectedIndex = 0;
+    let isDragging = false;
+    let dragStartX = 0;
+    let dragStartTranslate = 0;
+    let currentTranslate = 0;
+
+    function openSheet() {
+      elSheet.classList.add('open');
+      elSheet.setAttribute('aria-hidden', 'false');
+      elFormError.style.display = 'none';
+      elRoleId.value = '';
+      elSalary.value = '';
+      elCurrency.value = 'NT$';
+      elNote.value = '';
+      selectAvatar(AVATARS[0]);
+    }
+
+    function closeSheet() {
+      elSheet.classList.remove('open');
+      elSheet.setAttribute('aria-hidden', 'true');
+    }
+
+    let selectedAvatar = AVATARS[0];
+    function selectAvatar(ava) {
+      selectedAvatar = ava;
+      [...elAvatarGrid.querySelectorAll('.avaPick')].forEach(btn => {
+        btn.classList.toggle('selected', btn.dataset.ava === ava);
+      });
+    }
+
+    function renderAvatarPicker() {
+      elAvatarGrid.innerHTML = '';
+      for (const ava of AVATARS) {
+        const btn = document.createElement('div');
+        btn.className = 'avaPick' + (ava === selectedAvatar ? ' selected' : '');
+        btn.textContent = ava;
+        btn.dataset.ava = ava;
+        btn.addEventListener('click', () => selectAvatar(ava));
+        elAvatarGrid.appendChild(btn);
+      }
+    }
+
+    function renderCarousel() {
+      elTrack.innerHTML = '';
+      characters = loadJson(LS_KEYS.characters, []);
+      const lastRoleId = localStorage.getItem(LS_KEYS.lastRole);
+      selectedIndex = Math.max(0, characters.findIndex(c => c.id === lastRoleId));
+      if (selectedIndex < 0) selectedIndex = 0;
+
+      for (const c of characters) {
+        const card = document.createElement('div');
+        card.className = 'roleCard';
+        card.innerHTML = `
+          <div class="roleTop">
+            <div class="avatar" aria-hidden="true">${c.avatar}</div>
+            <div>
+              <div class="roleName">${escapeHtml(c.id)}</div>
+              <div class="salary">${formatMoney(c.currency || 'NT$', c.monthlySalary)} / 月</div>
+              <div class="muted" style="margin-top:6px;">${escapeHtml(c.note || '')}</div>
+            </div>
+          </div>
+        `;
+        elTrack.appendChild(card);
+      }
+
+      snapToIndex(selectedIndex, true);
+      updateActiveCard();
+    }
+
+    function escapeHtml(s) {
+      return String(s)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function carouselWidth() {
+      const carousel = document.getElementById('carousel');
+      return carousel.getBoundingClientRect().width;
+    }
+
+    function cardStride() {
+      const first = elTrack.querySelector('.roleCard');
+      if (!first) return 0;
+      const style = getComputedStyle(elTrack);
+      const gap = parseFloat(style.columnGap || style.gap || '12') || 12;
+      return first.getBoundingClientRect().width + gap;
+    }
+
+    function snapToIndex(idx, immediate = false) {
+      const stride = cardStride();
+      const viewport = carouselWidth();
+      const offsetToCenter = (viewport * 0.5) - (stride * 0.5);
+      currentTranslate = offsetToCenter - idx * stride;
+
+      elTrack.style.transition = immediate ? 'none' : 'transform 220ms ease';
+      elTrack.style.transform = `translateX(${currentTranslate}px)`;
+      if (immediate) {
+        requestAnimationFrame(() => { elTrack.style.transition = 'transform 220ms ease'; });
+      }
+
+      selectedIndex = idx;
+      updateActiveCard();
+      const role = characters[selectedIndex];
+      if (role) {
+        localStorage.setItem(LS_KEYS.lastRole, role.id);
+        elHint.textContent = `目前選取：${role.id}`;
+      }
+    }
+
+    function updateActiveCard() {
+      const cards = [...elTrack.querySelectorAll('.roleCard')];
+      cards.forEach((card, idx) => card.classList.toggle('active', idx === selectedIndex));
+    }
+
+    function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
+
+    function onPointerDown(e) {
+      if (!characters.length) return;
+      isDragging = true;
+      elTrack.style.transition = 'none';
+      dragStartX = (e.touches ? e.touches[0].clientX : e.clientX);
+      dragStartTranslate = currentTranslate;
+    }
+
+    function onPointerMove(e) {
+      if (!isDragging) return;
+      const x = (e.touches ? e.touches[0].clientX : e.clientX);
+      const dx = x - dragStartX;
+      currentTranslate = dragStartTranslate + dx;
+      elTrack.style.transform = `translateX(${currentTranslate}px)`;
+      e.preventDefault?.();
+    }
+
+    function onPointerUp() {
+      if (!isDragging) return;
+      isDragging = false;
+
+      const stride = cardStride();
+      const viewport = carouselWidth();
+      const offsetToCenter = (viewport * 0.5) - (stride * 0.5);
+      const rawIdx = (offsetToCenter - currentTranslate) / stride;
+      const idx = clamp(Math.round(rawIdx), 0, Math.max(0, characters.length - 1));
+      snapToIndex(idx);
+    }
+
+    function createCharacter() {
+      const id = elRoleId.value.trim();
+      const salary = Number(elSalary.value);
+      const currency = elCurrency.value || 'NT$';
+      const note = elNote.value.trim();
+
+      if (!id) return showError('角色 ID 不能空白');
+      if (id.length < 2) return showError('角色 ID 太短（至少 2 個字）');
+      if (!Number.isFinite(salary) || salary <= 0) return showError('月薪需為大於 0 的數字');
+
+      const existing = loadJson(LS_KEYS.characters, []);
+      if (existing.some(c => c.id === id)) return showError('角色 ID 已存在，請換一個');
+
+      existing.push({
+        id,
+        avatar: selectedAvatar,
+        monthlySalary: salary,
+        currency,
+        note,
+        createdAt: nowTs()
+      });
+
+      saveJson(LS_KEYS.characters, existing);
+      localStorage.setItem(LS_KEYS.lastRole, id);
+      closeSheet();
+      renderCarousel();
+    }
+
+    function showError(msg) {
+      elFormError.textContent = msg;
+      elFormError.style.display = 'block';
+    }
+
+    function loginSelected() {
+      const role = characters[selectedIndex];
+      if (!role) return;
+      localStorage.setItem(LS_KEYS.lastRole, role.id);
+      location.href = `HappyShit.html?role=${encodeURIComponent(role.id)}`;
+    }
+
+    function setupCarouselEvents() {
+      const carousel = document.getElementById('carousel');
+      carousel.addEventListener('mousedown', onPointerDown);
+      carousel.addEventListener('mousemove', onPointerMove);
+      window.addEventListener('mouseup', onPointerUp);
+
+      carousel.addEventListener('touchstart', onPointerDown, { passive: false });
+      carousel.addEventListener('touchmove', onPointerMove, { passive: false });
+      carousel.addEventListener('touchend', onPointerUp);
+      carousel.addEventListener('touchcancel', onPointerUp);
+
+      window.addEventListener('resize', () => snapToIndex(selectedIndex, true));
+    }
+
+    function init() {
+      ensureSeed();
+      renderAvatarPicker();
+      renderCarousel();
+      setupCarouselEvents();
+
+      elBtnNew.addEventListener('click', openSheet);
+      elBtnClose.addEventListener('click', closeSheet);
+      elBtnCreate.addEventListener('click', createCharacter);
+      elBtnLogin.addEventListener('click', loginSelected);
+
+      // show role UI after animation settles
+      setTimeout(() => elRoleSection.classList.add('ready'), 1200);
+
+      // If already have a last role and want quick enter
+      const lastRole = localStorage.getItem(LS_KEYS.lastRole);
+      if (lastRole) elHint.textContent = `上次使用：${lastRole}`;
+    }
+
+    init();
+  </script>
+</body>
+</html>
