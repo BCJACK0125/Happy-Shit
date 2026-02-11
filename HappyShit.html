@@ -1,0 +1,1671 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Happy Shit | 主頁</title>
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+  <style>
+    :root {
+      --primary: #6B4F3F;
+      --bg: #FFF7E9;
+      --accent: #FFD166;
+      --mint: #4ECDC4;
+      --text: #1f1f1f;
+      --muted: #8A8A8A;
+      --card: #ffffff;
+      --shadow: 0 10px 30px rgba(0,0,0,0.08);
+      --radius: 18px;
+      --danger: #b00020;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Inter", "Noto Sans TC", "SF Pro Text", "Segoe UI", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .app {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      max-width: 520px;
+      margin: 0 auto;
+      background: var(--bg);
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      padding: 12px 14px 10px;
+      background: rgba(255, 247, 233, 0.92);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(107,79,63,0.12);
+    }
+
+    .topRow {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .roleBadge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      background: rgba(78, 205, 196, 0.18);
+      border: 2px solid rgba(78,205,196,0.35);
+      display: grid;
+      place-items: center;
+      font-size: 22px;
+      user-select: none;
+      flex: 0 0 auto;
+    }
+
+    .roleText {
+      min-width: 0;
+    }
+
+    .roleId {
+      font-weight: 900;
+      color: var(--primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 14px;
+    }
+
+    .roleMeta {
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .statsPill {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      flex: 0 0 auto;
+    }
+
+    .pillValue {
+      font-weight: 900;
+      color: var(--primary);
+      font-size: 14px;
+      line-height: 1.1;
+    }
+
+    .pillLabel {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .content {
+      flex: 1;
+      padding: 12px 14px 78px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .title {
+      margin: 0 0 10px;
+      font-weight: 900;
+      color: var(--primary);
+      font-size: 16px;
+    }
+
+    .muted { color: var(--muted); font-size: 13px; }
+
+    /* Tabs */
+    .tabBar {
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 0;
+      width: 100%;
+      max-width: 520px;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+      padding: 8px 8px 10px;
+      background: rgba(255, 247, 233, 0.95);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(107,79,63,0.12);
+      z-index: 30;
+    }
+
+    .tabBtn {
+      border: 0;
+      background: transparent;
+      padding: 10px 6px;
+      border-radius: 14px;
+      min-height: 52px;
+      cursor: pointer;
+      color: var(--primary);
+      display: grid;
+      place-items: center;
+      gap: 2px;
+      font-weight: 900;
+      font-size: 11px;
+    }
+
+    .tabBtn .ico { font-size: 18px; line-height: 1; }
+
+    .tabBtn.active {
+      background: rgba(255, 209, 102, 0.55);
+      box-shadow: 0 10px 22px rgba(255, 209, 102, 0.25);
+    }
+
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* Map */
+    #map {
+      height: 60vh;
+      min-height: 360px;
+      border-radius: 18px;
+      overflow: hidden;
+      border: 2px solid rgba(107,79,63,0.10);
+    }
+
+    .chipRow {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: rgba(107,79,63,0.08);
+      color: var(--primary);
+      font-weight: 900;
+      font-size: 12px;
+      border: 1px solid rgba(107,79,63,0.12);
+    }
+
+    .chip button {
+      border: 0;
+      background: transparent;
+      font-weight: 900;
+      cursor: pointer;
+      color: var(--primary);
+      padding: 0;
+      min-height: unset;
+    }
+
+    .panel {
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 16px;
+      background: rgba(255, 247, 233, 1);
+      border: 1px solid rgba(107,79,63,0.15);
+    }
+
+    .checkList {
+      display: grid;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .checkItem {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: #fff;
+      border: 2px solid rgba(0,0,0,0.06);
+    }
+
+    .checkItem .left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      background: var(--mint);
+      flex: 0 0 auto;
+    }
+
+    /* Forms */
+    label { display: block; font-size: 12px; color: var(--muted); margin-top: 10px; }
+    input, select, textarea {
+      width: 100%;
+      padding: 12px 12px;
+      border-radius: 14px;
+      border: 2px solid rgba(0,0,0,0.08);
+      background: #fff;
+      outline: none;
+      min-height: 44px;
+      font-size: 14px;
+    }
+
+    textarea { min-height: 80px; resize: vertical; }
+
+    .btnRow {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 14px;
+      padding: 12px 12px;
+      font-weight: 900;
+      font-size: 14px;
+      cursor: pointer;
+      min-height: 44px;
+    }
+
+    .btnPrimary { background: var(--accent); color: #2b231c; }
+    .btnGhost { background: transparent; border: 2px solid rgba(107,79,63,0.25); color: var(--primary); }
+    .btnMint { background: rgba(78,205,196,0.22); border: 2px solid rgba(78,205,196,0.35); color: #0f3a37; }
+    .btnDanger { background: rgba(176,0,32,0.10); border: 2px solid rgba(176,0,32,0.25); color: var(--danger); }
+
+    .seg {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .seg button {
+      border: 2px solid rgba(107,79,63,0.18);
+      background: #fff;
+      border-radius: 16px;
+      padding: 12px 10px;
+      min-height: 52px;
+      font-weight: 900;
+      cursor: pointer;
+      color: var(--primary);
+    }
+
+    .seg button.active {
+      border-color: rgba(78,205,196,0.8);
+      box-shadow: 0 12px 24px rgba(78,205,196,0.18);
+    }
+
+    .bigNumber {
+      font-variant-numeric: tabular-nums;
+      font-weight: 1000;
+      font-size: 28px;
+      color: var(--primary);
+      text-align: center;
+      letter-spacing: 0.2px;
+    }
+
+    .timerRow {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .timerBtns {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+    }
+
+    .error { color: var(--danger); font-size: 12px; margin-top: 8px; }
+    .success { color: #0b6b62; font-size: 12px; margin-top: 8px; }
+
+    /* Overview */
+    .toggleRow {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .toggleRow button {
+      border: 2px solid rgba(107,79,63,0.18);
+      background: #fff;
+      border-radius: 999px;
+      padding: 8px 10px;
+      min-height: 44px;
+      font-weight: 900;
+      cursor: pointer;
+      color: var(--primary);
+      font-size: 12px;
+    }
+
+    .toggleRow button.active {
+      background: rgba(255, 209, 102, 0.55);
+      border-color: rgba(255, 209, 102, 0.75);
+    }
+
+    .kpi {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .kpi .box {
+      background: #fff;
+      border-radius: 16px;
+      border: 2px solid rgba(0,0,0,0.06);
+      padding: 12px;
+    }
+
+    .kpi .box .k { font-size: 12px; color: var(--muted); }
+    .kpi .box .v { font-weight: 1000; font-size: 18px; color: var(--primary); margin-top: 6px; font-variant-numeric: tabular-nums; }
+
+    /* Ranking */
+    .rankControls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .rankItem {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 10px;
+      padding: 12px;
+      border-radius: 16px;
+      background: #fff;
+      border: 2px solid rgba(0,0,0,0.06);
+      margin-top: 10px;
+    }
+
+    .badge {
+      width: 34px;
+      height: 34px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      font-weight: 1000;
+      color: #2b231c;
+      background: rgba(255, 209, 102, 0.75);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .rankTitle {
+      font-weight: 1000;
+      color: var(--primary);
+    }
+
+    .rankMeta {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Role */
+    .roleList { display: grid; gap: 10px; }
+    .roleRow {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 12px;
+      border-radius: 16px;
+      background: #fff;
+      border: 2px solid rgba(0,0,0,0.06);
+    }
+
+    .roleRow .left { display:flex; align-items:center; gap:10px; min-width:0; }
+
+    .small { font-size: 12px; color: var(--muted); }
+
+    /* Leaflet popup tweaks */
+    .leaflet-popup-content-wrapper { border-radius: 16px; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="topRow">
+        <div class="roleBadge">
+          <div class="avatar" id="hdrAvatar">🧑‍💼</div>
+          <div class="roleText">
+            <div class="roleId" id="hdrRoleId">—</div>
+            <div class="roleMeta" id="hdrRoleMeta">—</div>
+          </div>
+        </div>
+        <div class="statsPill">
+          <div class="pillValue" id="hdrValue">NT$ 0</div>
+          <div class="pillLabel" id="hdrValueLabel">本月拉屎薪資</div>
+        </div>
+      </div>
+    </header>
+
+    <div class="content">
+      <!-- MAP -->
+      <section class="view" id="view-map">
+        <div class="card">
+          <p class="title">屎勢力地圖</p>
+          <div class="chipRow">
+            <div class="chip">目前：<span id="mapRoleName" style="margin-left:6px;"></span></div>
+            <div class="chip">點數：<span id="mapPointCount" style="margin-left:6px;">0</span></div>
+            <div class="chip"><button id="btnToggleRolePanel">查看其他角色</button></div>
+          </div>
+
+          <div id="rolePanel" class="panel" style="display:none;">
+            <div class="muted">勾選要疊加顯示的角色（可多選）</div>
+            <div class="checkList" id="roleCheckList"></div>
+          </div>
+
+          <div id="map" aria-label="map"></div>
+          <div class="muted" style="margin-top:10px;">
+            點擊地標可查看地點資訊（最高分、次數、最近時間）。
+          </div>
+        </div>
+      </section>
+
+      <!-- LOG -->
+      <section class="view" id="view-log">
+        <div class="card">
+          <p class="title">立即紀錄</p>
+          <div class="muted" id="locStatus">定位狀態：尚未開始</div>
+
+          <div class="btnRow" style="grid-template-columns: 1fr 1fr;">
+            <button class="btn btnMint" id="btnStartNew">開始新紀錄</button>
+            <button class="btn btnGhost" id="btnUseLastLoc">改用最後一次定位</button>
+          </div>
+
+          <label for="manualPlace">手動地點名稱（定位失敗時使用）</label>
+          <input id="manualPlace" placeholder="例如：公司 7 樓廁所" />
+
+          <div class="seg" aria-label="type selector">
+            <button id="btnTypePee">尿尿</button>
+            <button id="btnTypePoop">大便</button>
+          </div>
+
+          <div class="timerRow">
+            <div class="bigNumber" id="timer">00:00</div>
+            <div class="timerBtns">
+              <button class="btn btnGhost" id="btnTimerStart">開始</button>
+              <button class="btn btnGhost" id="btnTimerPause">暫停</button>
+              <button class="btn btnPrimary" id="btnTimerEnd">結束</button>
+            </div>
+            <div class="muted" id="timerHint">選擇類型後開始計時。</div>
+          </div>
+
+          <div id="resultArea" style="display:none; margin-top:10px;">
+            <div class="panel">
+              <div class="muted">計算結果</div>
+              <div class="row" style="margin-top:10px;">
+                <div>
+                  <div class="small">本次秒數</div>
+                  <div class="pillValue" id="resSec">0</div>
+                </div>
+                <div>
+                  <div class="small" id="resRightLabel">—</div>
+                  <div class="pillValue" id="resRightValue">—</div>
+                </div>
+              </div>
+
+              <div id="peeAdjust" style="display:none;">
+                <label for="peeCc">尿量（cc，可微調）</label>
+                <input id="peeCc" type="number" min="0" inputmode="numeric" />
+              </div>
+
+              <div id="poopAmount" style="display:none;">
+                <label for="poopLevel">你覺得這次的量？</label>
+                <select id="poopLevel">
+                  <option value="">請選擇</option>
+                  <option value="150">偏少（150 g）</option>
+                  <option value="225">正常（225 g）</option>
+                  <option value="300">偏多（300 g）</option>
+                  <option value="350">巨量（350 g）</option>
+                </select>
+              </div>
+
+              <label for="placeName">地點名稱（必填）</label>
+              <input id="placeName" placeholder="例如：星巴克 A 店廁所" />
+
+              <div class="row">
+                <div>
+                  <label for="rating">評分（1.0 ~ 10.0）</label>
+                  <input id="rating" type="number" min="1" max="10" step="0.1" inputmode="decimal" placeholder="8.5" />
+                </div>
+                <div>
+                  <label for="tag">類型標籤（選填）</label>
+                  <select id="tag">
+                    <option value="">不設定</option>
+                    <option value="公司">公司</option>
+                    <option value="住家">住家</option>
+                    <option value="公共場所">公共場所</option>
+                    <option value="咖啡廳">咖啡廳</option>
+                  </select>
+                </div>
+              </div>
+
+              <label for="note">備註（選填）</label>
+              <textarea id="note" placeholder="例如：有音樂遮掩聲音、廁紙很粗...\n（別太寫實，拜託）"></textarea>
+
+              <button class="btn btnPrimary" id="btnSave" style="margin-top:12px; width:100%;">儲存紀錄</button>
+              <div class="error" id="saveError" style="display:none;"></div>
+              <div class="success" id="saveOk" style="display:none;"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- OVERVIEW -->
+      <section class="view" id="view-overview">
+        <div class="card">
+          <p class="title">屎生大數據</p>
+          <div class="toggleRow" aria-label="period toggle">
+            <button id="periodWeek">本週</button>
+            <button id="periodMonth" class="active">本月</button>
+            <button id="periodAll">全部</button>
+          </div>
+
+          <div class="kpi">
+            <div class="box">
+              <div class="k">勢力範圍擴張度</div>
+              <div class="v" id="kpiTerritory">—</div>
+            </div>
+            <div class="box">
+              <div class="k">累積拉屎薪資</div>
+              <div class="v" id="kpiMoney">—</div>
+            </div>
+            <div class="box">
+              <div class="k">累積屎量</div>
+              <div class="v" id="kpiPoop">—</div>
+            </div>
+            <div class="box">
+              <div class="k">累積尿量</div>
+              <div class="v" id="kpiPee">—</div>
+            </div>
+          </div>
+
+          <div class="panel" style="margin-top:12px;">
+            <div class="muted" id="funHint">你今天又征服了新的馬桶！</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- RANK -->
+      <section class="view" id="view-rank">
+        <div class="card">
+          <p class="title">傳說中的廁所</p>
+          <div class="rankControls">
+            <div>
+              <label for="rankSort">排序</label>
+              <select id="rankSort">
+                <option value="rating">評分最高</option>
+                <option value="visits">造訪次數最多</option>
+                <option value="recent">最近造訪</option>
+              </select>
+            </div>
+            <div>
+              <label for="rankType">篩選</label>
+              <select id="rankType">
+                <option value="all">全部</option>
+                <option value="poop">僅大便</option>
+                <option value="pee">僅尿尿</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="rankList"></div>
+          <div class="muted" id="rankEmpty" style="display:none; margin-top:10px;">還沒有資料，先去「立即紀錄」來一發。</div>
+        </div>
+      </section>
+
+      <!-- ROLE -->
+      <section class="view" id="view-role">
+        <div class="card">
+          <p class="title">角色</p>
+          <div class="muted" style="margin-bottom:10px;">切換角色會更新地圖、統計與榜單。</div>
+          <div class="roleList" id="roleList"></div>
+          <div class="btnRow" style="grid-template-columns: 1fr 1fr; margin-top:12px;">
+            <button class="btn btnPrimary" id="btnGoIndex">回到登入頁新增角色</button>
+            <button class="btn btnGhost" id="btnExport">匯出資料（JSON）</button>
+          </div>
+          <div class="muted" style="margin-top:8px;">匯出僅為方便備份；仍以 LocalStorage 為主。</div>
+        </div>
+      </section>
+    </div>
+
+    <nav class="tabBar" aria-label="tab bar">
+      <button class="tabBtn active" data-tab="map"><div class="ico">📍</div><div>地圖</div></button>
+      <button class="tabBtn" data-tab="log"><div class="ico">🚽</div><div>紀錄</div></button>
+      <button class="tabBtn" data-tab="overview"><div class="ico">📊</div><div>總覽</div></button>
+      <button class="tabBtn" data-tab="rank"><div class="ico">🏆</div><div>必拉榜</div></button>
+      <button class="tabBtn" data-tab="role"><div class="ico">🧑</div><div>角色</div></button>
+    </nav>
+  </div>
+
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+
+  <script>
+    // ---- Storage ----
+    const LS_KEYS = {
+      characters: 'happyshit.characters.v1',
+      records: 'happyshit.records.v1',
+      lastRole: 'happyshit.lastRoleId.v1',
+      lastLoc: 'happyshit.lastLoc.v1'
+    };
+
+    function loadJson(key, fallback) {
+      try {
+        const raw = localStorage.getItem(key);
+        if (!raw) return fallback;
+        return JSON.parse(raw);
+      } catch {
+        return fallback;
+      }
+    }
+
+    function saveJson(key, value) {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+
+    function ensureSeed() {
+      let characters = loadJson(LS_KEYS.characters, null);
+      if (Array.isArray(characters) && characters.length) return;
+
+      characters = [
+        { id: '社畜小王', avatar: '🧑\u200d💼', monthlySalary: 45000, currency: 'NT$', note: '咖啡社畜', createdAt: Date.now() },
+        { id: '健身小美', avatar: '🧑\u200d🦾', monthlySalary: 52000, currency: 'NT$', note: '健身少女', createdAt: Date.now() },
+        { id: '學生阿哲', avatar: '🧑\u200d🎓', monthlySalary: 12000, currency: 'NT$', note: '被期末追殺', createdAt: Date.now() }
+      ];
+      saveJson(LS_KEYS.characters, characters);
+      saveJson(LS_KEYS.records, []);
+      localStorage.setItem(LS_KEYS.lastRole, characters[0].id);
+    }
+
+    function uid() { return Math.random().toString(16).slice(2) + '-' + Date.now().toString(16); }
+
+    function formatMoney(currency, amount, digits = 0) {
+      const num = Number(amount);
+      if (!Number.isFinite(num)) return `${currency} 0`;
+      const fixed = Number(num.toFixed(digits));
+      return `${currency} ${fixed.toLocaleString('en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits })}`;
+    }
+
+    function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
+
+    function escapeHtml(s) {
+      return String(s)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function startOfDay(ts) {
+      const d = new Date(ts);
+      d.setHours(0,0,0,0);
+      return d.getTime();
+    }
+
+    function startOfWeek(ts) {
+      const d = new Date(ts);
+      const day = d.getDay(); // 0 Sun
+      const diff = (day + 6) % 7; // Mon=0
+      d.setDate(d.getDate() - diff);
+      d.setHours(0,0,0,0);
+      return d.getTime();
+    }
+
+    function startOfMonth(ts) {
+      const d = new Date(ts);
+      d.setDate(1);
+      d.setHours(0,0,0,0);
+      return d.getTime();
+    }
+
+    function endOfMonth(ts) {
+      const d = new Date(ts);
+      d.setMonth(d.getMonth() + 1);
+      d.setDate(1);
+      d.setHours(0,0,0,0);
+      return d.getTime();
+    }
+
+    function endOfWeek(ts) {
+      const s = startOfWeek(ts);
+      return s + 7*24*60*60*1000;
+    }
+
+    // ---- Role selection ----
+    function getRoleIdFromUrl() {
+      const url = new URL(location.href);
+      return url.searchParams.get('role');
+    }
+
+    function getCurrentRoleId() {
+      return getRoleIdFromUrl() || localStorage.getItem(LS_KEYS.lastRole);
+    }
+
+    function setCurrentRoleId(roleId) {
+      localStorage.setItem(LS_KEYS.lastRole, roleId);
+      const url = new URL(location.href);
+      url.searchParams.set('role', roleId);
+      history.replaceState({}, '', url.toString());
+    }
+
+    function getRoleById(roleId) {
+      const chars = loadJson(LS_KEYS.characters, []);
+      return chars.find(c => c.id === roleId) || chars[0];
+    }
+
+    function roleColor(roleId) {
+      // stable color palette
+      const palette = [
+        '#4ECDC4', '#FFD166', '#9b87f5', '#ff7aa2', '#7bd389',
+        '#6aa9ff', '#ffb703', '#00b4d8', '#f77f00', '#8ecae6'
+      ];
+      let h = 0;
+      for (let i=0;i<roleId.length;i++) h = (h*31 + roleId.charCodeAt(i)) >>> 0;
+      return palette[h % palette.length];
+    }
+
+    // ---- Records ----
+    function loadRecords() {
+      return loadJson(LS_KEYS.records, []);
+    }
+
+    function saveRecord(rec) {
+      const all = loadRecords();
+      all.push(rec);
+      saveJson(LS_KEYS.records, all);
+    }
+
+    function recordsByRole(roleId) {
+      return loadRecords().filter(r => r.characterId === roleId);
+    }
+
+    function sum(arr) { return arr.reduce((a,b) => a + b, 0); }
+
+    // ---- Map + Convex hull ----
+    let map;
+    let mapLayerMarkers;
+    let mapLayerHulls;
+    let mapReady = false;
+
+    function toMercator(lat, lng) {
+      const R = 6378137;
+      const x = R * (lng * Math.PI/180);
+      const y = R * Math.log(Math.tan(Math.PI/4 + (lat * Math.PI/180)/2));
+      return { x, y };
+    }
+
+    function convexHull(points) {
+      // Monotonic chain on projected x/y
+      if (points.length < 3) return points;
+      const pts = points.slice().sort((a,b) => (a.x === b.x ? a.y - b.y : a.x - b.x));
+      const cross = (o,a,b) => (a.x - o.x)*(b.y - o.y) - (a.y - o.y)*(b.x - o.x);
+      const lower = [];
+      for (const p of pts) {
+        while (lower.length >= 2 && cross(lower[lower.length-2], lower[lower.length-1], p) <= 0) lower.pop();
+        lower.push(p);
+      }
+      const upper = [];
+      for (let i=pts.length-1;i>=0;i--) {
+        const p = pts[i];
+        while (upper.length >= 2 && cross(upper[upper.length-2], upper[upper.length-1], p) <= 0) upper.pop();
+        upper.push(p);
+      }
+      upper.pop();
+      lower.pop();
+      return lower.concat(upper);
+    }
+
+    function polygonArea(pts) {
+      if (pts.length < 3) return 0;
+      let a = 0;
+      for (let i=0;i<pts.length;i++) {
+        const j = (i+1) % pts.length;
+        a += pts[i].x*pts[j].y - pts[j].x*pts[i].y;
+      }
+      return Math.abs(a) / 2;
+    }
+
+    function initMapOnce() {
+      if (mapReady) return;
+      mapReady = true;
+
+      const mapEl = document.getElementById('map');
+      if (!window.L || !window.L.map) {
+        mapEl.innerHTML = `
+          <div style="height:100%; display:grid; place-items:center; padding:18px; text-align:center;">
+            <div>
+              <div style="font-weight:1000; color:#6B4F3F; font-size:16px;">地圖載入失敗</div>
+              <div style="margin-top:8px; color:#8A8A8A; font-size:13px; line-height:1.45;">
+                Leaflet / 圖磚資源可能被網路阻擋或離線。<br>
+                請確認可連到 <span style="font-weight:900;">unpkg.com</span> 與 <span style="font-weight:900;">tile.openstreetmap.org</span>。
+              </div>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      map = L.map('map', { zoomControl: true });
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap'
+      }).addTo(map);
+
+      mapLayerMarkers = L.layerGroup().addTo(map);
+      mapLayerHulls = L.layerGroup().addTo(map);
+
+      // default view
+      map.setView([25.0330, 121.5654], 12);
+    }
+
+    function clearMap() {
+      mapLayerMarkers?.clearLayers();
+      mapLayerHulls?.clearLayers();
+    }
+
+    function markerPopupForRole(roleId, placeKey, placeStats) {
+      const best = placeStats.bestRating;
+      const last = new Date(placeStats.lastTs).toLocaleString();
+      return `
+        <div style="font-family:inherit;">
+          <div style="font-weight:900; color:#6B4F3F;">${escapeHtml(placeStats.placeName || placeKey)}</div>
+          <div style="margin-top:6px; font-size:12px; color:#8A8A8A;">${escapeHtml(roleId)}</div>
+          <div style="margin-top:8px; font-size:12px;">
+            <div>最佳評分：<b>${Number.isFinite(best) ? best.toFixed(1) : '—'}</b></div>
+            <div>累積次數：<b>${placeStats.count}</b></div>
+            <div>最近時間：<b>${escapeHtml(last)}</b></div>
+          </div>
+        </div>
+      `;
+    }
+
+    function computePlaceStats(recs) {
+      // group by placeKey = placeName|lat,lng (rounded) to avoid tiny jitter
+      const byKey = new Map();
+      for (const r of recs) {
+        const lat = Number(r.lat);
+        const lng = Number(r.lng);
+        const llKey = `${lat.toFixed(5)},${lng.toFixed(5)}`;
+        const placeName = (r.placeName || '').trim();
+        const placeKey = placeName ? `${placeName}__${llKey}` : `未命名__${llKey}`;
+        const prev = byKey.get(placeKey) || { placeName: placeName || '未命名地點', lat, lng, bestRating: -Infinity, count: 0, lastTs: 0 };
+        prev.count += 1;
+        prev.lastTs = Math.max(prev.lastTs, r.timestamp);
+        const rating = Number(r.rating);
+        if (Number.isFinite(rating)) prev.bestRating = Math.max(prev.bestRating, rating);
+        byKey.set(placeKey, prev);
+      }
+      // normalize bestRating
+      for (const v of byKey.values()) {
+        if (!Number.isFinite(v.bestRating) || v.bestRating === -Infinity) v.bestRating = NaN;
+      }
+      return byKey;
+    }
+
+    function renderMap(selectedRoleIds) {
+      initMapOnce();
+      clearMap();
+
+      const all = loadRecords();
+      const boundsPts = [];
+
+      for (const rid of selectedRoleIds) {
+        const recs = all.filter(r => r.characterId === rid);
+        const stats = computePlaceStats(recs);
+
+        const color = roleColor(rid);
+        const hullPtsProjected = [];
+
+        for (const [placeKey, p] of stats.entries()) {
+          if (!Number.isFinite(p.lat) || !Number.isFinite(p.lng)) continue;
+          boundsPts.push([p.lat, p.lng]);
+
+          const marker = L.circleMarker([p.lat, p.lng], {
+            radius: 8,
+            color,
+            weight: 3,
+            fillColor: color,
+            fillOpacity: 0.35
+          }).addTo(mapLayerMarkers);
+          marker.bindPopup(markerPopupForRole(rid, placeKey, p));
+
+          const m = toMercator(p.lat, p.lng);
+          hullPtsProjected.push({ ...m, lat: p.lat, lng: p.lng });
+        }
+
+        if (hullPtsProjected.length >= 3) {
+          const hull = convexHull(hullPtsProjected);
+          const latlngs = hull.map(h => [h.lat, h.lng]);
+          L.polygon(latlngs, {
+            color,
+            weight: 2,
+            fillColor: color,
+            fillOpacity: 0.15
+          }).addTo(mapLayerHulls);
+        }
+      }
+
+      if (boundsPts.length) {
+        const b = L.latLngBounds(boundsPts);
+        map.fitBounds(b.pad(0.18));
+      }
+    }
+
+    function computeHullAreaForRole(roleId, recs) {
+      const stats = computePlaceStats(recs);
+      const pts = [];
+      for (const p of stats.values()) {
+        const m = toMercator(p.lat, p.lng);
+        pts.push({ ...m });
+      }
+      if (pts.length < 3) return 0;
+      const hull = convexHull(pts);
+      return polygonArea(hull);
+    }
+
+    // ---- Tabs ----
+    const views = {
+      map: document.getElementById('view-map'),
+      log: document.getElementById('view-log'),
+      overview: document.getElementById('view-overview'),
+      rank: document.getElementById('view-rank'),
+      role: document.getElementById('view-role')
+    };
+
+    function showTab(tab) {
+      for (const [k, el] of Object.entries(views)) {
+        el.classList.toggle('active', k === tab);
+      }
+      [...document.querySelectorAll('.tabBtn')].forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tab));
+
+      if (tab === 'map') {
+        initMapOnce();
+        if (map) {
+          setTimeout(() => map.invalidateSize(true), 80);
+          refreshMapUI();
+        }
+      }
+      if (tab === 'overview') refreshOverview();
+      if (tab === 'rank') refreshRanking();
+      if (tab === 'role') refreshRoleTab();
+    }
+
+    // ---- Header summary carousel ----
+    let hdrSummaryMode = 0;
+    function refreshHeader() {
+      const roleId = getCurrentRoleId();
+      const role = getRoleById(roleId);
+      if (!role) return;
+
+      document.getElementById('hdrAvatar').textContent = role.avatar || '🧑';
+      document.getElementById('hdrRoleId').textContent = role.id;
+      document.getElementById('hdrRoleMeta').textContent = `${formatMoney(role.currency || 'NT$', role.monthlySalary)} / 月 · ${role.note || ''}`.replace(/\s+·\s*$/, '');
+
+      const now = Date.now();
+      const monthStart = startOfMonth(now);
+      const monthEnd = endOfMonth(now);
+      const monthRecs = recordsByRole(role.id).filter(r => r.timestamp >= monthStart && r.timestamp < monthEnd);
+      const monthPoopMoney = sum(monthRecs.filter(r => r.type === 'poop').map(r => Number(r.poopValueMoney) || 0));
+      const monthPee = sum(monthRecs.filter(r => r.type === 'pee').map(r => Number(r.peeVolumeCc) || 0));
+      const monthPoop = sum(monthRecs.filter(r => r.type === 'poop').map(r => Number(r.poopWeightG) || 0));
+
+      const elValue = document.getElementById('hdrValue');
+      const elLabel = document.getElementById('hdrValueLabel');
+
+      if (hdrSummaryMode % 3 === 0) {
+        elValue.textContent = formatMoney(role.currency || 'NT$', monthPoopMoney, 0);
+        elLabel.textContent = '本月拉屎薪資';
+      } else if (hdrSummaryMode % 3 === 1) {
+        elValue.textContent = `${Math.round(monthPoop)} g`;
+        elLabel.textContent = '本月屎量';
+      } else {
+        elValue.textContent = `${Math.round(monthPee)} cc`;
+        elLabel.textContent = '本月尿量';
+      }
+    }
+
+    function startHeaderCarousel() {
+      setInterval(() => {
+        hdrSummaryMode++;
+        refreshHeader();
+      }, 3200);
+    }
+
+    // ---- Map UI ----
+    const selectedRoleIds = new Set();
+
+    function refreshRoleChecklist() {
+      const chars = loadJson(LS_KEYS.characters, []);
+      const cur = getRoleById(getCurrentRoleId());
+      const list = document.getElementById('roleCheckList');
+      list.innerHTML = '';
+
+      for (const c of chars) {
+        const wrap = document.createElement('div');
+        wrap.className = 'checkItem';
+
+        const left = document.createElement('div');
+        left.className = 'left';
+
+        const dot = document.createElement('div');
+        dot.className = 'dot';
+        dot.style.background = roleColor(c.id);
+
+        const txt = document.createElement('div');
+        txt.style.minWidth = '0';
+        txt.innerHTML = `<div style="font-weight:900; color:#6B4F3F; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(c.id)}</div>
+                         <div class="small">${escapeHtml(c.note || '')}</div>`;
+
+        left.appendChild(dot);
+        left.appendChild(txt);
+
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.style.width = '20px';
+        cb.style.height = '20px';
+        cb.checked = selectedRoleIds.has(c.id);
+        cb.disabled = c.id === cur.id; // always include current
+
+        cb.addEventListener('change', () => {
+          if (cb.checked) selectedRoleIds.add(c.id);
+          else selectedRoleIds.delete(c.id);
+          refreshMapUI();
+        });
+
+        wrap.appendChild(left);
+        wrap.appendChild(cb);
+        list.appendChild(wrap);
+      }
+    }
+
+    function refreshMapUI() {
+      const cur = getRoleById(getCurrentRoleId());
+      if (!cur) return;
+
+      document.getElementById('mapRoleName').textContent = cur.id;
+
+      // ensure current role always included
+      selectedRoleIds.add(cur.id);
+      refreshRoleChecklist();
+
+      const curCount = computePlaceStats(recordsByRole(cur.id)).size;
+      document.getElementById('mapPointCount').textContent = String(curCount);
+
+      renderMap([...selectedRoleIds]);
+    }
+
+    // ---- Log / Timer ----
+    let logState = {
+      roleId: null,
+      type: null,
+      lat: null,
+      lng: null,
+      locOk: false,
+      startTs: null,
+      elapsedMs: 0,
+      running: false,
+      durationSec: 0
+    };
+
+    function resetLogUi() {
+      document.getElementById('btnTypePee').classList.remove('active');
+      document.getElementById('btnTypePoop').classList.remove('active');
+      document.getElementById('timer').textContent = '00:00';
+      document.getElementById('timerHint').textContent = '選擇類型後開始計時。';
+      document.getElementById('resultArea').style.display = 'none';
+      document.getElementById('saveError').style.display = 'none';
+      document.getElementById('saveOk').style.display = 'none';
+    }
+
+    function setType(type) {
+      logState.type = type;
+      document.getElementById('btnTypePee').classList.toggle('active', type === 'pee');
+      document.getElementById('btnTypePoop').classList.toggle('active', type === 'poop');
+      document.getElementById('timerHint').textContent = type === 'pee' ? '尿尿模式：結束後會估算尿量（秒數 × 20cc）' : '大便模式：結束後會算出拉屎薪資與屎量';
+    }
+
+    function fmtMMSS(ms) {
+      const s = Math.floor(ms / 1000);
+      const mm = String(Math.floor(s / 60)).padStart(2, '0');
+      const ss = String(s % 60).padStart(2, '0');
+      return `${mm}:${ss}`;
+    }
+
+    function tickTimer() {
+      if (!logState.running) return;
+      const now = Date.now();
+      const elapsed = logState.elapsedMs + (now - logState.startTs);
+      document.getElementById('timer').textContent = fmtMMSS(elapsed);
+      requestAnimationFrame(tickTimer);
+    }
+
+    function startTimer() {
+      if (!logState.type) {
+        document.getElementById('timerHint').textContent = '先選擇「尿尿」或「大便」再開始。';
+        return;
+      }
+      if (logState.running) return;
+      logState.running = true;
+      logState.startTs = Date.now();
+      tickTimer();
+    }
+
+    function pauseTimer() {
+      if (!logState.running) return;
+      logState.elapsedMs += Date.now() - logState.startTs;
+      logState.running = false;
+      logState.startTs = null;
+      document.getElementById('timer').textContent = fmtMMSS(logState.elapsedMs);
+    }
+
+    function endTimer() {
+      if (logState.running) pauseTimer();
+      const sec = Math.max(0, Math.round(logState.elapsedMs / 1000));
+      logState.durationSec = sec;
+
+      if (!logState.type) {
+        document.getElementById('timerHint').textContent = '先選擇「尿尿」或「大便」。';
+        return;
+      }
+
+      renderResult();
+    }
+
+    function secondsValuePerRole(role) {
+      const monthly = Number(role.monthlySalary) || 0;
+      return monthly / (30*24*60*60);
+    }
+
+    function renderResult() {
+      const sec = logState.durationSec;
+      const role = getRoleById(getCurrentRoleId());
+
+      document.getElementById('resultArea').style.display = 'block';
+      document.getElementById('resSec').textContent = `${sec} 秒`;
+
+      const peeAdjust = document.getElementById('peeAdjust');
+      const poopAmount = document.getElementById('poopAmount');
+
+      if (logState.type === 'pee') {
+        poopAmount.style.display = 'none';
+        peeAdjust.style.display = 'block';
+
+        const cc = sec * 20;
+        document.getElementById('resRightLabel').textContent = '估計尿量';
+        document.getElementById('resRightValue').textContent = `${cc} cc`;
+        document.getElementById('peeCc').value = String(cc);
+      } else {
+        peeAdjust.style.display = 'none';
+        poopAmount.style.display = 'block';
+
+        const v = secondsValuePerRole(role);
+        const money = sec * v;
+        document.getElementById('resRightLabel').textContent = '拉屎薪資';
+        document.getElementById('resRightValue').textContent = formatMoney(role.currency || 'NT$', money, 1);
+      }
+
+      // default place suggestion
+      const manual = document.getElementById('manualPlace').value.trim();
+      const placeInput = document.getElementById('placeName');
+      if (!placeInput.value.trim() && manual) placeInput.value = manual;
+    }
+
+    async function getLocation() {
+      const el = document.getElementById('locStatus');
+      el.textContent = '定位狀態：定位中...';
+      return new Promise((resolve) => {
+        if (!navigator.geolocation) {
+          el.textContent = '定位狀態：此瀏覽器不支援定位';
+          resolve({ ok: false });
+          return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
+            logState.lat = lat;
+            logState.lng = lng;
+            logState.locOk = true;
+            saveJson(LS_KEYS.lastLoc, { lat, lng, ts: Date.now() });
+            el.textContent = `定位狀態：已定位（${lat.toFixed(5)}, ${lng.toFixed(5)}）`;
+            resolve({ ok: true, lat, lng });
+          },
+          () => {
+            logState.locOk = false;
+            const last = loadJson(LS_KEYS.lastLoc, null);
+            el.textContent = last
+              ? '定位狀態：定位失敗（可改用最後一次定位）'
+              : '定位狀態：定位失敗（可手動輸入地點名稱）';
+            resolve({ ok: false });
+          },
+          { enableHighAccuracy: true, timeout: 8000, maximumAge: 15000 }
+        );
+      });
+    }
+
+    function useLastLocation() {
+      const last = loadJson(LS_KEYS.lastLoc, null);
+      const el = document.getElementById('locStatus');
+      if (!last) {
+        el.textContent = '定位狀態：沒有最後一次定位可用';
+        return;
+      }
+      logState.lat = last.lat;
+      logState.lng = last.lng;
+      logState.locOk = true;
+      el.textContent = `定位狀態：已套用最後一次定位（${last.lat.toFixed(5)}, ${last.lng.toFixed(5)}）`;
+    }
+
+    async function startNewLog() {
+      resetLogUi();
+      logState = {
+        roleId: getCurrentRoleId(),
+        type: null,
+        lat: null,
+        lng: null,
+        locOk: false,
+        startTs: null,
+        elapsedMs: 0,
+        running: false,
+        durationSec: 0
+      };
+      await getLocation();
+    }
+
+    function validateAndSave() {
+      const role = getRoleById(getCurrentRoleId());
+      const type = logState.type;
+      const sec = logState.durationSec;
+
+      const errEl = document.getElementById('saveError');
+      const okEl = document.getElementById('saveOk');
+      errEl.style.display = 'none';
+      okEl.style.display = 'none';
+
+      if (!type) return showSaveError('請先選擇類型（尿尿/大便）');
+      if (!Number.isFinite(sec) || sec <= 0) return showSaveError('請先完成計時（秒數需大於 0）');
+
+      const placeName = document.getElementById('placeName').value.trim();
+      if (!placeName) return showSaveError('地點名稱為必填');
+
+      const rating = Number(document.getElementById('rating').value);
+      if (!Number.isFinite(rating) || rating < 1 || rating > 10) return showSaveError('評分需介於 1.0 ~ 10.0');
+
+      // location: if missing, allow save with NaN but map won't show it
+      const lat = Number(logState.lat);
+      const lng = Number(logState.lng);
+
+      const note = document.getElementById('note').value.trim();
+      const tag = document.getElementById('tag').value;
+
+      const base = {
+        recordId: uid(),
+        characterId: role.id,
+        type,
+        timestamp: Date.now(),
+        durationSec: sec,
+        placeName,
+        rating: Math.round(rating * 10) / 10,
+        note,
+        tag,
+        lat: Number.isFinite(lat) ? lat : NaN,
+        lng: Number.isFinite(lng) ? lng : NaN
+      };
+
+      if (type === 'pee') {
+        const cc = Number(document.getElementById('peeCc').value);
+        if (!Number.isFinite(cc) || cc < 0) return showSaveError('尿量（cc）需為有效數字');
+        base.peeVolumeCc = cc;
+      } else {
+        const grams = Number(document.getElementById('poopLevel').value);
+        if (![150,225,300,350].includes(grams)) return showSaveError('請選擇大便多寡（對應重量）');
+        const money = sec * secondsValuePerRole(role);
+        base.poopWeightG = grams;
+        base.poopValueMoney = Math.round(money * 10) / 10;
+      }
+
+      saveRecord(base);
+
+      okEl.textContent = '儲存成功：你今天又征服了新的馬桶！';
+      okEl.style.display = 'block';
+
+      // refresh other pages immediately
+      refreshHeader();
+      refreshMapUI();
+      refreshOverview();
+      refreshRanking();
+
+      // reset timer for next record
+      logState.elapsedMs = 0;
+      document.getElementById('timer').textContent = '00:00';
+    }
+
+    function showSaveError(msg) {
+      const errEl = document.getElementById('saveError');
+      errEl.textContent = msg;
+      errEl.style.display = 'block';
+    }
+
+    // ---- Overview ----
+    let period = 'month';
+
+    function setPeriod(p) {
+      period = p;
+      document.getElementById('periodWeek').classList.toggle('active', p === 'week');
+      document.getElementById('periodMonth').classList.toggle('active', p === 'month');
+      document.getElementById('periodAll').classList.toggle('active', p === 'all');
+      refreshOverview();
+    }
+
+    function filterByPeriod(recs, p, now) {
+      if (p === 'all') return { current: recs, prev: [] };
+
+      let curStart, curEnd, prevStart, prevEnd;
+      if (p === 'week') {
+        curStart = startOfWeek(now);
+        curEnd = endOfWeek(now);
+        prevEnd = curStart;
+        prevStart = prevEnd - 7*24*60*60*1000;
+      } else {
+        curStart = startOfMonth(now);
+        curEnd = endOfMonth(now);
+        prevEnd = curStart;
+        prevStart = startOfMonth(prevEnd - 24*60*60*1000);
+      }
+
+      const current = recs.filter(r => r.timestamp >= curStart && r.timestamp < curEnd);
+      const prev = recs.filter(r => r.timestamp >= prevStart && r.timestamp < prevEnd);
+      return { current, prev };
+    }
+
+    function refreshOverview() {
+      const role = getRoleById(getCurrentRoleId());
+      const now = Date.now();
+      const recsAll = recordsByRole(role.id);
+      const { current, prev } = filterByPeriod(recsAll, period, now);
+
+      // totals
+      const pee = sum(current.filter(r => r.type === 'pee').map(r => Number(r.peeVolumeCc) || 0));
+      const poop = sum(current.filter(r => r.type === 'poop').map(r => Number(r.poopWeightG) || 0));
+      const money = sum(current.filter(r => r.type === 'poop').map(r => Number(r.poopValueMoney) || 0));
+
+      document.getElementById('kpiPee').textContent = `${Math.round(pee).toLocaleString('en-US')} cc`;
+      document.getElementById('kpiPoop').textContent = `${(poop/1000).toFixed(1)} kg`;
+      document.getElementById('kpiMoney').textContent = formatMoney(role.currency || 'NT$', money, 0);
+
+      // territory growth
+      const areaCur = computeHullAreaForRole(role.id, current);
+      const areaPrev = computeHullAreaForRole(role.id, prev);
+      let growthText = '—';
+      if (areaCur <= 0) {
+        growthText = '0%';
+      } else if (areaPrev <= 0) {
+        growthText = '+100%';
+      } else {
+        const pct = ((areaCur - areaPrev) / areaPrev) * 100;
+        const sign = pct >= 0 ? '+' : '';
+        growthText = `${sign}${pct.toFixed(0)}%`;
+      }
+      document.getElementById('kpiTerritory').textContent = growthText;
+
+      // fun hint (simple)
+      const hints = [
+        '你今天又征服了新的馬桶！',
+        '注意補水：尿量王就是你。',
+        '拉屎薪資累積中，老闆不會知道。'
+      ];
+      document.getElementById('funHint').textContent = hints[Math.floor(now / 10000) % hints.length];
+    }
+
+    // ---- Ranking ----
+    function refreshRanking() {
+      const role = getRoleById(getCurrentRoleId());
+      const sort = document.getElementById('rankSort').value;
+      const type = document.getElementById('rankType').value;
+
+      let recs = recordsByRole(role.id);
+      if (type !== 'all') recs = recs.filter(r => r.type === type);
+
+      const grouped = new Map();
+      for (const r of recs) {
+        const name = (r.placeName || '未命名地點').trim();
+        const key = name;
+        const prev = grouped.get(key) || { placeName: name, avgRating: 0, ratingSum: 0, ratingCount: 0, visits: 0, lastTs: 0, tag: '' };
+        prev.visits += 1;
+        prev.lastTs = Math.max(prev.lastTs, r.timestamp);
+        const rating = Number(r.rating);
+        if (Number.isFinite(rating)) {
+          prev.ratingSum += rating;
+          prev.ratingCount += 1;
+        }
+        prev.tag = prev.tag || (r.tag || '');
+        grouped.set(key, prev);
+      }
+
+      const items = [...grouped.values()].map(it => ({
+        ...it,
+        avgRating: it.ratingCount ? it.ratingSum / it.ratingCount : NaN
+      }));
+
+      if (!items.length) {
+        document.getElementById('rankList').innerHTML = '';
+        document.getElementById('rankEmpty').style.display = 'block';
+        return;
+      }
+
+      document.getElementById('rankEmpty').style.display = 'none';
+
+      items.sort((a,b) => {
+        if (sort === 'visits') return b.visits - a.visits;
+        if (sort === 'recent') return b.lastTs - a.lastTs;
+        // rating
+        const ar = Number.isFinite(a.avgRating) ? a.avgRating : -1;
+        const br = Number.isFinite(b.avgRating) ? b.avgRating : -1;
+        if (br !== ar) return br - ar;
+        return b.lastTs - a.lastTs;
+      });
+
+      const list = document.getElementById('rankList');
+      list.innerHTML = '';
+
+      items.forEach((it, idx) => {
+        const el = document.createElement('div');
+        el.className = 'rankItem';
+        const last = new Date(it.lastTs).toLocaleString();
+        const avg = Number.isFinite(it.avgRating) ? it.avgRating.toFixed(1) : '—';
+        const tag = it.tag ? ` · ${escapeHtml(it.tag)}` : '';
+
+        el.innerHTML = `
+          <div class="badge">${idx+1}</div>
+          <div>
+            <div class="rankTitle">${escapeHtml(it.placeName)}</div>
+            <div class="rankMeta">平均評分：<b>${avg}</b> · 次數：<b>${it.visits}</b> · 最近：<b>${escapeHtml(last)}</b>${tag}</div>
+          </div>
+        `;
+        list.appendChild(el);
+      });
+    }
+
+    // ---- Role tab ----
+    function refreshRoleTab() {
+      const chars = loadJson(LS_KEYS.characters, []);
+      const curId = getCurrentRoleId();
+      const list = document.getElementById('roleList');
+      list.innerHTML = '';
+
+      for (const c of chars) {
+        const row = document.createElement('div');
+        row.className = 'roleRow';
+
+        const left = document.createElement('div');
+        left.className = 'left';
+
+        const ava = document.createElement('div');
+        ava.className = 'avatar';
+        ava.style.width = '40px';
+        ava.style.height = '40px';
+        ava.textContent = c.avatar || '🧑';
+        ava.style.borderColor = roleColor(c.id);
+        ava.style.background = 'rgba(255,255,255,1)';
+
+        const txt = document.createElement('div');
+        txt.style.minWidth = '0';
+        txt.innerHTML = `
+          <div style="font-weight:1000; color:#6B4F3F; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(c.id)}${c.id === curId ? '（目前）' : ''}</div>
+          <div class="small">${formatMoney(c.currency || 'NT$', c.monthlySalary)} / 月 · ${escapeHtml(c.note || '')}</div>
+        `;
+
+        left.appendChild(ava);
+        left.appendChild(txt);
+
+        const btn = document.createElement('button');
+        btn.className = 'btn btnGhost';
+        btn.textContent = '切換';
+        btn.style.width = '110px';
+        btn.disabled = c.id === curId;
+
+        btn.addEventListener('click', () => {
+          setCurrentRoleId(c.id);
+          selectedRoleIds.clear();
+          refreshHeader();
+          refreshMapUI();
+          refreshOverview();
+          refreshRanking();
+          showTab('map');
+        });
+
+        row.appendChild(left);
+        row.appendChild(btn);
+        list.appendChild(row);
+      }
+    }
+
+    function exportJson() {
+      const payload = {
+        characters: loadJson(LS_KEYS.characters, []),
+        records: loadJson(LS_KEYS.records, []),
+        exportedAt: new Date().toISOString()
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'happyshit-export.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // ---- Wiring ----
+    function init() {
+      ensureSeed();
+
+      const roleId = getCurrentRoleId();
+      const role = getRoleById(roleId);
+      if (!role) {
+        location.href = 'index.html';
+        return;
+      }
+      setCurrentRoleId(role.id);
+
+      selectedRoleIds.clear();
+      selectedRoleIds.add(role.id);
+
+      refreshHeader();
+      startHeaderCarousel();
+
+      // Tab events
+      document.querySelectorAll('.tabBtn').forEach(btn => {
+        btn.addEventListener('click', () => showTab(btn.dataset.tab));
+      });
+
+      // default tab (after wiring; even if map fails, other tabs still work)
+      showTab('map');
+
+      // Map role panel
+      const rolePanel = document.getElementById('rolePanel');
+      document.getElementById('btnToggleRolePanel').addEventListener('click', () => {
+        rolePanel.style.display = rolePanel.style.display === 'none' ? 'block' : 'none';
+      });
+
+      // Log events
+      document.getElementById('btnStartNew').addEventListener('click', startNewLog);
+      document.getElementById('btnUseLastLoc').addEventListener('click', useLastLocation);
+
+      document.getElementById('btnTypePee').addEventListener('click', () => setType('pee'));
+      document.getElementById('btnTypePoop').addEventListener('click', () => setType('poop'));
+
+      document.getElementById('btnTimerStart').addEventListener('click', startTimer);
+      document.getElementById('btnTimerPause').addEventListener('click', pauseTimer);
+      document.getElementById('btnTimerEnd').addEventListener('click', endTimer);
+
+      document.getElementById('btnSave').addEventListener('click', validateAndSave);
+
+      // Overview toggle
+      document.getElementById('periodWeek').addEventListener('click', () => setPeriod('week'));
+      document.getElementById('periodMonth').addEventListener('click', () => setPeriod('month'));
+      document.getElementById('periodAll').addEventListener('click', () => setPeriod('all'));
+
+      // Ranking controls
+      document.getElementById('rankSort').addEventListener('change', refreshRanking);
+      document.getElementById('rankType').addEventListener('change', refreshRanking);
+
+      // Role buttons
+      document.getElementById('btnGoIndex').addEventListener('click', () => location.href = 'index.html');
+      document.getElementById('btnExport').addEventListener('click', exportJson);
+
+      // start log with location attempt
+      startNewLog();
+
+      // render map now
+      refreshMapUI();
+      refreshOverview();
+      refreshRanking();
+    }
+
+    init();
+  </script>
+</body>
+</html>
