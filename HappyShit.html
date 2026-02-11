@@ -37,7 +37,83 @@
       display: flex;
       flex-direction: column;
       max-width: 520px;
+      cursor: pointer;
+      transition: transform 0.08s ease, box-shadow 0.12s ease;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
       margin: 0 auto;
+
+    .kpi .box:active {
+      transform: translateY(1px);
+      box-shadow: 0 10px 22px rgba(0,0,0,0.08);
+    }
+
+    .poopPin {
+      width: 28px;
+      height: 28px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.95);
+      border: 3px solid var(--c, #FFD166);
+      display: grid;
+      place-items: center;
+      font-size: 18px;
+      box-shadow: 0 10px 22px rgba(0,0,0,0.18);
+    }
+
+    .modalOverlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 60;
+    }
+
+    .modalOverlay.active { display: flex; }
+
+    .modalCard {
+      width: 100%;
+      max-width: 520px;
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 18px 50px rgba(0,0,0,0.22);
+      border: 1px solid rgba(107,79,63,0.12);
+      overflow: hidden;
+    }
+
+    .modalHead {
+      padding: 14px 14px 10px;
+      background: rgba(255, 247, 233, 1);
+      border-bottom: 1px solid rgba(107,79,63,0.12);
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .modalTitle {
+      font-weight: 1000;
+      color: var(--primary);
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.3;
+    }
+
+    .modalBody { padding: 12px 14px 14px; }
+
+    .modalClose {
+      border: 0;
+      background: transparent;
+      color: var(--primary);
+      font-weight: 1000;
+      cursor: pointer;
+      padding: 6px 8px;
+      border-radius: 10px;
+    }
+
+    .modalClose:active { transform: translateY(1px); }
       background: var(--bg);
     }
 
@@ -623,20 +699,20 @@
             <button id="periodAll">全部</button>
           </div>
 
-          <div class="kpi">
-            <div class="box">
+          <div class="kpi" aria-label="kpi cards">
+            <div class="box" data-kpi="territory" role="button" tabindex="0" aria-label="勢力範圍擴張度">
               <div class="k">勢力範圍擴張度</div>
               <div class="v" id="kpiTerritory">—</div>
             </div>
-            <div class="box">
+            <div class="box" data-kpi="money" role="button" tabindex="0" aria-label="累積拉屎薪資">
               <div class="k">累積拉屎薪資</div>
               <div class="v" id="kpiMoney">—</div>
             </div>
-            <div class="box">
+            <div class="box" data-kpi="poop" role="button" tabindex="0" aria-label="累積屎量">
               <div class="k">累積屎量</div>
               <div class="v" id="kpiPoop">—</div>
             </div>
-            <div class="box">
+            <div class="box" data-kpi="pee" role="button" tabindex="0" aria-label="累積尿量">
               <div class="k">累積尿量</div>
               <div class="v" id="kpiPee">—</div>
             </div>
@@ -647,6 +723,30 @@
           </div>
         </div>
       </section>
+
+      <div class="modalOverlay" id="kpiModal" aria-hidden="true">
+        <div class="modalCard" role="dialog" aria-modal="true" aria-label="排名資訊">
+          <div class="modalHead">
+            <div>
+              <p class="modalTitle" id="kpiModalTitle">—</p>
+              <div class="muted" id="kpiModalSub" style="margin-top:4px;">—</div>
+            </div>
+            <button class="modalClose" id="btnCloseKpiModal">關閉</button>
+          </div>
+          <div class="modalBody">
+            <div class="panel" style="margin-top:0;">
+              <div class="muted" style="margin-bottom:6px;">你的名次</div>
+              <div id="kpiModalRank" style="font-weight:1000; color:#6B4F3F; font-size:16px;">—</div>
+              <div class="muted" id="kpiModalGap" style="margin-top:6px;">—</div>
+            </div>
+
+            <div class="panel" style="margin-top:10px;">
+              <div class="muted" style="margin-bottom:6px;">前三名精神喊話</div>
+              <div id="kpiModalTop3" class="muted" style="line-height:1.5;">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <!-- RANK -->
       <section class="view" id="view-rank">
@@ -1047,6 +1147,20 @@
       return byKey;
     }
 
+    const _poopIconCache = new Map();
+    function poopIcon(color) {
+      if (_poopIconCache.has(color)) return _poopIconCache.get(color);
+      const icon = L.divIcon({
+        className: '',
+        html: `<div class="poopPin" style="--c:${color}">💩</div>`,
+        iconSize: [28, 28],
+        iconAnchor: [14, 14],
+        popupAnchor: [0, -14]
+      });
+      _poopIconCache.set(color, icon);
+      return icon;
+    }
+
     function renderMap(selectedRoleIds) {
       initMapOnce();
       clearMap();
@@ -1065,13 +1179,7 @@
           if (!Number.isFinite(p.lat) || !Number.isFinite(p.lng)) continue;
           boundsPts.push([p.lat, p.lng]);
 
-          const marker = L.circleMarker([p.lat, p.lng], {
-            radius: 8,
-            color,
-            weight: 3,
-            fillColor: color,
-            fillOpacity: 0.35
-          }).addTo(mapLayerMarkers);
+          const marker = L.marker([p.lat, p.lng], { icon: poopIcon(color) }).addTo(mapLayerMarkers);
           marker.bindPopup(markerPopupForRole(rid, placeKey, p));
 
           const m = toMercator(p.lat, p.lng);
@@ -1760,6 +1868,38 @@
     }
 
     // ---- Role tab ----
+    function deleteRoleAndData(roleId) {
+      const chars = loadJson(LS_KEYS.characters, []);
+      const remaining = chars.filter(c => c.id !== roleId);
+
+      if (!remaining.length) {
+        alert('至少要留一位角色，否則誰來扛屎？');
+        return false;
+      }
+
+      // delete records of this role
+      const allRecs = loadRecords();
+      const keptRecs = allRecs.filter(r => r.characterId !== roleId);
+      saveJson(LS_KEYS.records, keptRecs);
+      saveJson(LS_KEYS.characters, remaining);
+
+      // if current role deleted, switch to first remaining
+      const curId = getCurrentRoleId();
+      if (curId === roleId) {
+        setCurrentRoleId(remaining[0].id);
+        selectedRoleIds.clear();
+        selectedRoleIds.add(remaining[0].id);
+      }
+
+      refreshHeader();
+      refreshMapUI();
+      refreshOverview();
+      refreshRanking();
+      refreshRoleTab();
+
+      return true;
+    }
+
     function refreshRoleTab() {
       const chars = loadJson(LS_KEYS.characters, []);
       const curId = getCurrentRoleId();
@@ -1791,15 +1931,21 @@
         left.appendChild(ava);
         left.appendChild(txt);
 
-        const btn = document.createElement('button');
-        btn.className = 'btn btnGhost';
-        btn.textContent = '切換';
-        btn.style.width = '110px';
-        btn.disabled = c.id === curId;
+        const right = document.createElement('div');
+        right.style.display = 'flex';
+        right.style.gap = '10px';
+        right.style.flex = '0 0 auto';
 
-        btn.addEventListener('click', () => {
+        const btnSwitch = document.createElement('button');
+        btnSwitch.className = 'btn btnGhost';
+        btnSwitch.textContent = '切換';
+        btnSwitch.style.width = '96px';
+        btnSwitch.disabled = c.id === curId;
+
+        btnSwitch.addEventListener('click', () => {
           setCurrentRoleId(c.id);
           selectedRoleIds.clear();
+          selectedRoleIds.add(c.id);
           refreshHeader();
           refreshMapUI();
           refreshOverview();
@@ -1807,10 +1953,144 @@
           showTab('map');
         });
 
+        const btnDel = document.createElement('button');
+        btnDel.className = 'btn btnDanger';
+        btnDel.textContent = '刪除';
+        btnDel.style.width = '96px';
+
+        btnDel.addEventListener('click', () => {
+          const msg = `妳要讓「${c.id}」的屎前功盡棄嗎？\n\n刪除後：\n- 角色會消失\n- 他的所有紀錄/勢力範圍也會一起蒸發\n\n確定要刪除？`;
+          if (!confirm(msg)) return;
+          deleteRoleAndData(c.id);
+        });
+
+        right.appendChild(btnSwitch);
+        right.appendChild(btnDel);
+
         row.appendChild(left);
-        row.appendChild(btn);
+        row.appendChild(right);
         list.appendChild(row);
       }
+    }
+
+    // ---- Overview KPI ranking modal ----
+    function getPeriodRecsForRole(roleId, now) {
+      const recs = recordsByRole(roleId);
+      return filterByPeriod(recs, period, now).current;
+    }
+
+    function uniquePlaceCount(recs) {
+      return computePlaceStats(recs).size;
+    }
+
+    function kpiValueForRole(role, metric, now) {
+      const recs = getPeriodRecsForRole(role.id, now);
+      if (metric === 'territory') return uniquePlaceCount(recs);
+      if (metric === 'money') return sum(recs.filter(r => r.type === 'poop').map(r => Number(r.poopValueMoney) || 0));
+      if (metric === 'poop') return sum(recs.filter(r => r.type === 'poop').map(r => Number(r.poopWeightG) || 0));
+      if (metric === 'pee') return sum(recs.filter(r => r.type === 'pee').map(r => Number(r.peeVolumeCc) || 0));
+      return 0;
+    }
+
+    function openKpiModal(metric) {
+      const now = Date.now();
+      const roles = loadJson(LS_KEYS.characters, []);
+      const curId = getCurrentRoleId();
+      const curRole = getRoleById(curId);
+      if (!curRole) return;
+
+      const titleMap = {
+        territory: '勢力範圍（地點數）排名',
+        money: '拉屎薪資排名',
+        poop: '屎量排名',
+        pee: '尿量排名'
+      };
+
+      const unitMap = {
+        territory: '個地點',
+        money: curRole.currency || 'NT$',
+        poop: 'g',
+        pee: 'cc'
+      };
+
+      const items = roles.map(r => ({
+        role: r,
+        value: kpiValueForRole(r, metric, now)
+      })).sort((a,b) => (b.value - a.value));
+
+      const total = items.length;
+      const idx = items.findIndex(x => x.role.id === curRole.id);
+      const rank = idx >= 0 ? idx + 1 : total;
+      const myVal = idx >= 0 ? items[idx].value : 0;
+
+      const modal = document.getElementById('kpiModal');
+      modal.classList.add('active');
+      modal.setAttribute('aria-hidden', 'false');
+
+      document.getElementById('kpiModalTitle').textContent = titleMap[metric] || '排名';
+      document.getElementById('kpiModalSub').textContent = `統計期間：${period === 'week' ? '本週' : period === 'month' ? '本月' : '全部'} · 角色數：${total}`;
+
+      const rankEl = document.getElementById('kpiModalRank');
+      const gapEl = document.getElementById('kpiModalGap');
+
+      const fmtValue = (v) => {
+        if (metric === 'money') return formatMoney(curRole.currency || 'NT$', v, 0);
+        if (metric === 'poop') return `${Math.round(v).toLocaleString('en-US')} g`;
+        if (metric === 'pee') return `${Math.round(v).toLocaleString('en-US')} cc`;
+        return `${Math.round(v).toLocaleString('en-US')} 個地點`;
+      };
+
+      rankEl.textContent = `第 ${rank} 名 / ${total}（你目前：${fmtValue(myVal)}）`;
+
+      if (rank === 1) {
+        gapEl.textContent = '你已經是第一名：屎勢力登基，馬桶對你鞠躬。';
+      } else {
+        const ahead = items[rank - 2];
+        const delta = Math.max(0, (ahead?.value ?? 0) - myVal);
+        const aheadName = ahead?.role?.id ?? '上一名';
+
+        if (metric === 'territory') {
+          const need = Math.ceil(delta);
+          gapEl.textContent = `距離晉升（超越「${aheadName}」）還差：${need} 個新地點。\n小提示：換間廁所拉一波，勢力才會長。`;
+        } else if (metric === 'poop') {
+          const needG = Math.ceil(delta);
+          gapEl.textContent = `距離晉升（超越「${aheadName}」）還差：${needG.toLocaleString('en-US')} g。\n（是的…你需要更多屎。）`;
+        } else if (metric === 'money') {
+          const needMoney = Math.ceil(delta);
+          // convert money gap to grams using your average money per gram (fallback to 0)
+          const myRecs = getPeriodRecsForRole(curRole.id, now);
+          const myMoney = sum(myRecs.filter(r => r.type === 'poop').map(r => Number(r.poopValueMoney) || 0));
+          const myPoopG = sum(myRecs.filter(r => r.type === 'poop').map(r => Number(r.poopWeightG) || 0));
+          const moneyPerGram = (myMoney > 0 && myPoopG > 0) ? (myMoney / myPoopG) : 0;
+          const grams = moneyPerGram > 0 ? Math.ceil(needMoney / moneyPerGram) : null;
+          gapEl.textContent = grams
+            ? `距離晉升（超越「${aheadName}」）還差：${formatMoney(curRole.currency || 'NT$', needMoney, 0)}。\n換算成屎量約：${grams.toLocaleString('en-US')} g（以你本期屎/薪資表現估算）。`
+            : `距離晉升（超越「${aheadName}」）還差：${formatMoney(curRole.currency || 'NT$', needMoney, 0)}。\n換算屎量需要更多樣本：多拉幾次我再幫你算得更準。`;
+        } else {
+          const needCc = Math.ceil(delta);
+          const myRecs = getPeriodRecsForRole(curRole.id, now);
+          const peeRecs = myRecs.filter(r => r.type === 'pee');
+          const avg = peeRecs.length ? (sum(peeRecs.map(r => Number(r.peeVolumeCc) || 0)) / peeRecs.length) : 0;
+          const needTimes = avg > 0 ? Math.ceil(needCc / avg) : null;
+          gapEl.textContent = needTimes
+            ? `距離晉升（超越「${aheadName}」）還差：${needCc.toLocaleString('en-US')} cc。\n約等於再尿 ${needTimes} 次（以你本期平均估算）。`
+            : `距離晉升（超越「${aheadName}」）還差：${needCc.toLocaleString('en-US')} cc。\n（這是尿量榜，不是屎量榜，但我懂你想努力的心。）`;
+        }
+      }
+
+      const top3 = items.slice(0, 3);
+      const lines = [];
+      if (top3[0]) lines.push(`🥇 ${top3[0].role.id}：今天的馬桶，向你行注目禮。`);
+      if (top3[1]) lines.push(`🥈 ${top3[1].role.id}：離王座只差一張衛生紙的距離。`);
+      if (top3[2]) lines.push(`🥉 ${top3[2].role.id}：銅牌也很硬，繼續把屎勢力撐起來。`);
+      if (!lines.length) lines.push('目前沒有角色可以排名。');
+      document.getElementById('kpiModalTop3').innerHTML = lines.map(x => escapeHtml(x)).join('<br>');
+    }
+
+    function closeKpiModal() {
+      const modal = document.getElementById('kpiModal');
+      modal.classList.remove('active');
+      modal.setAttribute('aria-hidden', 'true');
     }
 
     function exportJson() {
@@ -1907,6 +2187,19 @@
       // Role buttons
       document.getElementById('btnGoIndex').addEventListener('click', () => location.href = 'index.html');
       document.getElementById('btnExport').addEventListener('click', exportJson);
+
+      // KPI click -> ranking modal
+      document.querySelectorAll('#view-overview .kpi .box').forEach(box => {
+        box.addEventListener('click', () => openKpiModal(box.dataset.kpi));
+        box.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') openKpiModal(box.dataset.kpi);
+        });
+      });
+
+      document.getElementById('btnCloseKpiModal').addEventListener('click', closeKpiModal);
+      document.getElementById('kpiModal').addEventListener('click', (e) => {
+        if (e.target && e.target.id === 'kpiModal') closeKpiModal();
+      });
 
       // start log with location attempt
       startNewLog();
