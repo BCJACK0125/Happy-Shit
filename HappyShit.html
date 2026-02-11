@@ -297,6 +297,20 @@
       font-size: 14px;
       cursor: pointer;
       min-height: 44px;
+      transition: transform 0.08s ease, filter 0.12s ease, box-shadow 0.12s ease;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      filter: grayscale(0.15);
+    }
+
+    .btn.timerActive {
+      background: var(--accent);
+      color: #2b231c;
+      box-shadow: 0 10px 22px rgba(255, 209, 102, 0.25);
+      transform: translateY(1px);
     }
 
     .btnPrimary { background: var(--accent); color: #2b231c; }
@@ -505,6 +519,15 @@
         <div class="card">
           <p class="title">立即紀錄</p>
           <div class="muted" id="locStatus">定位狀態：尚未開始</div>
+
+          <div class="panel" id="nearbyPanel" style="display:none; margin-top:10px;">
+            <div style="font-weight:1000; color:#6B4F3F;">你是不是在這裡？</div>
+            <div class="muted" style="margin-top:6px;" id="nearbyText">—</div>
+            <div class="btnRow" style="grid-template-columns: 1fr 1fr; margin-top:10px;">
+              <button class="btn btnPrimary" id="btnNearbyYes">是，填入</button>
+              <button class="btn btnGhost" id="btnNearbyNo">不是</button>
+            </div>
+          </div>
 
           <div class="btnRow" style="grid-template-columns: 1fr 1fr;">
             <button class="btn btnMint" id="btnStartNew">開始新紀錄</button>
@@ -1244,6 +1267,28 @@
       document.getElementById('resultArea').style.display = 'none';
       document.getElementById('saveError').style.display = 'none';
       document.getElementById('saveOk').style.display = 'none';
+      document.getElementById('nearbyPanel').style.display = 'none';
+      updateTimerButtons();
+    }
+
+    function updateTimerButtons() {
+      const btnStart = document.getElementById('btnTimerStart');
+      const btnPause = document.getElementById('btnTimerPause');
+      const btnEnd = document.getElementById('btnTimerEnd');
+
+      const hasType = !!logState.type;
+      const hasTime = (Number(logState.elapsedMs) || 0) > 0;
+      const running = !!logState.running;
+
+      btnStart.classList.toggle('timerActive', running);
+      btnPause.classList.toggle('timerActive', !running && hasTime);
+
+      btnStart.textContent = hasTime ? (running ? '進行中' : '繼續') : '開始';
+      btnPause.textContent = running ? '暫停' : '已暫停';
+
+      btnStart.disabled = !hasType || running;
+      btnPause.disabled = !hasType || !hasTime || running === false;
+      btnEnd.disabled = !hasType || !hasTime;
     }
 
     function setType(type) {
@@ -1276,6 +1321,7 @@
       if (logState.running) return;
       logState.running = true;
       logState.startTs = Date.now();
+      updateTimerButtons();
       tickTimer();
     }
 
@@ -1285,6 +1331,7 @@
       logState.running = false;
       logState.startTs = null;
       document.getElementById('timer').textContent = fmtMMSS(logState.elapsedMs);
+      updateTimerButtons();
     }
 
     function endTimer() {
@@ -1292,12 +1339,82 @@
       const sec = Math.max(0, Math.round(logState.elapsedMs / 1000));
       logState.durationSec = sec;
 
+      updateTimerButtons();
+
       if (!logState.type) {
         document.getElementById('timerHint').textContent = '先選擇「尿尿」或「大便」。';
         return;
       }
 
       renderResult();
+    }
+
+    function resetLogInputsAfterSave() {
+      document.getElementById('manualPlace').value = '';
+      document.getElementById('placeName').value = '';
+      document.getElementById('rating').value = '';
+      document.getElementById('note').value = '';
+      document.getElementById('tag').value = '';
+      document.getElementById('peeCc').value = '';
+      document.getElementById('poopLevel').value = '';
+
+      logState.type = null;
+      logState.running = false;
+      logState.startTs = null;
+      logState.elapsedMs = 0;
+      logState.durationSec = 0;
+      document.getElementById('timer').textContent = '00:00';
+      document.getElementById('timerHint').textContent = '選擇類型後開始計時。';
+      document.getElementById('resultArea').style.display = 'none';
+      document.getElementById('btnTypePee').classList.remove('active');
+      document.getElementById('btnTypePoop').classList.remove('active');
+      document.getElementById('nearbyPanel').style.display = 'none';
+      updateTimerButtons();
+    }
+
+    function haversineMeters(lat1, lng1, lat2, lng2) {
+      const R = 6371000;
+      const toRad = (d) => d * Math.PI / 180;
+      const dLat = toRad(lat2 - lat1);
+      const dLng = toRad(lng2 - lng1);
+      const a = Math.sin(dLat/2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng/2) ** 2;
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return R * c;
+    }
+
+    function findNearestSavedPlace(roleId, lat, lng, thresholdMeters = 60) {
+      const recs = loadRecords().filter(r => r.characterId === roleId);
+      let best = null;
+      let bestDist = Infinity;
+      for (const r of recs) {
+        const rLat = Number(r.lat);
+        const rLng = Number(r.lng);
+        if (!Number.isFinite(rLat) || !Number.isFinite(rLng)) continue;
+        const name = String(r.placeName || '').trim();
+        if (!name) continue;
+        const d = haversineMeters(lat, lng, rLat, rLng);
+        if (d < bestDist) {
+          bestDist = d;
+          best = { placeName: name, lat: rLat, lng: rLng, meters: d };
+        }
+      }
+      if (!best || bestDist > thresholdMeters) return null;
+      return best;
+    }
+
+    function showNearbyPrompt(suggestion) {
+      const panel = document.getElementById('nearbyPanel');
+      const txt = document.getElementById('nearbyText');
+      panel.dataset.placeName = suggestion.placeName;
+      panel.style.display = 'block';
+      const m = Math.round(suggestion.meters);
+      txt.textContent = `「${suggestion.placeName}」(約 ${m} 公尺)`;
+    }
+
+    function hideNearbyPrompt() {
+      const panel = document.getElementById('nearbyPanel');
+      panel.style.display = 'none';
+      panel.dataset.placeName = '';
     }
 
     function secondsValuePerRole(role) {
@@ -1414,7 +1531,19 @@
         running: false,
         durationSec: 0
       };
+
       await getLocation();
+
+      // Suggest place name if close to a previously saved location
+      try {
+        const placeInput = document.getElementById('placeName');
+        if (logState.locOk && Number.isFinite(logState.lat) && Number.isFinite(logState.lng) && !placeInput.value.trim()) {
+          const sug = findNearestSavedPlace(logState.roleId, logState.lat, logState.lng, 60);
+          if (sug) showNearbyPrompt(sug);
+        }
+      } catch {
+        // ignore
+      }
     }
 
     function validateAndSave() {
@@ -1481,8 +1610,7 @@
       refreshRanking();
 
       // reset timer for next record
-      logState.elapsedMs = 0;
-      document.getElementById('timer').textContent = '00:00';
+      resetLogInputsAfterSave();
     }
 
     function showSaveError(msg) {
@@ -1747,6 +1875,26 @@
 
       document.getElementById('btnSave').addEventListener('click', validateAndSave);
 
+      document.getElementById('btnNearbyYes').addEventListener('click', () => {
+        const panel = document.getElementById('nearbyPanel');
+        const name = String(panel.dataset.placeName || '').trim();
+        if (name) {
+          document.getElementById('placeName').value = name;
+          document.getElementById('manualPlace').value = name;
+          hideNearbyPrompt();
+          document.getElementById('rating').focus();
+        }
+      });
+
+      document.getElementById('btnNearbyNo').addEventListener('click', () => {
+        hideNearbyPrompt();
+        document.getElementById('placeName').focus();
+      });
+
+      document.getElementById('placeName').addEventListener('input', () => {
+        if (document.getElementById('placeName').value.trim()) hideNearbyPrompt();
+      });
+
       // Overview toggle
       document.getElementById('periodWeek').addEventListener('click', () => setPeriod('week'));
       document.getElementById('periodMonth').addEventListener('click', () => setPeriod('month'));
@@ -1767,6 +1915,8 @@
       refreshMapUI();
       refreshOverview();
       refreshRanking();
+
+      updateTimerButtons();
     }
 
     init();
