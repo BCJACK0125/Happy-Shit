@@ -30,6 +30,7 @@
       font-family: ui-sans-serif, system-ui, -apple-system, "Inter", "Noto Sans TC", "SF Pro Text", "Segoe UI", Arial, sans-serif;
       background: var(--bg);
       color: var(--text);
+      -webkit-tap-highlight-color: transparent;
     }
 
     .app {
@@ -37,11 +38,14 @@
       display: flex;
       flex-direction: column;
       max-width: 520px;
-      cursor: pointer;
-      transition: transform 0.08s ease, box-shadow 0.12s ease;
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
       margin: 0 auto;
+    }
+
+    .kpi .box {
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.08s ease, box-shadow 0.12s ease;
+    }
 
     .kpi .box:active {
       transform: translateY(1px);
@@ -114,8 +118,7 @@
     }
 
     .modalClose:active { transform: translateY(1px); }
-      background: var(--bg);
-    }
+
 
     header {
       position: sticky;
@@ -526,6 +529,19 @@
       font-variant-numeric: tabular-nums;
     }
 
+    .recList { display: grid; gap: 10px; margin-top: 10px; }
+    .recItem {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      padding: 12px;
+      border-radius: 16px;
+      background: #fff;
+      border: 2px solid rgba(0,0,0,0.06);
+    }
+    .recTitle { font-weight: 1000; color: var(--primary); }
+    .recMeta { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.35; }
+
     /* Role */
     .roleList { display: grid; gap: 10px; }
     .roleRow {
@@ -537,9 +553,21 @@
       border-radius: 16px;
       background: #fff;
       border: 2px solid rgba(0,0,0,0.06);
+      flex-wrap: wrap;
     }
 
-    .roleRow .left { display:flex; align-items:center; gap:10px; min-width:0; }
+    .roleRow .left { display:flex; align-items:center; gap:10px; min-width:0; flex: 1 1 auto; }
+
+    .roleActions {
+      display: flex;
+      gap: 10px;
+      flex: 0 0 auto;
+    }
+
+    @media (max-width: 420px) {
+      .roleActions { width: 100%; }
+      .roleActions .btn { flex: 1 1 0; }
+    }
 
     .small { font-size: 12px; color: var(--muted); }
 
@@ -595,6 +623,7 @@
         <div class="card">
           <p class="title">立即紀錄</p>
           <div class="muted" id="locStatus">定位狀態：尚未開始</div>
+          <div class="success" id="saveToast" style="display:none; margin-top:8px;"></div>
 
           <div class="panel" id="nearbyPanel" style="display:none; margin-top:10px;">
             <div style="font-weight:1000; color:#6B4F3F;">你是不是在這裡？</div>
@@ -773,6 +802,17 @@
 
           <div id="rankList"></div>
           <div class="muted" id="rankEmpty" style="display:none; margin-top:10px;">還沒有資料，先去「立即紀錄」來一發。</div>
+
+          <div class="panel" style="margin-top:12px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+              <div class="muted">最近紀錄（可刪除）</div>
+              <button class="btn btnGhost" id="btnToggleRecent" style="width:auto; padding:8px 10px; min-height:unset; font-size:12px;">展開</button>
+            </div>
+            <div id="recentWrap" style="display:none; margin-top:10px;">
+              <div id="recentList" class="recList"></div>
+              <div class="muted" id="recentEmpty" style="display:none; margin-top:10px;">目前沒有可刪除的紀錄。</div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -933,11 +973,25 @@
 
     // ---- Records ----
     function loadRecords() {
-      return loadJson(LS_KEYS.records, []);
+      const recs = loadJson(LS_KEYS.records, []);
+      if (!Array.isArray(recs)) return [];
+
+      let changed = false;
+      const next = [];
+      for (const r of recs) {
+        if (!r || typeof r !== 'object') { changed = true; continue; }
+        const nr = { ...r };
+        if (!nr.recordId) { nr.recordId = uid(); changed = true; }
+        if (!Number.isFinite(Number(nr.timestamp))) { nr.timestamp = Date.now(); changed = true; }
+        next.push(nr);
+      }
+      if (changed) saveJson(LS_KEYS.records, next);
+      return next;
     }
 
     function saveRecord(rec) {
       const all = loadRecords();
+      if (!rec.recordId) rec.recordId = uid();
       all.push(rec);
       saveJson(LS_KEYS.records, all);
     }
@@ -1163,6 +1217,7 @@
 
     function renderMap(selectedRoleIds) {
       initMapOnce();
+      if (!window.L || !map || !mapLayerMarkers || !mapLayerHulls) return;
       clearMap();
 
       const all = loadRecords();
@@ -1385,8 +1440,11 @@
       const btnEnd = document.getElementById('btnTimerEnd');
 
       const hasType = !!logState.type;
-      const hasTime = (Number(logState.elapsedMs) || 0) > 0;
       const running = !!logState.running;
+
+      const elapsedMs = (Number(logState.elapsedMs) || 0);
+      const elapsedNow = elapsedMs + (running && logState.startTs ? (Date.now() - logState.startTs) : 0);
+      const hasTime = running || elapsedNow > 0;
 
       btnStart.classList.toggle('timerActive', running);
       btnPause.classList.toggle('timerActive', !running && hasTime);
@@ -1395,8 +1453,8 @@
       btnPause.textContent = running ? '暫停' : '已暫停';
 
       btnStart.disabled = !hasType || running;
-      btnPause.disabled = !hasType || !hasTime || running === false;
-      btnEnd.disabled = !hasType || !hasTime;
+      btnPause.disabled = !hasType || !running;
+      btnEnd.disabled = !hasType || (!running && !hasTime);
     }
 
     function setType(type) {
@@ -1404,6 +1462,7 @@
       document.getElementById('btnTypePee').classList.toggle('active', type === 'pee');
       document.getElementById('btnTypePoop').classList.toggle('active', type === 'poop');
       document.getElementById('timerHint').textContent = type === 'pee' ? '尿尿模式：結束後會估算尿量（秒數 × 20cc）' : '大便模式：結束後會算出拉屎薪資與屎量';
+      updateTimerButtons();
     }
 
     function fmtMMSS(ms) {
@@ -1710,6 +1769,7 @@
 
       okEl.textContent = '儲存成功：你今天又征服了新的馬桶！';
       okEl.style.display = 'block';
+      showSaveToast('✅ 儲存成功：已清空欄位，可直接開始下一筆。');
 
       // refresh other pages immediately
       refreshHeader();
@@ -1725,6 +1785,19 @@
       const errEl = document.getElementById('saveError');
       errEl.textContent = msg;
       errEl.style.display = 'block';
+    }
+
+    let _saveToastTimer = null;
+    function showSaveToast(msg) {
+      const el = document.getElementById('saveToast');
+      if (!el) return;
+      el.textContent = msg;
+      el.style.display = 'block';
+      if (_saveToastTimer) clearTimeout(_saveToastTimer);
+      _saveToastTimer = setTimeout(() => {
+        el.style.display = 'none';
+        el.textContent = '';
+      }, 2200);
     }
 
     // ---- Overview ----
@@ -1865,6 +1938,91 @@
         `;
         list.appendChild(el);
       });
+
+      const wrap = document.getElementById('recentWrap');
+      if (wrap && wrap.style.display !== 'none') refreshRecentRecords();
+    }
+
+    function renderRecordValue(role, r) {
+      if (r.type === 'pee') {
+        const cc = Math.round(Number(r.peeVolumeCc) || 0);
+        return `尿量 ${cc.toLocaleString('en-US')} cc`;
+      }
+      const grams = Math.round(Number(r.poopWeightG) || 0);
+      const money = Number(r.poopValueMoney) || 0;
+      return `屎量 ${grams.toLocaleString('en-US')} g · 薪資 ${formatMoney(role.currency || 'NT$', money, 1)}`;
+    }
+
+    function deleteRecord(recordId) {
+      if (!recordId) {
+        showSaveToast('刪除失敗：找不到這筆紀錄的 ID（請重新整理頁面）。');
+        return;
+      }
+      const all = loadRecords();
+      const next = all.filter(r => r.recordId !== recordId);
+      saveJson(LS_KEYS.records, next);
+      refreshHeader();
+      refreshMapUI();
+      refreshOverview();
+      refreshRanking();
+      refreshRoleTab();
+    }
+
+    function refreshRecentRecords() {
+      const list = document.getElementById('recentList');
+      const empty = document.getElementById('recentEmpty');
+      if (!list || !empty) return;
+
+      const wrap = document.getElementById('recentWrap');
+      if (wrap && wrap.style.display === 'none') return;
+
+      const role = getRoleById(getCurrentRoleId());
+      const type = document.getElementById('rankType')?.value || 'all';
+
+      let recs = recordsByRole(role.id);
+      if (type !== 'all') recs = recs.filter(r => r.type === type);
+      recs = recs.slice().sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0));
+      const top = recs.slice(0, 20);
+
+      list.innerHTML = '';
+      if (!top.length) {
+        empty.style.display = 'block';
+        return;
+      }
+      empty.style.display = 'none';
+
+      for (const r of top) {
+        const item = document.createElement('div');
+        item.className = 'recItem';
+
+        const place = String(r.placeName || '未命名地點').trim() || '未命名地點';
+        const when = new Date(r.timestamp).toLocaleString();
+        const value = renderRecordValue(role, r);
+        const rating = Number(r.rating);
+        const ratingText = Number.isFinite(rating) ? `評分 ${rating.toFixed(1)}` : '未評分';
+        const ico = r.type === 'pee' ? '💧' : '💩';
+
+        const left = document.createElement('div');
+        left.innerHTML = `
+          <div class="recTitle">${ico} ${escapeHtml(place)}</div>
+          <div class="recMeta">${escapeHtml(when)} · ${escapeHtml(value)} · ${escapeHtml(ratingText)}</div>
+        `;
+
+        const btn = document.createElement('button');
+        btn.className = 'btn btnDanger';
+        btn.textContent = '刪除';
+        btn.style.width = '92px';
+        btn.addEventListener('click', () => {
+          const msg = `確定要刪除這筆紀錄嗎？\n\n${place}\n${when}\n${value}`;
+          if (!confirm(msg)) return;
+          deleteRecord(r.recordId);
+          showSaveToast('已刪除一筆紀錄。');
+        });
+
+        item.appendChild(left);
+        item.appendChild(btn);
+        list.appendChild(item);
+      }
     }
 
     // ---- Role tab ----
@@ -1932,14 +2090,11 @@
         left.appendChild(txt);
 
         const right = document.createElement('div');
-        right.style.display = 'flex';
-        right.style.gap = '10px';
-        right.style.flex = '0 0 auto';
+        right.className = 'roleActions';
 
         const btnSwitch = document.createElement('button');
         btnSwitch.className = 'btn btnGhost';
         btnSwitch.textContent = '切換';
-        btnSwitch.style.width = '96px';
         btnSwitch.disabled = c.id === curId;
 
         btnSwitch.addEventListener('click', () => {
@@ -1956,7 +2111,6 @@
         const btnDel = document.createElement('button');
         btnDel.className = 'btn btnDanger';
         btnDel.textContent = '刪除';
-        btnDel.style.width = '96px';
 
         btnDel.addEventListener('click', () => {
           const msg = `妳要讓「${c.id}」的屎前功盡棄嗎？\n\n刪除後：\n- 角色會消失\n- 他的所有紀錄/勢力範圍也會一起蒸發\n\n確定要刪除？`;
@@ -1998,6 +2152,36 @@
       const curId = getCurrentRoleId();
       const curRole = getRoleById(curId);
       if (!curRole) return;
+
+      const top3Copy = {
+        territory: {
+          one: (n) => `🥇 ${n}：地盤王本人。馬桶地政事務所已蓋章。`,
+          two: (n) => `🥈 ${n}：再多征服一間廁所就要封侯。`,
+          three: (n) => `🥉 ${n}：地圖上那一塊，是你屎勢力的起點。`
+        },
+        money: {
+          one: (n) => `🥇 ${n}：把薪水帶進廁所的人，才懂人生。`,
+          two: (n) => `🥈 ${n}：老闆看不到，但馬桶看得到你的 KPI。`,
+          three: (n) => `🥉 ${n}：每一次坐下，都是財富自由的練習。`
+        },
+        poop: {
+          one: (n) => `🥇 ${n}：重磅選手登場。馬桶承重已警報。`,
+          two: (n) => `🥈 ${n}：穩定輸出，才是真正的核心競爭力。`,
+          three: (n) => `🥉 ${n}：量不在大，氣勢要到位。`
+        },
+        pee: {
+          one: (n) => `🥇 ${n}：水庫開閘王。補水做得跟課表一樣滿。`,
+          two: (n) => `🥈 ${n}：尿量穩健成長，腎臟給你按讚。`,
+          three: (n) => `🥉 ${n}：小溪也能成江河，繼續沖。`
+        }
+      };
+
+      const rank1Copy = {
+        territory: '你是地盤第一名：每間廁所都在你的版圖裡。',
+        money: '你是薪資第一名：把摸魚時間榨成現金的王者。',
+        poop: '你是屎量第一名：輸出最強，馬桶都尊敬你。',
+        pee: '你是尿量第一名：補水之神，水循環為你工作。'
+      };
 
       const titleMap = {
         territory: '勢力範圍（地點數）排名',
@@ -2043,7 +2227,7 @@
       rankEl.textContent = `第 ${rank} 名 / ${total}（你目前：${fmtValue(myVal)}）`;
 
       if (rank === 1) {
-        gapEl.textContent = '你已經是第一名：屎勢力登基，馬桶對你鞠躬。';
+        gapEl.textContent = rank1Copy[metric] || '你已經是第一名：馬桶對你鞠躬。';
       } else {
         const ahead = items[rank - 2];
         const delta = Math.max(0, (ahead?.value ?? 0) - myVal);
@@ -2080,9 +2264,10 @@
 
       const top3 = items.slice(0, 3);
       const lines = [];
-      if (top3[0]) lines.push(`🥇 ${top3[0].role.id}：今天的馬桶，向你行注目禮。`);
-      if (top3[1]) lines.push(`🥈 ${top3[1].role.id}：離王座只差一張衛生紙的距離。`);
-      if (top3[2]) lines.push(`🥉 ${top3[2].role.id}：銅牌也很硬，繼續把屎勢力撐起來。`);
+      const copy = top3Copy[metric] || top3Copy.territory;
+      if (top3[0]) lines.push(copy.one(top3[0].role.id));
+      if (top3[1]) lines.push(copy.two(top3[1].role.id));
+      if (top3[2]) lines.push(copy.three(top3[2].role.id));
       if (!lines.length) lines.push('目前沒有角色可以排名。');
       document.getElementById('kpiModalTop3').innerHTML = lines.map(x => escapeHtml(x)).join('<br>');
     }
@@ -2183,6 +2368,18 @@
       // Ranking controls
       document.getElementById('rankSort').addEventListener('change', refreshRanking);
       document.getElementById('rankType').addEventListener('change', refreshRanking);
+
+      // Recent records collapsible
+      const btnToggleRecent = document.getElementById('btnToggleRecent');
+      const recentWrap = document.getElementById('recentWrap');
+      if (btnToggleRecent && recentWrap) {
+        btnToggleRecent.addEventListener('click', () => {
+          const open = recentWrap.style.display === 'none';
+          recentWrap.style.display = open ? 'block' : 'none';
+          btnToggleRecent.textContent = open ? '收起' : '展開';
+          if (open) refreshRecentRecords();
+        });
+      }
 
       // Role buttons
       document.getElementById('btnGoIndex').addEventListener('click', () => location.href = 'index.html');
