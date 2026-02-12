@@ -94,6 +94,12 @@
       left: 50%;
       transform: translateX(-50%);
       box-shadow: 0 18px 40px rgba(0,0,0,0.10);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .toilet:active {
+      transform: translateX(-50%) scale(0.99);
     }
 
     .toilet:before {
@@ -118,10 +124,13 @@
         linear-gradient(180deg, #7a5643, #5e4032);
       position: absolute;
       left: 50%;
-      top: -100px;
+      top: 84px;
       transform: translateX(-50%);
       display: grid;
       place-items: center;
+    }
+
+    .poop.dropIn {
       animation: drop 1.6s ease-in-out forwards;
     }
 
@@ -154,6 +163,17 @@
       65% { top: 88px; transform: translateX(-50%) scale(1.02); }
       78% { top: 70px; transform: translateX(-50%) scale(0.98); }
       100% { top: 84px; transform: translateX(-50%) scale(1.0); }
+    }
+
+    .poop.hop {
+      animation: hop 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    @keyframes hop {
+      0% { transform: translateX(-50%) translateY(0) scale(1); }
+      45% { transform: translateX(-50%) translateY(-22px) scale(1.04); }
+      75% { transform: translateX(-50%) translateY(0) scale(0.98); }
+      100% { transform: translateX(-50%) translateY(0) scale(1); }
     }
 
     .fadeIn {
@@ -374,14 +394,14 @@
 
     <main>
       <section class="card animWrap">
-        <div class="poop" aria-label="poop animation">
+        <div class="poop dropIn" id="poop" aria-label="poop animation">
           <div class="face">
             <div class="eye"></div>
             <div class="eye"></div>
           </div>
           <div class="smile"></div>
         </div>
-        <div class="toilet" aria-hidden="true"></div>
+        <div class="toilet" id="toilet" aria-label="tap toilet"></div>
       </section>
 
       <section id="roleSection" class="card fadeIn">
@@ -508,12 +528,34 @@
     const elBtnCreate = document.getElementById('btnCreate');
     const elFormError = document.getElementById('formError');
 
+    const elToilet = document.getElementById('toilet');
+    const elPoop = document.getElementById('poop');
+
     let characters = [];
     let selectedIndex = 0;
     let isDragging = false;
     let dragStartX = 0;
     let dragStartTranslate = 0;
     let currentTranslate = 0;
+
+    function hopPoop() {
+      if (!elPoop) return;
+      elPoop.classList.remove('hop');
+      // force reflow so animation can restart
+      void elPoop.offsetWidth;
+      elPoop.classList.add('hop');
+    }
+
+    if (elToilet) {
+      elToilet.addEventListener('click', hopPoop);
+    }
+
+    if (elPoop) {
+      elPoop.addEventListener('animationend', (e) => {
+        if (e.animationName === 'hop') elPoop.classList.remove('hop');
+        if (e.animationName === 'drop') elPoop.classList.remove('dropIn');
+      });
+    }
 
     function openSheet() {
       elSheet.classList.add('open');
