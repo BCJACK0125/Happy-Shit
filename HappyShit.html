@@ -2,2414 +2,2388 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Happy Shit | 主頁</title>
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-    crossorigin=""
-  />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#FFF7E9" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="屎地圖" />
+  <title>Happy Shit 屎地圖</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="assets/icon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <link rel="stylesheet" href="assets/hs-base.css" />
   <style>
     :root {
-      --primary: #6B4F3F;
-      --bg: #FFF7E9;
-      --accent: #FFD166;
-      --mint: #4ECDC4;
-      --text: #1f1f1f;
-      --muted: #8A8A8A;
-      --card: #ffffff;
-      --shadow: 0 10px 30px rgba(0,0,0,0.08);
-      --radius: 18px;
-      --danger: #b00020;
+      --hdr-h: 64px;
+      --tab-h: 66px;
+      --chrome-b: calc(var(--tab-h) + var(--safe-b));
     }
 
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: ui-sans-serif, system-ui, -apple-system, "Inter", "Noto Sans TC", "SF Pro Text", "Segoe UI", Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      -webkit-tap-highlight-color: transparent;
-    }
+    .app { max-width: 520px; margin: 0 auto; min-height: 100dvh; }
 
-    .app {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      max-width: 520px;
-      margin: 0 auto;
-    }
-
-    .kpi .box {
-      cursor: pointer;
-      user-select: none;
-      transition: transform 0.08s ease, box-shadow 0.12s ease;
-    }
-
-    .kpi .box:active {
-      transform: translateY(1px);
-      box-shadow: 0 10px 22px rgba(0,0,0,0.08);
-    }
-
-    .poopPin {
-      width: 28px;
-      height: 28px;
-      border-radius: 16px;
-      background: rgba(255, 255, 255, 0.95);
-      border: 3px solid var(--c, #FFD166);
-      display: grid;
-      place-items: center;
-      font-size: 18px;
-      box-shadow: 0 10px 22px rgba(0,0,0,0.18);
-    }
-
-    .modalOverlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.35);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-      z-index: 60;
-    }
-
-    .modalOverlay.active { display: flex; }
-
-    .modalCard {
-      width: 100%;
-      max-width: 520px;
-      background: #fff;
-      border-radius: 18px;
-      box-shadow: 0 18px 50px rgba(0,0,0,0.22);
-      border: 1px solid rgba(107,79,63,0.12);
-      overflow: hidden;
-    }
-
-    .modalHead {
-      padding: 14px 14px 10px;
-      background: rgba(255, 247, 233, 1);
-      border-bottom: 1px solid rgba(107,79,63,0.12);
-      display: flex;
-      align-items: start;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    .modalTitle {
-      font-weight: 1000;
-      color: var(--primary);
-      margin: 0;
-      font-size: 15px;
-      line-height: 1.3;
-    }
-
-    .modalBody { padding: 12px 14px 14px; }
-
-    .modalClose {
-      border: 0;
-      background: transparent;
-      color: var(--primary);
-      font-weight: 1000;
-      cursor: pointer;
-      padding: 6px 8px;
-      border-radius: 10px;
-    }
-
-    .modalClose:active { transform: translateY(1px); }
-
-
-    header {
+    /* ---------- Header ---------- */
+    .hdr {
       position: sticky;
       top: 0;
-      z-index: 20;
-      padding: 12px 14px 10px;
-      background: rgba(255, 247, 233, 0.92);
-      backdrop-filter: blur(8px);
-      border-bottom: 1px solid rgba(107,79,63,0.12);
-    }
-
-    .topRow {
+      z-index: 500;
+      height: calc(var(--hdr-h) + var(--safe-t));
+      padding: var(--safe-t) 12px 0 10px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
-    }
-
-    .roleBadge {
-      display: flex;
-      align-items: center;
       gap: 10px;
-      min-width: 0;
+      background: rgba(255, 247, 233, 0.9);
+      backdrop-filter: saturate(1.4) blur(12px);
+      -webkit-backdrop-filter: saturate(1.4) blur(12px);
+      border-bottom: 1px solid var(--line);
     }
-
-    .avatar {
-      width: 42px;
-      height: 42px;
-      border-radius: 14px;
-      background: rgba(78, 205, 196, 0.18);
-      border: 2px solid rgba(78,205,196,0.35);
-      display: grid;
-      place-items: center;
-      font-size: 22px;
-      user-select: none;
-      flex: 0 0 auto;
+    .who {
+      display: flex; align-items: center; gap: 10px;
+      min-width: 0; min-height: 48px;
+      padding: 4px 8px 4px 4px;
+      border: 0; border-radius: 16px;
+      background: transparent;
+      text-align: left;
     }
+    .who:active { background: rgba(107, 79, 63, 0.07); }
+    .who-text { min-width: 0; }
+    .who-name { font-weight: 800; color: var(--brown); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.25; }
+    .who-sub { font-size: 12.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-    .roleText {
-      min-width: 0;
-    }
-
-    .roleId {
-      font-weight: 900;
-      color: var(--primary);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      font-size: 14px;
-    }
-
-    .roleMeta {
-      font-size: 12px;
-      color: var(--muted);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .statsPill {
+    .ticker {
+      min-height: 48px;
+      padding: 4px 10px;
+      border: 0; border-radius: 14px;
+      background: transparent;
       text-align: right;
-      font-variant-numeric: tabular-nums;
-      flex: 0 0 auto;
+      flex: none;
+      overflow: hidden;
     }
+    .ticker-v, .ticker-l, .who-name, .who-sub { display: block; }
+    .ticker-v { font-weight: 800; font-size: 16px; color: var(--brown); line-height: 1.2; }
+    .ticker-l { font-size: 12px; color: var(--muted); }
+    .ticker.is-ticking > * { animation: tick-in 0.35s var(--ease-out); }
+    @keyframes tick-in { from { opacity: 0; transform: translateY(8px); } }
 
-    .pillValue {
-      font-weight: 900;
-      color: var(--primary);
-      font-size: 14px;
-      line-height: 1.1;
-    }
-
-    .pillLabel {
-      font-size: 11px;
-      color: var(--muted);
-      margin-top: 2px;
-    }
-
-    .content {
-      flex: 1;
-      padding: 12px 14px 78px;
-    }
-
-    .card {
-      background: var(--card);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 14px;
-    }
-
-    .row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
-    .title {
-      margin: 0 0 10px;
-      font-weight: 900;
-      color: var(--primary);
-      font-size: 16px;
-    }
-
-    .muted { color: var(--muted); font-size: 13px; }
-
-    /* Tabs */
-    .tabBar {
+    /* ---------- Tab bar ---------- */
+    .tabbar {
       position: fixed;
-      left: 50%;
+      left: 50%; bottom: 0;
       transform: translateX(-50%);
-      bottom: 0;
+      z-index: 500;
       width: 100%;
       max-width: 520px;
+      height: var(--chrome-b);
+      padding: 6px 6px var(--safe-b);
       display: grid;
       grid-template-columns: repeat(5, 1fr);
-      gap: 6px;
-      padding: 8px 8px 10px;
-      background: rgba(255, 247, 233, 0.95);
-      backdrop-filter: blur(10px);
-      border-top: 1px solid rgba(107,79,63,0.12);
-      z-index: 30;
+      background: rgba(255, 247, 233, 0.94);
+      backdrop-filter: saturate(1.4) blur(14px);
+      -webkit-backdrop-filter: saturate(1.4) blur(14px);
+      border-top: 1px solid var(--line);
     }
-
-    .tabBtn {
+    .tab-btn {
+      position: relative;
+      display: grid;
+      justify-items: center;
+      align-content: center;
+      gap: 3px;
       border: 0;
       background: transparent;
-      padding: 10px 6px;
-      border-radius: 14px;
-      min-height: 52px;
-      cursor: pointer;
-      color: var(--primary);
-      display: grid;
-      place-items: center;
-      gap: 2px;
-      font-weight: 900;
-      font-size: 11px;
-    }
-
-    .tabBtn .ico { font-size: 18px; line-height: 1; }
-
-    .tabBtn.active {
-      background: rgba(255, 209, 102, 0.55);
-      box-shadow: 0 10px 22px rgba(255, 209, 102, 0.25);
-    }
-
-    .view { display: none; }
-    .view.active { display: block; }
-
-    /* Map */
-    #map {
-      height: 60vh;
-      min-height: 360px;
-      border-radius: 18px;
-      overflow: hidden;
-      border: 2px solid rgba(107,79,63,0.10);
-    }
-
-    .chipRow {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 10px;
-    }
-
-    .chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 10px;
-      border-radius: 999px;
-      background: rgba(107,79,63,0.08);
-      color: var(--primary);
-      font-weight: 900;
+      color: var(--muted);
       font-size: 12px;
-      border: 1px solid rgba(107,79,63,0.12);
+      font-weight: 700;
     }
-
-    .chip button {
-      border: 0;
-      background: transparent;
-      font-weight: 900;
-      cursor: pointer;
-      color: var(--primary);
-      padding: 0;
-      min-height: unset;
+    .tab-ico {
+      display: grid; place-items: center;
+      width: 56px; height: 30px;
+      border-radius: 99px;
+      transition: background-color 0.2s ease;
     }
+    .tab-ico svg { width: 23px; height: 23px; }
+    .tab-btn[aria-current="page"] { color: var(--brown); font-weight: 800; }
+    .tab-btn[aria-current="page"] .tab-ico { background: var(--yellow); }
+    .tab-btn.is-live .tab-ico::after {
+      content: "";
+      position: absolute;
+      top: 6px; right: calc(50% - 26px);
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--danger);
+      box-shadow: 0 0 0 2px var(--cream);
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+    @keyframes pulse { 50% { transform: scale(0.7); opacity: 0.6; } }
 
-    .panel {
-      margin-top: 10px;
-      padding: 12px;
+    /* ---------- Views ---------- */
+    .view { padding: 16px 16px calc(var(--chrome-b) + 28px); }
+    .view-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+    .view-head h1 { font-size: 24px; letter-spacing: -0.01em; }
+    .section-title { font-size: 17px; margin: 26px 0 10px; }
+
+    .empty {
+      display: grid; justify-items: center; text-align: center; gap: 8px;
+      padding: 32px 20px;
+    }
+    .empty .mascot { width: 88px; height: 88px; margin-bottom: 4px; }
+    .empty h2 { font-size: 18px; }
+    .empty p { color: var(--muted); max-width: 30ch; }
+    .empty .btn { margin-top: 8px; }
+
+    /* ---------- Map ---------- */
+    .view-map { position: relative; padding: 0; height: calc(100dvh - var(--hdr-h) - var(--safe-t) - var(--chrome-b)); }
+    #map { position: absolute; inset: 0; background: #EFE7DA; z-index: 0; }
+    .map-fail { height: 100%; display: grid; place-items: center; text-align: center; padding: 24px; color: var(--muted); }
+    .map-fail b { display: block; color: var(--brown); font-size: 17px; margin-bottom: 6px; }
+
+    .map-top {
+      position: absolute; top: 12px; left: 12px; right: 12px;
+      z-index: 400;
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
+      pointer-events: none;
+    }
+    .map-top > * { pointer-events: auto; }
+    .map-title {
+      padding: 10px 14px;
       border-radius: 16px;
-      background: rgba(255, 247, 233, 1);
-      border: 1px solid rgba(107,79,63,0.15);
-    }
-
-    .checkList {
-      display: grid;
-      gap: 8px;
-      margin-top: 8px;
-    }
-
-    .checkItem {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      padding: 10px 12px;
-      border-radius: 14px;
-      background: #fff;
-      border: 2px solid rgba(0,0,0,0.06);
-    }
-
-    .checkItem .left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: var(--shadow);
       min-width: 0;
     }
-
-    .dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 999px;
-      background: var(--mint);
-      flex: 0 0 auto;
-    }
-
-    /* Forms */
-    label { display: block; font-size: 12px; color: var(--muted); margin-top: 10px; }
-    input, select, textarea {
-      width: 100%;
-      padding: 12px 12px;
-      border-radius: 14px;
-      border: 2px solid rgba(0,0,0,0.08);
+    .map-title strong { display: block; color: var(--brown); font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .map-title span { font-size: 12.5px; color: var(--muted); }
+    .map-btn {
+      position: relative;
+      display: grid; place-items: center;
+      width: 48px; height: 48px;
+      border: 0; border-radius: 16px;
       background: #fff;
-      outline: none;
+      color: var(--brown);
+      box-shadow: var(--shadow);
+      flex: none;
+    }
+    .map-btn svg { width: 22px; height: 22px; }
+    .map-btn .badge {
+      position: absolute; top: -4px; right: -4px;
+      min-width: 20px; height: 20px; padding: 0 5px;
+      border-radius: 99px;
+      background: var(--brown); color: #fff;
+      font-size: 11.5px; font-weight: 800; line-height: 20px;
+    }
+    .map-btn.is-busy svg { animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .map-legend {
+      position: absolute; left: 12px; top: 76px; z-index: 400;
+      display: flex; flex-direction: column; gap: 6px; align-items: flex-start;
+    }
+    .legend-item {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 10px 4px 6px;
+      border-radius: 99px;
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: var(--shadow-sm);
+      font-size: 12.5px; font-weight: 700; color: var(--ink);
+    }
+    .legend-item i { width: 12px; height: 12px; border-radius: 50%; background: var(--c); }
+
+    .map-locate { position: absolute; right: 12px; bottom: 28px; z-index: 400; }
+    .map-fab {
+      position: absolute; left: 50%; bottom: 24px; z-index: 400;
+      transform: translateX(-50%);
+      min-height: 56px; padding: 0 26px 0 14px;
+      border-radius: 99px;
+      font-size: 17px;
+    }
+    .map-fab:active:not(:disabled) { transform: translateX(-50%) scale(0.97); }
+    .map-fab .mascot { width: 34px; height: 34px; }
+
+    .map-empty {
+      position: absolute; left: 16px; right: 16px; bottom: 96px; z-index: 400;
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 16px;
+      border-radius: var(--r-card);
+      background: #fff;
+      box-shadow: var(--shadow-lg);
+    }
+    .map-empty .mascot { width: 52px; height: 52px; flex: none; }
+    .map-empty b { color: var(--brown); }
+    .map-empty p { font-size: 13.5px; color: var(--muted); }
+
+    .hs-pin .pin {
+      position: relative;
+      display: grid; place-items: center;
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: inset 0 0 0 3px var(--c), 0 6px 14px rgba(59, 42, 32, 0.25);
+    }
+    .hs-pin .pin::after {
+      content: "";
+      position: absolute; bottom: -6px; left: 50%;
+      margin-left: -5px;
+      border: 5px solid transparent;
+      border-top: 7px solid var(--c);
+      border-bottom: 0;
+    }
+    .hs-pin .mascot { width: 22px; height: 22px; }
+
+    .hs-popup .leaflet-popup-content-wrapper { border-radius: 18px; box-shadow: var(--shadow-lg); }
+    .hs-popup .leaflet-popup-content { margin: 14px 16px; font-family: var(--font); color: var(--ink); min-width: 190px; }
+    .pop-name { font-weight: 800; color: var(--brown); font-size: 15px; }
+    .pop-role { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+    .pop-role i { width: 10px; height: 10px; border-radius: 50%; background: var(--c); }
+    .pop-stats { display: grid; grid-template-columns: repeat(3, auto); gap: 4px 14px; margin: 10px 0 0; }
+    .pop-stats dt { font-size: 11.5px; color: var(--muted); }
+    .pop-stats dd { margin: 0; font-weight: 800; font-size: 14px; }
+    .leaflet-container { font-family: var(--font); }
+    /* Warm the OSM tiles toward the cream palette so pins and hulls stay the loudest thing. */
+    .leaflet-tile-pane { filter: saturate(0.6) sepia(0.18) brightness(1.03); }
+    .leaflet-bottom.leaflet-right .leaflet-control-attribution { font-size: 10px; }
+
+    .layer-row {
+      display: flex; align-items: center; gap: 12px;
+      min-height: 64px;
+      padding: 10px 4px;
+      border-bottom: 1px solid var(--line);
+      cursor: pointer;
+    }
+    .layer-main { flex: 1; min-width: 0; display: grid; }
+    .layer-main b { color: var(--brown); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .switch {
+      appearance: none; -webkit-appearance: none;
+      width: 50px; height: 30px; flex: none;
+      border-radius: 99px;
+      background: var(--cream-deep);
+      box-shadow: inset 0 0 0 2px var(--line-strong);
+      position: relative;
+      transition: background-color 0.2s ease;
+      margin: 0;
+    }
+    .switch::after {
+      content: "";
+      position: absolute; top: 3px; left: 3px;
+      width: 24px; height: 24px; border-radius: 50%;
+      background: #fff;
+      box-shadow: var(--shadow-sm), 0 2px 4px rgba(0, 0, 0, 0.15);
+      transition: transform 0.2s var(--ease-out);
+    }
+    .switch:checked { background: var(--brown); box-shadow: none; }
+    .switch:checked::after { transform: translateX(20px); }
+    .switch:disabled { opacity: 0.55; }
+
+    /* ---------- Log ---------- */
+    .loc-pill {
+      display: flex; align-items: center; gap: 8px;
       min-height: 44px;
-      font-size: 14px;
+      padding: 6px 6px 6px 14px;
+      border-radius: 99px;
+      background: #fff;
+      box-shadow: var(--shadow-sm), inset 0 0 0 1px var(--line);
+      font-size: 13.5px;
+      font-weight: 600;
     }
+    .loc-pill .loc-text { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .loc-dot { width: 10px; height: 10px; border-radius: 50%; flex: none; background: var(--line-strong); }
+    .loc-pill[data-state="ok"] .loc-dot { background: var(--mint); box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.3); }
+    .loc-pill[data-state="locating"] .loc-dot { background: var(--yellow-deep); animation: pulse 1s ease-in-out infinite; }
+    .loc-pill[data-state="fallback"] .loc-dot { background: var(--yellow-deep); }
+    .loc-pill[data-state="fail"] .loc-dot { background: var(--danger); }
+    .loc-pill .btn { min-height: 34px; padding: 4px 12px; font-size: 13px; border-radius: 99px; }
 
-    textarea { min-height: 80px; resize: vertical; }
+    .log-q { font-size: 26px; text-align: center; margin-top: 26px; letter-spacing: -0.01em; }
+    .log-q + p { text-align: center; color: var(--muted); margin-top: 4px; }
 
-    .btnRow {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 10px;
-      margin-top: 10px;
-    }
-
-    .btn {
+    .type-pick { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 22px; }
+    .type-btn {
+      display: grid; justify-items: center; align-content: center; gap: 4px;
+      min-height: 210px;
+      padding: 18px 10px;
       border: 0;
-      border-radius: 14px;
-      padding: 12px 12px;
-      font-weight: 900;
-      font-size: 14px;
-      cursor: pointer;
-      min-height: 44px;
-      transition: transform 0.08s ease, filter 0.12s ease, box-shadow 0.12s ease;
+      border-radius: 28px;
+      color: var(--ink);
+      transition: transform 0.15s var(--ease-out), box-shadow 0.15s ease;
     }
+    .type-btn:active { transform: scale(0.96); }
+    .type-btn .art { width: 84px; height: 84px; margin-bottom: 8px; }
+    .type-btn .art svg { width: 100%; height: 100%; }
+    .type-name { font-size: 24px; font-weight: 900; color: var(--brown); }
+    .type-sub { font-size: 13px; color: var(--muted); font-weight: 600; }
+    .type-pee { background: #E2F5F3; box-shadow: inset 0 0 0 2px rgba(31, 154, 144, 0.25), 0 10px 24px rgba(31, 154, 144, 0.12); }
+    .type-poop { background: #F7E7D7; box-shadow: inset 0 0 0 2px rgba(154, 90, 50, 0.25), 0 10px 24px rgba(154, 90, 50, 0.12); }
+    .today-line { text-align: center; margin-top: 22px; color: var(--muted); font-size: 14px; }
 
-    .btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      filter: grayscale(0.15);
+    .timing { display: grid; justify-items: center; margin-top: 18px; }
+    .timing-label { font-weight: 800; color: var(--brown); font-size: 18px; text-align: center; }
+    .timing-label small { display: block; text-align: center; font-weight: 600; font-size: 13px; color: var(--muted); }
+    .bowl-wrap { position: relative; width: min(80vw, 300px); aspect-ratio: 1; margin: 14px auto 6px; }
+    .bowl-wrap svg { width: 100%; height: 100%; display: block; overflow: visible; }
+    .bowl-rim { fill: #fff; filter: drop-shadow(0 14px 22px rgba(107, 79, 63, 0.18)); }
+    .bowl-water { fill: #F1FAF9; }
+    .ring-track { fill: none; stroke: var(--cream-deep); stroke-width: 7; }
+    .ring { fill: none; stroke-width: 7; stroke-linecap: round; stroke: var(--pee); }
+    .wave { animation: wave 2.6s linear infinite; }
+    .wave-back { animation-duration: 3.8s; animation-direction: reverse; }
+    @keyframes wave { to { transform: translateX(-120px); } }
+    [data-type="pee"] .wave-front { fill: #FFD166; }
+    [data-type="pee"] .wave-back { fill: #FFE6A6; }
+    [data-type="poop"] .wave-front { fill: #CFA582; }
+    [data-type="poop"] .wave-back { fill: #E4C9AF; }
+    [data-type="poop"] .ring { stroke: var(--poop); }
+    .is-paused .wave { animation-play-state: paused; }
+
+    .bowl-center {
+      position: absolute; inset: 0;
+      display: grid; place-content: center; text-align: center;
+      pointer-events: none;
     }
+    .clock { font-size: clamp(44px, 14vw, 58px); font-weight: 800; letter-spacing: -0.02em; line-height: 1; color: var(--ink); }
+    .live-value { margin-top: 8px; font-weight: 800; font-size: 16px; color: var(--brown); }
+    .is-paused .clock { opacity: 0.55; }
 
-    .btn.timerActive {
-      background: var(--accent);
-      color: #2b231c;
-      box-shadow: 0 10px 22px rgba(255, 209, 102, 0.25);
-      transform: translateY(1px);
+    .timer-actions { display: grid; grid-template-columns: 1fr 1.5fr; gap: 12px; width: 100%; margin-top: 18px; }
+    .timer-actions .btn { min-height: 60px; font-size: 17px; border-radius: 18px; }
+    .discard { margin-top: 10px; color: var(--muted); }
+
+    .summary {
+      display: flex; align-items: center; gap: 14px;
+      padding: 16px;
+      border-radius: var(--r-card);
+      color: var(--ink);
     }
+    [data-type="pee"] .summary { background: #E2F5F3; }
+    [data-type="poop"] .summary { background: #F7E7D7; }
+    .summary .art { width: 52px; height: 52px; flex: none; }
+    .summary .art svg { width: 100%; height: 100%; }
+    .summary-main { flex: 1; min-width: 0; }
+    .summary-title { font-weight: 800; color: var(--brown); }
+    .summary-label { font-size: 12.5px; color: var(--muted); }
+    .summary-value { font-size: 26px; font-weight: 800; line-height: 1.1; text-align: right; color: var(--ink); }
 
-    .btnPrimary { background: var(--accent); color: #2b231c; }
-    .btnGhost { background: transparent; border: 2px solid rgba(107,79,63,0.25); color: var(--primary); }
-    .btnMint { background: rgba(78,205,196,0.22); border: 2px solid rgba(78,205,196,0.35); color: #0f3a37; }
-    .btnDanger { background: rgba(176,0,32,0.10); border: 2px solid rgba(176,0,32,0.25); color: var(--danger); }
+    .stepper-input { display: grid; grid-template-columns: 52px 1fr 52px; gap: 8px; }
+    .stepper-input .input { text-align: center; font-size: 20px; font-weight: 800; }
+    .stepper-input .icon-btn { width: 52px; height: 52px; font-size: 22px; font-weight: 800; background: #fff; box-shadow: inset 0 0 0 2px var(--line); }
 
-    .seg {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 10px;
-    }
-
-    .seg button {
-      border: 2px solid rgba(107,79,63,0.18);
+    .levels { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .level {
+      display: grid; justify-items: center; align-content: end; gap: 2px;
+      min-height: 104px;
+      padding: 10px 4px 10px;
+      border: 0; border-radius: 18px;
       background: #fff;
-      border-radius: 16px;
-      padding: 12px 10px;
+      box-shadow: inset 0 0 0 2px var(--line);
+    }
+    .level .mascot { width: calc(44px * var(--s)); height: calc(44px * var(--s)); margin-bottom: 4px; }
+    .level b { font-size: 14px; color: var(--brown); }
+    .level span { font-size: 12px; color: var(--muted); }
+    .level[aria-checked="true"] { background: #FFF1CC; box-shadow: inset 0 0 0 3px var(--brown); }
+
+    .suggest { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 4px; }
+    .suggest-label { font-size: 12.5px; color: var(--muted); width: 100%; }
+    .suggest .chip small { color: inherit; opacity: 0.7; font-weight: 600; }
+
+    .rating-head { display: flex; align-items: center; gap: 12px; }
+    .rating-num {
+      width: 96px;
       min-height: 52px;
-      font-weight: 900;
-      cursor: pointer;
-      color: var(--primary);
-    }
-
-    .seg button.active {
-      border-color: rgba(78,205,196,0.8);
-      box-shadow: 0 12px 24px rgba(78,205,196,0.18);
-    }
-
-    .bigNumber {
-      font-variant-numeric: tabular-nums;
-      font-weight: 1000;
-      font-size: 28px;
-      color: var(--primary);
+      padding: 4px 6px;
+      border: 2px solid var(--line);
+      border-radius: var(--r-ctl);
+      background: #fff;
       text-align: center;
-      letter-spacing: 0.2px;
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--ink);
     }
-
-    .timerRow {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 10px;
-      margin-top: 10px;
+    .rating-num:focus { outline: none; border-color: var(--brown-soft); box-shadow: 0 0 0 4px rgba(255, 209, 102, 0.45); }
+    .rating-face { font-size: 30px; line-height: 1; }
+    .rating-word { font-weight: 800; color: var(--brown); }
+    .range {
+      --p: 66%;
+      -webkit-appearance: none; appearance: none;
+      width: 100%; height: 40px;
+      margin: 4px 0 0;
+      background: transparent;
     }
-
-    .timerBtns {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 10px;
-    }
-
-    .error { color: var(--danger); font-size: 12px; margin-top: 8px; }
-    .success { color: #0b6b62; font-size: 12px; margin-top: 8px; }
-
-    /* Overview */
-    .toggleRow {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 10px;
-    }
-
-    .toggleRow button {
-      border: 2px solid rgba(107,79,63,0.18);
+    .range::-webkit-slider-runnable-track { height: 10px; border-radius: 99px; background: linear-gradient(90deg, var(--yellow-deep) var(--p), var(--cream-deep) var(--p)); }
+    .range::-moz-range-track { height: 10px; border-radius: 99px; background: linear-gradient(90deg, var(--yellow-deep) var(--p), var(--cream-deep) var(--p)); }
+    .range::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none;
+      width: 30px; height: 30px; margin-top: -10px;
+      border-radius: 50%;
       background: #fff;
-      border-radius: 999px;
+      box-shadow: inset 0 0 0 3px var(--brown), 0 4px 10px rgba(59, 42, 32, 0.25);
+    }
+    .range::-moz-range-thumb { width: 24px; height: 24px; border: 3px solid var(--brown); border-radius: 50%; background: #fff; }
+    .range-scale { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
+
+    .form-actions {
+      position: sticky;
+      bottom: calc(var(--chrome-b) + 8px);
+      display: grid; grid-template-columns: 1fr 2fr; gap: 10px;
+      margin-top: 24px;
+      padding: 10px;
+      border-radius: 22px;
+      background: rgba(255, 247, 233, 0.92);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+    }
+    .form-actions .btn-primary { min-height: 54px; font-size: 17px; }
+
+    /* ---------- Overview ---------- */
+    .hero {
+      position: relative;
+      overflow: hidden;
+      margin-top: 14px;
+      padding: 20px 20px 22px;
+      border: 0;
+      border-radius: 26px;
+      background: var(--brown);
+      color: var(--cream);
+      text-align: left;
+      width: 100%;
+      box-shadow: 0 16px 34px rgba(107, 79, 63, 0.3);
+    }
+    .hero-label { font-weight: 700; font-size: 14px; opacity: 0.85; }
+    .hero-value { font-size: clamp(40px, 12vw, 52px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; color: var(--yellow); margin-top: 4px; }
+    .hero-sub { margin-top: 8px; font-size: 14px; max-width: 24ch; opacity: 0.92; }
+    .hero .mascot { position: absolute; right: -14px; bottom: -22px; width: 118px; height: 118px; transform: rotate(-8deg); }
+    .hero-more { display: inline-flex; align-items: center; gap: 2px; margin-top: 12px; font-size: 13px; font-weight: 700; color: var(--yellow); }
+    .hero-more svg { width: 16px; height: 16px; }
+
+    .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+    .tile {
+      display: grid; align-content: start; gap: 2px;
+      min-height: 112px;
+      padding: 14px;
+      border: 0;
+      border-radius: 20px;
+      background: #fff;
+      box-shadow: var(--shadow);
+      text-align: left;
+      color: var(--ink);
+    }
+    .tile:active { transform: scale(0.98); }
+    .tile-k { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 700; color: var(--muted); }
+    .tile-k svg { width: 16px; height: 16px; }
+    .tile-v { font-size: 22px; font-weight: 800; color: var(--brown); line-height: 1.25; }
+    .tile-s { font-size: 12.5px; color: var(--muted); }
+    .tile-s.up { color: var(--mint-ink); font-weight: 700; }
+    .tile-s.down { color: var(--danger); font-weight: 700; }
+
+    .chart-card { margin-top: 12px; position: relative; }
+    .chart-card h2 { font-size: 17px; }
+    .chart-card h3 { font-size: 14px; color: var(--muted); font-weight: 700; margin: 18px 0 4px; }
+    .chart-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+    .legend { display: flex; gap: 12px; font-size: 13px; font-weight: 600; color: var(--ink); }
+    .legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .legend i { width: 10px; height: 10px; border-radius: 3px; background: var(--c); }
+    .insight { margin-top: 6px; font-weight: 700; color: var(--ink); }
+    .chart { position: relative; margin-top: 8px; touch-action: pan-y; }
+    .chart svg { display: block; width: 100%; overflow: visible; }
+    .chart .grid { stroke: #EFE5D6; stroke-width: 1; }
+    .chart .axis-t { font-size: 11px; fill: var(--muted); font-family: var(--font); }
+    .chart .axis-t.is-today { fill: var(--brown); font-weight: 800; }
+    .chart .val-t { font-size: 12px; font-weight: 800; fill: var(--ink); font-family: var(--font); }
+    .chart .hit { fill: transparent; cursor: pointer; }
+    .chart .hit.is-hover { fill: rgba(107, 79, 63, 0.06); }
+    .chart-tip {
+      position: absolute; top: 0; left: 0;
+      transform: translate(-50%, -100%);
       padding: 8px 10px;
-      min-height: 44px;
-      font-weight: 900;
-      cursor: pointer;
-      color: var(--primary);
-      font-size: 12px;
+      border-radius: 12px;
+      background: var(--ink);
+      color: #fff;
+      font-size: 12.5px;
+      line-height: 1.45;
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 2;
     }
+    .chart-tip b { display: block; }
+    .chart-tip i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 6px; background: var(--c); }
 
-    .toggleRow button.active {
-      background: rgba(255, 209, 102, 0.55);
-      border-color: rgba(255, 209, 102, 0.75);
+    .hbars { display: grid; gap: 8px; margin-top: 6px; }
+    .hbar { display: grid; grid-template-columns: 76px 1fr 34px; align-items: center; gap: 8px; font-size: 13px; }
+    .hbar-l { color: var(--ink); font-weight: 600; }
+    .hbar-l small { display: block; color: var(--muted); font-weight: 500; font-size: 11px; }
+    .hbar-track { height: 14px; }
+    .hbar-fill { height: 100%; min-width: 2px; border-radius: 0 4px 4px 0; background: #E6D3C2; }
+    .hbar.is-max .hbar-fill { background: var(--poop); }
+    .hbar-n { text-align: right; font-weight: 800; }
+
+    /* ---------- Rank ---------- */
+    .rank-controls { display: grid; gap: 10px; }
+    .chips.scroll { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin: 0 -16px; padding: 2px 16px; }
+    .chips.scroll::-webkit-scrollbar { display: none; }
+    .chips.scroll .chip { flex: none; }
+
+    .rank-list { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 10px; }
+    .place { border-radius: 20px; background: #fff; box-shadow: var(--shadow); overflow: hidden; }
+    .place-row {
+      display: grid; grid-template-columns: 36px 1fr auto; align-items: center; gap: 12px;
+      width: 100%;
+      min-height: 72px;
+      padding: 12px 14px;
+      border: 0; background: transparent;
+      text-align: left;
+      color: var(--ink);
     }
-
-    .kpi {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
+    .medal {
+      display: grid; place-items: center;
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: var(--cream-deep);
+      color: var(--brown);
+      font-weight: 800;
     }
-
-    .kpi .box {
-      background: #fff;
-      border-radius: 16px;
-      border: 2px solid rgba(0,0,0,0.06);
-      padding: 12px;
-    }
-
-    .kpi .box .k { font-size: 12px; color: var(--muted); }
-    .kpi .box .v { font-weight: 1000; font-size: 18px; color: var(--primary); margin-top: 6px; font-variant-numeric: tabular-nums; }
-
-    /* Ranking */
-    .rankControls {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-
-    .rankItem {
-      display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 10px;
-      padding: 12px;
-      border-radius: 16px;
-      background: #fff;
-      border: 2px solid rgba(0,0,0,0.06);
-      margin-top: 10px;
-    }
-
-    .badge {
-      width: 34px;
-      height: 34px;
+    .medal.m1 { background: #FFD166; color: #5A3E00; }
+    .medal.m2 { background: #E3E1DC; color: #4A4640; }
+    .medal.m3 { background: #EBC3A0; color: #5C3415; }
+    .place-main { min-width: 0; }
+    .place-name { font-weight: 800; color: var(--brown); overflow-wrap: anywhere; }
+    .place-meta { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+    .tag { display: inline-block; margin-left: 4px; padding: 1px 8px; border-radius: 99px; background: var(--cream-deep); color: var(--brown); font-size: 11.5px; font-weight: 700; vertical-align: 1px; }
+    .score {
+      display: grid; place-items: center;
+      min-width: 54px; height: 44px; padding: 0 8px;
       border-radius: 14px;
-      display: grid;
-      place-items: center;
-      font-weight: 1000;
-      color: #2b231c;
-      background: rgba(255, 209, 102, 0.75);
-      font-variant-numeric: tabular-nums;
+      font-size: 19px; font-weight: 800;
+      background: var(--cream-deep); color: var(--ink);
     }
-
-    .rankTitle {
-      font-weight: 1000;
-      color: var(--primary);
+    .score.s-top { background: #CDEFEC; }
+    .score.s-good { background: #FFEBB8; }
+    .score.s-bad { background: #F6D5CF; }
+    .place-detail { padding: 0 14px 14px; border-top: 1px dashed var(--line-strong); }
+    .rec-list { list-style: none; margin: 0; padding: 0; }
+    .rec {
+      display: grid; grid-template-columns: 28px 1fr auto; align-items: center; gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--line);
     }
+    .rec:last-child { border-bottom: 0; }
+    .rec-ico { font-size: 20px; text-align: center; }
+    .rec-main { min-width: 0; font-size: 13.5px; }
+    .rec-main b { display: block; color: var(--ink); overflow-wrap: anywhere; }
+    .rec-main span { color: var(--muted); font-size: 12.5px; }
+    .rec .icon-btn { width: 40px; height: 40px; background: transparent; color: var(--muted); }
+    .rec .icon-btn:hover { color: var(--danger); background: rgba(179, 54, 43, 0.08); }
+    .place-actions { display: flex; gap: 8px; margin-top: 10px; }
 
-    .rankMeta {
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 4px;
-      font-variant-numeric: tabular-nums;
+    details.recent { margin-top: 22px; border-radius: 20px; background: #fff; box-shadow: var(--shadow); }
+    details.recent summary {
+      display: flex; align-items: center; justify-content: space-between;
+      min-height: 56px; padding: 0 16px;
+      font-weight: 800; color: var(--brown);
+      cursor: pointer; list-style: none;
     }
+    details.recent summary::-webkit-details-marker { display: none; }
+    details.recent summary svg { width: 20px; height: 20px; transition: transform 0.2s ease; }
+    details.recent[open] summary svg { transform: rotate(90deg); }
+    details.recent .rec-list { padding: 0 16px 8px; }
 
-    .recList { display: grid; gap: 10px; margin-top: 10px; }
-    .recItem {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 10px;
-      padding: 12px;
-      border-radius: 16px;
+    /* ---------- Role ---------- */
+    .me-card { text-align: center; padding: 22px 18px 18px; }
+    .me-card .avatar-xl { margin: 0 auto 10px; }
+    .me-name { font-size: 22px; font-weight: 800; color: var(--brown); overflow-wrap: anywhere; }
+    .me-sub { color: var(--muted); font-size: 14px; }
+    .me-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 18px 0 0; padding: 14px 0 0; border-top: 1.5px dashed var(--line-strong); }
+    .me-stats dt { font-size: 12px; color: var(--muted); }
+    .me-stats dd { margin: 2px 0 0; font-weight: 800; color: var(--brown); font-size: 17px; }
+    .me-rate { margin-top: 14px; padding: 10px 12px; border-radius: 14px; background: rgba(255, 209, 102, 0.28); font-size: 13.5px; }
+    .me-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+
+    .role-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+    .role-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 10px 12px 14px;
+      border-radius: 20px;
       background: #fff;
-      border: 2px solid rgba(0,0,0,0.06);
+      box-shadow: var(--shadow);
     }
-    .recTitle { font-weight: 1000; color: var(--primary); }
-    .recMeta { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.35; }
+    .role-row .info { flex: 1; min-width: 0; }
+    .role-row b { display: block; color: var(--brown); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .role-row span { font-size: 12.5px; color: var(--muted); }
+    .role-row .icon-btn { background: transparent; width: 40px; }
+    .role-row .btn-sm { flex: none; }
 
-    /* Role */
-    .roleList { display: grid; gap: 10px; }
-    .roleRow {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      padding: 12px;
-      border-radius: 16px;
-      background: #fff;
-      border: 2px solid rgba(0,0,0,0.06);
-      flex-wrap: wrap;
+    .menu { border-radius: 20px; background: #fff; box-shadow: var(--shadow); overflow: hidden; }
+    .menu button {
+      display: flex; align-items: center; gap: 12px;
+      width: 100%; min-height: 56px;
+      padding: 0 16px;
+      border: 0; border-bottom: 1px solid var(--line);
+      background: transparent;
+      font-weight: 700; color: var(--ink);
+      text-align: left;
     }
+    .menu button:last-child { border-bottom: 0; }
+    .menu button svg { width: 20px; height: 20px; color: var(--brown); }
+    .menu button > span:first-child { display: grid; flex: none; }
+    .menu button > span:last-child { flex: 1; }
+    .menu button small { color: var(--muted); font-weight: 500; }
 
-    .roleRow .left { display:flex; align-items:center; gap:10px; min-width:0; flex: 1 1 auto; }
-
-    .roleActions {
-      display: flex;
-      gap: 10px;
-      flex: 0 0 auto;
-    }
-
-    @media (max-width: 420px) {
-      .roleActions { width: 100%; }
-      .roleActions .btn { flex: 1 1 0; }
-    }
-
-    .small { font-size: 12px; color: var(--muted); }
-
-    /* Leaflet popup tweaks */
-    .leaflet-popup-content-wrapper { border-radius: 16px; }
+    /* ---------- KPI ranking sheet ---------- */
+    .kpi-me { margin-top: 6px; padding: 14px; border-radius: 18px; background: #fff; box-shadow: var(--shadow-sm); }
+    .kpi-me b { font-size: 20px; color: var(--brown); }
+    .kpi-me p { margin-top: 4px; color: var(--muted); font-size: 14px; white-space: pre-line; }
+    .kpi-rows { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 8px; }
+    .kpi-row { display: grid; grid-template-columns: 26px 40px 1fr; gap: 10px; align-items: center; }
+    .kpi-row .avatar { width: 40px; height: 40px; font-size: 20px; }
+    .kpi-row .n { font-weight: 800; color: var(--muted); text-align: center; }
+    .kpi-row .nm { display: flex; justify-content: space-between; gap: 8px; font-size: 14px; }
+    .kpi-row .nm b { color: var(--brown); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .kpi-row .bar { height: 8px; margin-top: 4px; border-radius: 99px; background: var(--cream-deep); overflow: hidden; }
+    .kpi-row .bar i { display: block; height: 100%; border-radius: 99px; background: var(--c); }
+    .kpi-row.is-me .nm b::after { content: "（你）"; color: var(--muted); font-weight: 600; }
+    .kpi-cheer { margin-top: 16px; padding: 12px 14px; border-radius: 16px; background: rgba(255, 209, 102, 0.28); font-size: 14px; line-height: 1.7; }
   </style>
 </head>
 <body>
   <div class="app">
-    <header>
-      <div class="topRow">
-        <div class="roleBadge">
-          <div class="avatar" id="hdrAvatar">🧑‍💼</div>
-          <div class="roleText">
-            <div class="roleId" id="hdrRoleId">—</div>
-            <div class="roleMeta" id="hdrRoleMeta">—</div>
-          </div>
-        </div>
-        <div class="statsPill">
-          <div class="pillValue" id="hdrValue">NT$ 0</div>
-          <div class="pillLabel" id="hdrValueLabel">本月拉屎薪資</div>
-        </div>
-      </div>
+    <header class="hdr">
+      <button class="who" id="btnWho" aria-label="角色">
+        <span class="avatar" id="hdrAvatar"></span>
+        <span class="who-text">
+          <span class="who-name" id="hdrName"></span>
+          <span class="who-sub num" id="hdrSub"></span>
+        </span>
+      </button>
+      <button class="ticker" id="ticker" aria-label="本月統計，點一下切換">
+        <span class="ticker-v num" id="tickerV"></span>
+        <span class="ticker-l" id="tickerL"></span>
+      </button>
     </header>
 
-    <div class="content">
-      <!-- MAP -->
-      <section class="view" id="view-map">
-        <div class="card">
-          <p class="title">屎勢力地圖</p>
-          <div class="chipRow">
-            <div class="chip">目前：<span id="mapRoleName" style="margin-left:6px;"></span></div>
-            <div class="chip">點數：<span id="mapPointCount" style="margin-left:6px;">0</span></div>
-            <div class="chip"><button id="btnCenterMe">回到目前位置</button></div>
-            <div class="chip"><button id="btnToggleRolePanel">查看其他角色</button></div>
+    <main>
+      <!-- ============ MAP ============ -->
+      <section class="view view-map" id="view-map" hidden>
+        <div id="map" aria-label="屎勢力地圖"></div>
+        <div class="map-top">
+          <div class="map-title">
+            <strong id="mapTitle"></strong>
+            <span id="mapCount"></span>
           </div>
-
-          <div id="rolePanel" class="panel" style="display:none;">
-            <div class="muted">勾選要疊加顯示的角色（可多選）</div>
-            <div class="checkList" id="roleCheckList"></div>
-          </div>
-
-          <div id="map" aria-label="map"></div>
-          <div class="muted" id="mapLocStatus" style="margin-top:10px;">目前位置：尚未定位</div>
-          <div class="muted" style="margin-top:10px;">
-            點擊地標可查看地點資訊（最高分、次數、最近時間）。
-          </div>
+          <button class="map-btn" id="btnLayers" aria-label="查看其他角色">
+            <span id="icoLayers"></span><span class="badge num" id="layersBadge" hidden></span>
+          </button>
         </div>
+        <div class="map-legend" id="mapLegend"></div>
+        <div class="map-empty" id="mapEmpty" hidden>
+          <span id="mapEmptyArt"></span>
+          <div><b>還沒有勢力範圍</b><p>每上一次廁所，就在地圖上插一面旗。</p></div>
+        </div>
+        <button class="map-btn map-locate" id="btnLocate" aria-label="回到目前位置"></button>
+        <button class="btn btn-primary map-fab" id="btnFab"><span id="fabArt"></span>來一發</button>
       </section>
 
-      <!-- LOG -->
-      <section class="view" id="view-log">
-        <div class="card">
-          <p class="title">立即紀錄</p>
-          <div class="muted" id="locStatus">定位狀態：尚未開始</div>
-          <div class="success" id="saveToast" style="display:none; margin-top:8px;"></div>
+      <!-- ============ LOG ============ -->
+      <section class="view view-log" id="view-log" hidden>
+        <div class="loc-pill" id="locPill" data-state="idle" role="status">
+          <span class="loc-dot"></span>
+          <span class="loc-text" id="locText">尚未定位</span>
+          <button type="button" class="btn btn-secondary" id="btnLocAlt" hidden>用上次位置</button>
+          <button type="button" class="btn btn-secondary" id="btnLocRetry">定位</button>
+        </div>
 
-          <div class="panel" id="nearbyPanel" style="display:none; margin-top:10px;">
-            <div style="font-weight:1000; color:#6B4F3F;">你是不是在這裡？</div>
-            <div class="muted" style="margin-top:6px;" id="nearbyText">—</div>
-            <div class="btnRow" style="grid-template-columns: 1fr 1fr; margin-top:10px;">
-              <button class="btn btnPrimary" id="btnNearbyYes">是，填入</button>
-              <button class="btn btnGhost" id="btnNearbyNo">不是</button>
+        <div data-stage="idle">
+          <h1 class="log-q">要尿尿，還是大便？</h1>
+          <p>點一下就開始計時。</p>
+          <div class="type-pick">
+            <button class="type-btn type-pee" data-start="pee">
+              <span class="art" id="artPee"></span>
+              <span class="type-name">尿尿</span>
+              <span class="type-sub">每秒約 20 cc</span>
+            </button>
+            <button class="type-btn type-poop" data-start="poop">
+              <span class="art" id="artPoop"></span>
+              <span class="type-name">大便</span>
+              <span class="type-sub num" id="poopRate"></span>
+            </button>
+          </div>
+          <p class="today-line" id="todayLine"></p>
+        </div>
+
+        <div data-stage="timing" class="timing" hidden>
+          <div class="timing-label" id="timingLabel"></div>
+          <div class="bowl-wrap">
+            <svg viewBox="0 0 240 240" aria-hidden="true">
+              <defs><clipPath id="bowlClip"><circle cx="120" cy="120" r="92" /></clipPath></defs>
+              <circle class="bowl-rim" cx="120" cy="120" r="116" />
+              <circle class="bowl-water" cx="120" cy="120" r="92" />
+              <g clip-path="url(#bowlClip)">
+                <g id="liquid" transform="translate(0 200)">
+                  <path class="wave wave-back" d="M0 10Q30 0 60 10T120 10T180 10T240 10T300 10T360 10T420 10T480 10V260H0Z" />
+                  <path class="wave wave-front" d="M0 12Q30 2 60 12T120 12T180 12T240 12T300 12T360 12T420 12T480 12V260H0Z" />
+                </g>
+              </g>
+              <circle class="ring-track" cx="120" cy="120" r="104" />
+              <circle class="ring" id="ring" cx="120" cy="120" r="104" transform="rotate(-90 120 120)" />
+            </svg>
+            <div class="bowl-center">
+              <div class="clock num" id="clock" role="timer" aria-live="off">00:00</div>
+              <div class="live-value num" id="liveValue"></div>
             </div>
           </div>
-
-          <div class="btnRow" style="grid-template-columns: 1fr 1fr;">
-            <button class="btn btnMint" id="btnStartNew">開始新紀錄</button>
-            <button class="btn btnGhost" id="btnUseLastLoc">改用最後一次定位</button>
+          <div class="timer-actions">
+            <button class="btn btn-secondary" id="btnPause"></button>
+            <button class="btn btn-primary" id="btnEnd"></button>
           </div>
+          <button class="btn btn-ghost discard" id="btnDiscard">不算了，取消這次</button>
+        </div>
 
-          <label for="manualPlace">手動地點名稱（定位失敗時使用）</label>
-          <input id="manualPlace" placeholder="例如：公司 7 樓廁所" />
-
-          <div class="seg" aria-label="type selector">
-            <button id="btnTypePee">尿尿</button>
-            <button id="btnTypePoop">大便</button>
-          </div>
-
-          <div class="timerRow">
-            <div class="bigNumber" id="timer">00:00</div>
-            <div class="timerBtns">
-              <button class="btn btnGhost" id="btnTimerStart">開始</button>
-              <button class="btn btnGhost" id="btnTimerPause">暫停</button>
-              <button class="btn btnPrimary" id="btnTimerEnd">結束</button>
+        <form data-stage="details" id="detailForm" novalidate hidden>
+          <div class="summary" style="margin-top:14px">
+            <span class="art" id="sumArt"></span>
+            <div class="summary-main">
+              <div class="summary-title" id="sumTitle"></div>
+              <div class="summary-label" id="sumLabel"></div>
             </div>
-            <div class="muted" id="timerHint">選擇類型後開始計時。</div>
+            <div class="summary-value num" id="sumValue"></div>
           </div>
 
-          <div id="resultArea" style="display:none; margin-top:10px;">
-            <div class="panel">
-              <div class="muted">計算結果</div>
-              <div class="row" style="margin-top:10px;">
-                <div>
-                  <div class="small">本次秒數</div>
-                  <div class="pillValue" id="resSec">0</div>
-                </div>
-                <div>
-                  <div class="small" id="resRightLabel">—</div>
-                  <div class="pillValue" id="resRightValue">—</div>
-                </div>
+          <div class="field" id="fieldPee">
+            <label for="peeCc">尿量（cc）</label>
+            <div class="stepper-input">
+              <button type="button" class="icon-btn" data-cc="-50" aria-label="減少 50 cc">−</button>
+              <input class="input num" id="peeCc" type="number" inputmode="numeric" min="0" step="10" />
+              <button type="button" class="icon-btn" data-cc="50" aria-label="增加 50 cc">＋</button>
+            </div>
+            <div class="hint">依每秒 20 cc 估算，覺得不準可以自己調。</div>
+          </div>
+
+          <div class="field" id="fieldPoop">
+            <span class="field-label" id="levelLabel">你覺得這次的量？</span>
+            <div class="levels" role="radiogroup" aria-labelledby="levelLabel" id="levels"></div>
+          </div>
+
+          <div class="field">
+            <label for="placeName">地點名稱</label>
+            <input class="input" id="placeName" list="placeList" maxlength="40" autocomplete="off" placeholder="例如：公司 7F 靠窗那間" />
+            <datalist id="placeList"></datalist>
+            <div class="suggest" id="placeSuggest"></div>
+            <div class="error" id="placeErr" hidden></div>
+          </div>
+
+          <div class="field">
+            <label for="ratingNum">評分</label>
+            <div class="rating-head">
+              <input class="rating-num num" id="ratingNum" type="number" inputmode="decimal" min="1" max="10" step="0.1" aria-describedby="ratingWord" />
+              <span class="rating-face" id="ratingFace" aria-hidden="true"></span>
+              <span class="rating-word" id="ratingWord"></span>
+            </div>
+            <input class="range" id="ratingRange" type="range" min="1" max="10" step="0.1" aria-label="評分滑桿" />
+            <div class="range-scale"><span>1.0 地獄</span><span>10.0 神廁</span></div>
+            <div class="error" id="ratingErr" hidden></div>
+          </div>
+
+          <div class="field">
+            <span class="field-label">類型標籤（選填）</span>
+            <div class="chips" id="tagChips"></div>
+          </div>
+
+          <div class="field">
+            <label for="recNote">備註（選填）</label>
+            <textarea class="input" id="recNote" maxlength="200" placeholder="例如：有音樂遮聲音、衛生紙很粗"></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" id="btnDrop">捨棄</button>
+            <button type="submit" class="btn btn-primary">儲存紀錄</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- ============ OVERVIEW ============ -->
+      <section class="view" id="view-overview" hidden>
+        <div class="view-head"><h1>屎生大數據</h1></div>
+        <div class="seg" id="periodSeg" role="group" aria-label="統計期間">
+          <button type="button" data-p="week">本週</button>
+          <button type="button" data-p="month">本月</button>
+          <button type="button" data-p="all">全部</button>
+        </div>
+
+        <div class="empty" id="ovEmpty" hidden>
+          <span id="ovEmptyArt"></span>
+          <h2>這裡還空空的</h2>
+          <p id="ovEmptyText"></p>
+          <button class="btn btn-primary" data-goto="log">去紀錄</button>
+        </div>
+
+        <div id="ovBody">
+          <button class="hero" data-kpi="money">
+            <div class="hero-label" id="heroLabel"></div>
+            <div class="hero-value" id="heroValue"></div>
+            <div class="hero-sub" id="heroSub"></div>
+            <span class="hero-more">看大家的排名<span id="heroChevron"></span></span>
+            <span id="heroArt"></span>
+          </button>
+
+          <div class="tiles">
+            <button class="tile" data-kpi="territory">
+              <span class="tile-k">勢力範圍<span class="chev"></span></span>
+              <span class="tile-v num" id="tTerritory"></span>
+              <span class="tile-s" id="tTerritoryS"></span>
+            </button>
+            <button class="tile" data-kpi="count">
+              <span class="tile-k">上廁所次數<span class="chev"></span></span>
+              <span class="tile-v num" id="tCount"></span>
+              <span class="tile-s" id="tCountS"></span>
+            </button>
+            <button class="tile" data-kpi="poop">
+              <span class="tile-k">累積屎量<span class="chev"></span></span>
+              <span class="tile-v num" id="tPoop"></span>
+              <span class="tile-s" id="tPoopS"></span>
+            </button>
+            <button class="tile" data-kpi="pee">
+              <span class="tile-k">累積尿量<span class="chev"></span></span>
+              <span class="tile-v num" id="tPee"></span>
+              <span class="tile-s" id="tPeeS"></span>
+            </button>
+          </div>
+
+          <div class="card chart-card">
+            <div class="chart-head">
+              <h2 id="dailyTitle">每天上幾次</h2>
+              <div class="legend">
+                <span><i style="--c:var(--pee)"></i>尿尿</span>
+                <span><i style="--c:var(--poop)"></i>大便</span>
               </div>
-
-              <div id="peeAdjust" style="display:none;">
-                <label for="peeCc">尿量（cc，可微調）</label>
-                <input id="peeCc" type="number" min="0" inputmode="numeric" />
-              </div>
-
-              <div id="poopAmount" style="display:none;">
-                <label for="poopLevel">你覺得這次的量？</label>
-                <select id="poopLevel">
-                  <option value="">請選擇</option>
-                  <option value="150">偏少（150 g）</option>
-                  <option value="225">正常（225 g）</option>
-                  <option value="300">偏多（300 g）</option>
-                  <option value="350">巨量（350 g）</option>
-                </select>
-              </div>
-
-              <label for="placeName">地點名稱（必填）</label>
-              <input id="placeName" placeholder="例如：星巴克 A 店廁所" />
-
-              <div class="row">
-                <div>
-                  <label for="rating">評分（1.0 ~ 10.0）</label>
-                  <input id="rating" type="number" min="1" max="10" step="0.1" inputmode="decimal" placeholder="8.5" />
-                </div>
-                <div>
-                  <label for="tag">類型標籤（選填）</label>
-                  <select id="tag">
-                    <option value="">不設定</option>
-                    <option value="公司">公司</option>
-                    <option value="住家">住家</option>
-                    <option value="公共場所">公共場所</option>
-                    <option value="咖啡廳">咖啡廳</option>
-                  </select>
-                </div>
-              </div>
-
-              <label for="note">備註（選填）</label>
-              <textarea id="note" placeholder="例如：有音樂遮掩聲音、廁紙很粗...\n（別太寫實，拜託）"></textarea>
-
-              <button class="btn btnPrimary" id="btnSave" style="margin-top:12px; width:100%;">儲存紀錄</button>
-              <div class="error" id="saveError" style="display:none;"></div>
-              <div class="success" id="saveOk" style="display:none;"></div>
             </div>
+            <div class="chart" id="chartDaily"></div>
+          </div>
+
+          <div class="card chart-card">
+            <h2>大便習慣</h2>
+            <p class="insight" id="habitInsight"></p>
+            <h3>星期幾最常大</h3>
+            <div class="chart" id="chartWeekday"></div>
+            <h3>什麼時段最常大</h3>
+            <div class="hbars" id="chartSlots"></div>
           </div>
         </div>
       </section>
 
-      <!-- OVERVIEW -->
-      <section class="view" id="view-overview">
-        <div class="card">
-          <p class="title">屎生大數據</p>
-          <div class="toggleRow" aria-label="period toggle">
-            <button id="periodWeek">本週</button>
-            <button id="periodMonth" class="active">本月</button>
-            <button id="periodAll">全部</button>
-          </div>
-
-          <div class="kpi" aria-label="kpi cards">
-            <div class="box" data-kpi="territory" role="button" tabindex="0" aria-label="勢力範圍擴張度">
-              <div class="k">勢力範圍擴張度</div>
-              <div class="v" id="kpiTerritory">—</div>
-            </div>
-            <div class="box" data-kpi="money" role="button" tabindex="0" aria-label="累積拉屎薪資">
-              <div class="k">累積拉屎薪資</div>
-              <div class="v" id="kpiMoney">—</div>
-            </div>
-            <div class="box" data-kpi="poop" role="button" tabindex="0" aria-label="累積屎量">
-              <div class="k">累積屎量</div>
-              <div class="v" id="kpiPoop">—</div>
-            </div>
-            <div class="box" data-kpi="pee" role="button" tabindex="0" aria-label="累積尿量">
-              <div class="k">累積尿量</div>
-              <div class="v" id="kpiPee">—</div>
-            </div>
-          </div>
-
-          <div class="panel" style="margin-top:12px;">
-            <div class="muted" id="funHint">你今天又征服了新的馬桶！</div>
-          </div>
+      <!-- ============ RANK ============ -->
+      <section class="view" id="view-rank" hidden>
+        <div class="view-head">
+          <h1>傳說中的廁所</h1>
+          <button class="icon-btn" id="btnShare" aria-label="分享必拉榜"></button>
         </div>
+        <div class="rank-controls">
+          <div class="seg" id="rankSort" role="group" aria-label="排序">
+            <button type="button" data-sort="rating">評分最高</button>
+            <button type="button" data-sort="visits">最常造訪</button>
+            <button type="button" data-sort="recent">最近造訪</button>
+          </div>
+          <div class="chips scroll" id="rankFilter" role="group" aria-label="篩選"></div>
+        </div>
+
+        <ol class="rank-list" id="rankList"></ol>
+        <div class="empty" id="rankEmpty" hidden>
+          <span id="rankEmptyArt"></span>
+          <h2 id="rankEmptyTitle">還沒有上榜的廁所</h2>
+          <p id="rankEmptyText">每次紀錄都會幫地點評分，分數最高的就是你的必拉聖地。</p>
+          <button class="btn btn-primary" data-goto="log">去紀錄</button>
+        </div>
+
+        <details class="recent" id="recentBox">
+          <summary>最近紀錄<span id="recentChevron"></span></summary>
+          <ul class="rec-list" id="recentList"></ul>
+        </details>
       </section>
 
-      <div class="modalOverlay" id="kpiModal" aria-hidden="true">
-        <div class="modalCard" role="dialog" aria-modal="true" aria-label="排名資訊">
-          <div class="modalHead">
-            <div>
-              <p class="modalTitle" id="kpiModalTitle">—</p>
-              <div class="muted" id="kpiModalSub" style="margin-top:4px;">—</div>
-            </div>
-            <button class="modalClose" id="btnCloseKpiModal">關閉</button>
-          </div>
-          <div class="modalBody">
-            <div class="panel" style="margin-top:0;">
-              <div class="muted" style="margin-bottom:6px;">你的名次</div>
-              <div id="kpiModalRank" style="font-weight:1000; color:#6B4F3F; font-size:16px;">—</div>
-              <div class="muted" id="kpiModalGap" style="margin-top:6px;">—</div>
-            </div>
+      <!-- ============ ROLE ============ -->
+      <section class="view" id="view-role" hidden>
+        <div class="view-head"><h1>角色</h1></div>
+        <div class="card me-card" id="meCard"></div>
 
-            <div class="panel" style="margin-top:10px;">
-              <div class="muted" style="margin-bottom:6px;">前三名精神喊話</div>
-              <div id="kpiModalTop3" class="muted" style="line-height:1.5;">—</div>
-            </div>
-          </div>
+        <h2 class="section-title">其他角色</h2>
+        <ul class="role-list" id="roleList"></ul>
+        <button class="btn btn-secondary btn-block" id="btnAddRole" style="margin-top:10px"></button>
+
+        <h2 class="section-title">資料</h2>
+        <div class="menu">
+          <button id="btnExport"><span id="icoExport"></span><span>匯出備份<br><small>下載 JSON 檔</small></span></button>
+          <button id="btnImport"><span id="icoImport"></span><span>匯入備份<br><small>合併到目前的資料</small></span></button>
+          <button id="btnLogout"><span id="icoLogout"></span><span>回到角色選擇</span></button>
         </div>
-      </div>
-
-      <!-- RANK -->
-      <section class="view" id="view-rank">
-        <div class="card">
-          <p class="title">傳說中的廁所</p>
-          <div class="rankControls">
-            <div>
-              <label for="rankSort">排序</label>
-              <select id="rankSort">
-                <option value="rating">評分最高</option>
-                <option value="visits">造訪次數最多</option>
-                <option value="recent">最近造訪</option>
-              </select>
-            </div>
-            <div>
-              <label for="rankType">篩選</label>
-              <select id="rankType">
-                <option value="all">全部</option>
-                <option value="poop">僅大便</option>
-                <option value="pee">僅尿尿</option>
-              </select>
-            </div>
-          </div>
-
-          <div id="rankList"></div>
-          <div class="muted" id="rankEmpty" style="display:none; margin-top:10px;">還沒有資料，先去「立即紀錄」來一發。</div>
-
-          <div class="panel" style="margin-top:12px;">
-            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-              <div class="muted">最近紀錄（可刪除）</div>
-              <button class="btn btnGhost" id="btnToggleRecent" style="width:auto; padding:8px 10px; min-height:unset; font-size:12px;">展開</button>
-            </div>
-            <div id="recentWrap" style="display:none; margin-top:10px;">
-              <div id="recentList" class="recList"></div>
-              <div class="muted" id="recentEmpty" style="display:none; margin-top:10px;">目前沒有可刪除的紀錄。</div>
-            </div>
-          </div>
-        </div>
+        <input type="file" id="importFile" accept="application/json,.json" hidden />
+        <p class="muted small" style="margin-top:12px; text-align:center">紀錄只存在這台裝置的瀏覽器裡，記得定期匯出備份。</p>
       </section>
+    </main>
 
-      <!-- ROLE -->
-      <section class="view" id="view-role">
-        <div class="card">
-          <p class="title">角色</p>
-          <div class="muted" style="margin-bottom:10px;">切換角色會更新地圖、統計與榜單。</div>
-          <div class="roleList" id="roleList"></div>
-          <div class="btnRow" style="grid-template-columns: 1fr 1fr; margin-top:12px;">
-            <button class="btn btnPrimary" id="btnGoIndex">回到登入頁新增角色</button>
-            <button class="btn btnGhost" id="btnExport">匯出資料（JSON）</button>
-          </div>
-          <div class="muted" style="margin-top:8px;">匯出僅為方便備份；仍以 LocalStorage 為主。</div>
-        </div>
-      </section>
-    </div>
-
-    <nav class="tabBar" aria-label="tab bar">
-      <button class="tabBtn active" data-tab="map"><div class="ico">📍</div><div>地圖</div></button>
-      <button class="tabBtn" data-tab="log"><div class="ico">🚽</div><div>紀錄</div></button>
-      <button class="tabBtn" data-tab="overview"><div class="ico">📊</div><div>總覽</div></button>
-      <button class="tabBtn" data-tab="rank"><div class="ico">🏆</div><div>必拉榜</div></button>
-      <button class="tabBtn" data-tab="role"><div class="ico">🧑</div><div>角色</div></button>
+    <nav class="tabbar" aria-label="主選單">
+      <button class="tab-btn" data-tab="map"><span class="tab-ico" data-ico="map"></span>地圖</button>
+      <button class="tab-btn" data-tab="log"><span class="tab-ico" data-ico="toilet"></span>紀錄</button>
+      <button class="tab-btn" data-tab="overview"><span class="tab-ico" data-ico="chart"></span>總覽</button>
+      <button class="tab-btn" data-tab="rank"><span class="tab-ico" data-ico="trophy"></span>必拉榜</button>
+      <button class="tab-btn" data-tab="role"><span class="tab-ico" data-ico="user"></span>角色</button>
     </nav>
   </div>
 
-  <script
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-    crossorigin=""
-  ></script>
+  <!-- Map: role overlay sheet -->
+  <dialog class="sheet" id="layersSheet" aria-labelledby="layersTitle">
+    <div class="sheet-body">
+      <div class="sheet-grabber"></div>
+      <div class="sheet-head">
+        <h2 id="layersTitle">疊加其他角色</h2>
+        <button type="button" class="icon-btn" data-close aria-label="關閉" data-ico-btn="close"></button>
+      </div>
+      <p class="muted small">每個角色用不同顏色標出地點與勢力範圍。</p>
+      <div id="layersList"></div>
+      <div class="sheet-foot">
+        <button type="button" class="btn btn-secondary" id="btnLayersMe">只看我</button>
+        <button type="button" class="btn btn-primary" id="btnLayersAll">全部顯示</button>
+      </div>
+    </div>
+  </dialog>
 
+  <!-- Overview: cross-role ranking sheet -->
+  <dialog class="sheet" id="kpiSheet" aria-labelledby="kpiTitle">
+    <div class="sheet-body">
+      <div class="sheet-grabber"></div>
+      <div class="sheet-head">
+        <h2 id="kpiTitle"></h2>
+        <button type="button" class="icon-btn" data-close aria-label="關閉" data-ico-btn="close"></button>
+      </div>
+      <p class="muted small" id="kpiSub"></p>
+      <div class="kpi-me"><b id="kpiRank"></b><p id="kpiGap"></p></div>
+      <ol class="kpi-rows" id="kpiRows"></ol>
+      <div class="kpi-cheer" id="kpiCheer"></div>
+    </div>
+  </dialog>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="assets/hs-core.js"></script>
   <script>
-    // ---- Storage ----
-    const LS_KEYS = {
-      characters: 'happyshit.characters.v1',
-      records: 'happyshit.records.v1',
-      lastRole: 'happyshit.lastRoleId.v1',
-      lastLoc: 'happyshit.lastLoc.v1'
-    };
+  (function () {
+    'use strict';
+    const { $, $$, CALC, sum } = HS;
+    const esc = HS.escapeHtml;
 
-    function loadJson(key, fallback) {
-      try {
-        const raw = localStorage.getItem(key);
-        if (!raw) return fallback;
-        return JSON.parse(raw);
-      } catch {
-        return fallback;
-      }
+    const TABS = ['map', 'log', 'overview', 'rank', 'role'];
+    const TAGS = ['公司', '住家', '公共場所', '咖啡廳'];
+
+    let role = null;              // current character
+    let current = null;           // current tab
+    const dirty = new Set(TABS);  // views that need a re-render when shown
+
+    // ================================================================ role context
+    function resolveRole() {
+      const urlId = new URL(location.href).searchParams.get('role');
+      role = HS.getRole(urlId) || HS.getRole(HS.getLastRoleId()) || HS.getCharacters()[0] || null;
     }
 
-    function saveJson(key, value) {
-      localStorage.setItem(key, JSON.stringify(value));
-    }
-
-    function ensureSeed() {
-      let characters = loadJson(LS_KEYS.characters, null);
-      if (Array.isArray(characters) && characters.length) return;
-
-      characters = [
-        { id: '社畜小王', avatar: '🧑\u200d💼', monthlySalary: 45000, currency: 'NT$', note: '咖啡社畜', createdAt: Date.now() },
-        { id: '健身小美', avatar: '🧑\u200d🦾', monthlySalary: 52000, currency: 'NT$', note: '健身少女', createdAt: Date.now() },
-        { id: '學生阿哲', avatar: '🧑\u200d🎓', monthlySalary: 12000, currency: 'NT$', note: '被期末追殺', createdAt: Date.now() }
-      ];
-      saveJson(LS_KEYS.characters, characters);
-      saveJson(LS_KEYS.records, []);
-      localStorage.setItem(LS_KEYS.lastRole, characters[0].id);
-    }
-
-    function uid() { return Math.random().toString(16).slice(2) + '-' + Date.now().toString(16); }
-
-    function formatMoney(currency, amount, digits = 0) {
-      const num = Number(amount);
-      if (!Number.isFinite(num)) return `${currency} 0`;
-      const fixed = Number(num.toFixed(digits));
-      return `${currency} ${fixed.toLocaleString('en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits })}`;
-    }
-
-    function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
-
-    function escapeHtml(s) {
-      return String(s)
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#039;');
-    }
-
-    function startOfDay(ts) {
-      const d = new Date(ts);
-      d.setHours(0,0,0,0);
-      return d.getTime();
-    }
-
-    function startOfWeek(ts) {
-      const d = new Date(ts);
-      const day = d.getDay(); // 0 Sun
-      const diff = (day + 6) % 7; // Mon=0
-      d.setDate(d.getDate() - diff);
-      d.setHours(0,0,0,0);
-      return d.getTime();
-    }
-
-    function startOfMonth(ts) {
-      const d = new Date(ts);
-      d.setDate(1);
-      d.setHours(0,0,0,0);
-      return d.getTime();
-    }
-
-    function endOfMonth(ts) {
-      const d = new Date(ts);
-      d.setMonth(d.getMonth() + 1);
-      d.setDate(1);
-      d.setHours(0,0,0,0);
-      return d.getTime();
-    }
-
-    function endOfWeek(ts) {
-      const s = startOfWeek(ts);
-      return s + 7*24*60*60*1000;
-    }
-
-    // ---- Role selection ----
-    function getRoleIdFromUrl() {
+    function syncUrl() {
       const url = new URL(location.href);
-      return url.searchParams.get('role');
+      url.searchParams.set('role', role.id);
+      if (current) url.hash = current;
+      history.replaceState(null, '', url);
     }
 
-    function getCurrentRoleId() {
-      return getRoleIdFromUrl() || localStorage.getItem(LS_KEYS.lastRole);
-    }
-
-    function setCurrentRoleId(roleId) {
-      localStorage.setItem(LS_KEYS.lastRole, roleId);
+    function setRole(id) {
+      HS.setLastRoleId(id);
       const url = new URL(location.href);
-      url.searchParams.set('role', roleId);
-      history.replaceState({}, '', url.toString());
+      url.searchParams.set('role', id);
+      history.replaceState(null, '', url);
+      resolveRole();
+      selectedRoles = new Set([role.id]);
+      mapNeedsFit = true;
+      if (session && session.roleId !== role.id) { session = null; saveSession(); }
+      invalidate('log');
     }
 
-    function getRoleById(roleId) {
-      const chars = loadJson(LS_KEYS.characters, []);
-      return chars.find(c => c.id === roleId) || chars[0];
+    // Mark views stale; re-render the visible one now. The log form is only
+    // re-rendered when asked explicitly so typing is never wiped.
+    function invalidate(...extra) {
+      TABS.filter(t => t !== 'log').forEach(t => dirty.add(t));
+      extra.forEach(t => dirty.add(t));
+      renderHeader();
+      if (current && dirty.has(current)) { dirty.delete(current); renderView(current); }
     }
 
-    function roleColor(roleId) {
-      // stable color palette
-      const palette = [
-        '#4ECDC4', '#FFD166', '#9b87f5', '#ff7aa2', '#7bd389',
-        '#6aa9ff', '#ffb703', '#00b4d8', '#f77f00', '#8ecae6'
+    function monthTotals(r = role) {
+      const recs = HS.recordsOf(r.id).filter(x => x.timestamp >= HS.startOfMonth(Date.now()));
+      const poops = recs.filter(x => x.type === 'poop');
+      return {
+        money: sum(poops.map(x => Number(x.poopValueMoney) || 0)),
+        poopG: sum(poops.map(x => Number(x.poopWeightG) || 0)),
+        peeCc: sum(recs.filter(x => x.type === 'pee').map(x => Number(x.peeVolumeCc) || 0)),
+        count: recs.length
+      };
+    }
+
+    // ================================================================ header
+    let tickerIdx = 0;
+    function renderHeader() {
+      const av = $('#hdrAvatar');
+      av.textContent = role.avatar || '🧑';
+      av.style.setProperty('--role', role.color);
+      $('#hdrName').textContent = role.id;
+      $('#hdrSub').textContent = `${HS.money(role.currency, role.monthlySalary)} / 月`;
+      renderTicker(false);
+    }
+
+    function renderTicker(animate) {
+      const t = monthTotals();
+      const items = [
+        [HS.money(role.currency, t.money), '本月拉屎薪資'],
+        [`${HS.int(t.poopG)} g`, '本月屎量'],
+        [`${HS.int(t.peeCc)} cc`, '本月尿量']
       ];
-      let h = 0;
-      for (let i=0;i<roleId.length;i++) h = (h*31 + roleId.charCodeAt(i)) >>> 0;
-      return palette[h % palette.length];
-    }
-
-    // ---- Records ----
-    function loadRecords() {
-      const recs = loadJson(LS_KEYS.records, []);
-      if (!Array.isArray(recs)) return [];
-
-      let changed = false;
-      const next = [];
-      for (const r of recs) {
-        if (!r || typeof r !== 'object') { changed = true; continue; }
-        const nr = { ...r };
-        if (!nr.recordId) { nr.recordId = uid(); changed = true; }
-        if (!Number.isFinite(Number(nr.timestamp))) { nr.timestamp = Date.now(); changed = true; }
-        next.push(nr);
+      const [v, l] = items[tickerIdx % items.length];
+      $('#tickerV').textContent = v;
+      $('#tickerL').textContent = l;
+      if (animate) {
+        const el = $('#ticker');
+        el.classList.remove('is-ticking');
+        void el.offsetWidth;
+        el.classList.add('is-ticking');
       }
-      if (changed) saveJson(LS_KEYS.records, next);
-      return next;
     }
 
-    function saveRecord(rec) {
-      const all = loadRecords();
-      if (!rec.recordId) rec.recordId = uid();
-      all.push(rec);
-      saveJson(LS_KEYS.records, all);
+    function advanceTicker() { tickerIdx++; renderTicker(true); }
+    setInterval(() => { if (document.visibilityState === 'visible') advanceTicker(); }, 4500);
+
+    // ================================================================ tabs
+    function renderView(name) {
+      if (name === 'map') renderMapView();
+      if (name === 'log') renderLog();
+      if (name === 'overview') renderOverview();
+      if (name === 'rank') renderRank();
+      if (name === 'role') renderRoleView();
     }
 
-    function recordsByRole(roleId) {
-      return loadRecords().filter(r => r.characterId === roleId);
-    }
-
-    function sum(arr) { return arr.reduce((a,b) => a + b, 0); }
-
-    // ---- Map + Convex hull ----
-    let map;
-    let mapLayerMarkers;
-    let mapLayerHulls;
-    let mapLayerUser;
-    let mapUserMarker;
-    let mapReady = false;
-    let mapAutoLocateTs = 0;
-
-    function toMercator(lat, lng) {
-      const R = 6378137;
-      const x = R * (lng * Math.PI/180);
-      const y = R * Math.log(Math.tan(Math.PI/4 + (lat * Math.PI/180)/2));
-      return { x, y };
-    }
-
-    function convexHull(points) {
-      // Monotonic chain on projected x/y
-      if (points.length < 3) return points;
-      const pts = points.slice().sort((a,b) => (a.x === b.x ? a.y - b.y : a.x - b.x));
-      const cross = (o,a,b) => (a.x - o.x)*(b.y - o.y) - (a.y - o.y)*(b.x - o.x);
-      const lower = [];
-      for (const p of pts) {
-        while (lower.length >= 2 && cross(lower[lower.length-2], lower[lower.length-1], p) <= 0) lower.pop();
-        lower.push(p);
-      }
-      const upper = [];
-      for (let i=pts.length-1;i>=0;i--) {
-        const p = pts[i];
-        while (upper.length >= 2 && cross(upper[upper.length-2], upper[upper.length-1], p) <= 0) upper.pop();
-        upper.push(p);
-      }
-      upper.pop();
-      lower.pop();
-      return lower.concat(upper);
-    }
-
-    function polygonArea(pts) {
-      if (pts.length < 3) return 0;
-      let a = 0;
-      for (let i=0;i<pts.length;i++) {
-        const j = (i+1) % pts.length;
-        a += pts[i].x*pts[j].y - pts[j].x*pts[i].y;
-      }
-      return Math.abs(a) / 2;
-    }
-
-    function initMapOnce() {
-      if (mapReady) return;
-      mapReady = true;
-
-      const mapEl = document.getElementById('map');
-      if (!window.L || !window.L.map) {
-        mapEl.innerHTML = `
-          <div style="height:100%; display:grid; place-items:center; padding:18px; text-align:center;">
-            <div>
-              <div style="font-weight:1000; color:#6B4F3F; font-size:16px;">地圖載入失敗</div>
-              <div style="margin-top:8px; color:#8A8A8A; font-size:13px; line-height:1.45;">
-                Leaflet / 圖磚資源可能被網路阻擋或離線。<br>
-                請確認可連到 <span style="font-weight:900;">unpkg.com</span> 與 <span style="font-weight:900;">tile.openstreetmap.org</span>。
-              </div>
-            </div>
-          </div>
-        `;
-        return;
-      }
-
-      map = L.map('map', { zoomControl: true });
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; OpenStreetMap'
-      }).addTo(map);
-
-      mapLayerMarkers = L.layerGroup().addTo(map);
-      mapLayerHulls = L.layerGroup().addTo(map);
-      mapLayerUser = L.layerGroup().addTo(map);
-
-      // default view
-      map.setView([25.0330, 121.5654], 12);
-    }
-
-    function clearMap() {
-      mapLayerMarkers?.clearLayers();
-      mapLayerHulls?.clearLayers();
-    }
-
-    function setMapLocStatus(msg) {
-      const el = document.getElementById('mapLocStatus');
-      if (el) el.textContent = msg;
-    }
-
-    function geoErrorText(err) {
-      if (!err) return '未知錯誤';
-      const code = err.code;
-      if (code === 1) return '使用者拒絕定位權限';
-      if (code === 2) return '無法取得定位（訊號/室內/網路）';
-      if (code === 3) return '定位逾時';
-      return err.message || '未知錯誤';
-    }
-
-    function getCurrentPositionPromise(options) {
-      return new Promise((resolve, reject) => {
-        if (!navigator.geolocation) {
-          reject(new Error('Geolocation unsupported'));
-          return;
-        }
-        navigator.geolocation.getCurrentPosition(resolve, reject, options);
+    function showTab(name) {
+      if (!TABS.includes(name)) name = 'map';
+      const changed = current !== name;
+      current = name;
+      TABS.forEach(t => { $(`#view-${t}`).hidden = t !== name; });
+      $$('.tab-btn').forEach(b => {
+        if (b.dataset.tab === name) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
       });
+      syncUrl();
+      if (dirty.has(name)) { dirty.delete(name); renderView(name); }
+      if (name === 'map') onMapShown();
+      if (name === 'log') onLogShown();
+      if (changed) window.scrollTo(0, 0);
     }
 
-    async function centerMapOnMe() {
-      initMapOnce();
-      if (!map) return;
-
-      setMapLocStatus('目前位置：定位中...');
-
-      const applyLatLng = (lat, lng, label) => {
-        const color = '#2563eb';
-        mapLayerUser?.clearLayers();
-        mapUserMarker = L.circleMarker([lat, lng], {
-          radius: 9,
-          color: '#ffffff',
-          weight: 3,
-          fillColor: color,
-          fillOpacity: 0.9
-        }).addTo(mapLayerUser);
-        map.flyTo([lat, lng], Math.max(map.getZoom(), 15), { duration: 0.8 });
-        setMapLocStatus(`目前位置：${label}（${lat.toFixed(5)}, ${lng.toFixed(5)}）`);
-      };
-
-      const last = loadJson(LS_KEYS.lastLoc, null);
-
-      // Phase 1: quick cached position (less likely to timeout)
-      try {
-        const pos = await getCurrentPositionPromise({ enableHighAccuracy: false, timeout: 5000, maximumAge: 10 * 60 * 1000 });
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-        saveJson(LS_KEYS.lastLoc, { lat, lng, ts: Date.now() });
-        applyLatLng(lat, lng, '已定位');
-      } catch (e) {
-        // ignore and try high accuracy
-      }
-
-      // Phase 2: high accuracy refine
-      try {
-        const pos = await getCurrentPositionPromise({ enableHighAccuracy: true, timeout: 12000, maximumAge: 60 * 1000 });
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-        saveJson(LS_KEYS.lastLoc, { lat, lng, ts: Date.now() });
-        applyLatLng(lat, lng, '已精準定位');
-        return;
-      } catch (err) {
-        if (last && Number.isFinite(last.lat) && Number.isFinite(last.lng)) {
-          applyLatLng(last.lat, last.lng, '定位失敗，已用最後一次');
-          return;
-        }
-        setMapLocStatus(`目前位置：定位失敗（${geoErrorText(err)}）`);
-      }
-    }
-
-    function markerPopupForRole(roleId, placeKey, placeStats) {
-      const best = placeStats.bestRating;
-      const last = new Date(placeStats.lastTs).toLocaleString();
-      return `
-        <div style="font-family:inherit;">
-          <div style="font-weight:900; color:#6B4F3F;">${escapeHtml(placeStats.placeName || placeKey)}</div>
-          <div style="margin-top:6px; font-size:12px; color:#8A8A8A;">${escapeHtml(roleId)}</div>
-          <div style="margin-top:8px; font-size:12px;">
-            <div>最佳評分：<b>${Number.isFinite(best) ? best.toFixed(1) : '—'}</b></div>
-            <div>累積次數：<b>${placeStats.count}</b></div>
-            <div>最近時間：<b>${escapeHtml(last)}</b></div>
-          </div>
-        </div>
-      `;
-    }
-
-    function computePlaceStats(recs) {
-      // group by placeKey = placeName|lat,lng (rounded) to avoid tiny jitter
-      const byKey = new Map();
-      for (const r of recs) {
-        const lat = Number(r.lat);
-        const lng = Number(r.lng);
-        const llKey = `${lat.toFixed(5)},${lng.toFixed(5)}`;
-        const placeName = (r.placeName || '').trim();
-        const placeKey = placeName ? `${placeName}__${llKey}` : `未命名__${llKey}`;
-        const prev = byKey.get(placeKey) || { placeName: placeName || '未命名地點', lat, lng, bestRating: -Infinity, count: 0, lastTs: 0 };
-        prev.count += 1;
-        prev.lastTs = Math.max(prev.lastTs, r.timestamp);
-        const rating = Number(r.rating);
-        if (Number.isFinite(rating)) prev.bestRating = Math.max(prev.bestRating, rating);
-        byKey.set(placeKey, prev);
-      }
-      // normalize bestRating
-      for (const v of byKey.values()) {
-        if (!Number.isFinite(v.bestRating) || v.bestRating === -Infinity) v.bestRating = NaN;
-      }
-      return byKey;
-    }
-
-    const _poopIconCache = new Map();
-    function poopIcon(color) {
-      if (_poopIconCache.has(color)) return _poopIconCache.get(color);
-      const icon = L.divIcon({
-        className: '',
-        html: `<div class="poopPin" style="--c:${color}">💩</div>`,
-        iconSize: [28, 28],
-        iconAnchor: [14, 14],
-        popupAnchor: [0, -14]
-      });
-      _poopIconCache.set(color, icon);
-      return icon;
-    }
-
-    function renderMap(selectedRoleIds) {
-      initMapOnce();
-      if (!window.L || !map || !mapLayerMarkers || !mapLayerHulls) return;
-      clearMap();
-
-      const all = loadRecords();
-      const boundsPts = [];
-
-      for (const rid of selectedRoleIds) {
-        const recs = all.filter(r => r.characterId === rid);
-        const stats = computePlaceStats(recs);
-
-        const color = roleColor(rid);
-        const hullPtsProjected = [];
-
-        for (const [placeKey, p] of stats.entries()) {
-          if (!Number.isFinite(p.lat) || !Number.isFinite(p.lng)) continue;
-          boundsPts.push([p.lat, p.lng]);
-
-          const marker = L.marker([p.lat, p.lng], { icon: poopIcon(color) }).addTo(mapLayerMarkers);
-          marker.bindPopup(markerPopupForRole(rid, placeKey, p));
-
-          const m = toMercator(p.lat, p.lng);
-          hullPtsProjected.push({ ...m, lat: p.lat, lng: p.lng });
-        }
-
-        if (hullPtsProjected.length >= 3) {
-          const hull = convexHull(hullPtsProjected);
-          const latlngs = hull.map(h => [h.lat, h.lng]);
-          L.polygon(latlngs, {
-            color,
-            weight: 2,
-            fillColor: color,
-            fillOpacity: 0.15
-          }).addTo(mapLayerHulls);
-        }
-      }
-
-      if (boundsPts.length) {
-        const b = L.latLngBounds(boundsPts);
-        map.fitBounds(b.pad(0.18));
-      }
-    }
-
-    function computeHullAreaForRole(roleId, recs) {
-      const stats = computePlaceStats(recs);
-      const pts = [];
-      for (const p of stats.values()) {
-        const m = toMercator(p.lat, p.lng);
-        pts.push({ ...m });
-      }
-      if (pts.length < 3) return 0;
-      const hull = convexHull(pts);
-      return polygonArea(hull);
-    }
-
-    // ---- Tabs ----
-    const views = {
-      map: document.getElementById('view-map'),
-      log: document.getElementById('view-log'),
-      overview: document.getElementById('view-overview'),
-      rank: document.getElementById('view-rank'),
-      role: document.getElementById('view-role')
-    };
-
-    function showTab(tab) {
-      for (const [k, el] of Object.entries(views)) {
-        el.classList.toggle('active', k === tab);
-      }
-      [...document.querySelectorAll('.tabBtn')].forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tab));
-
-      if (tab === 'map') {
-        initMapOnce();
-        if (map) {
-          setTimeout(() => map.invalidateSize(true), 80);
-          refreshMapUI();
-
-          // Auto-locate once when entering the map (cooldown to avoid repeated prompts)
-          const now = Date.now();
-          if (now - mapAutoLocateTs > 45_000) {
-            mapAutoLocateTs = now;
-            centerMapOnMe();
-          }
-        }
-      }
-      if (tab === 'overview') refreshOverview();
-      if (tab === 'rank') refreshRanking();
-      if (tab === 'role') refreshRoleTab();
-    }
-
-    // ---- Header summary carousel ----
-    let hdrSummaryMode = 0;
-    function refreshHeader() {
-      const roleId = getCurrentRoleId();
-      const role = getRoleById(roleId);
-      if (!role) return;
-
-      document.getElementById('hdrAvatar').textContent = role.avatar || '🧑';
-      document.getElementById('hdrRoleId').textContent = role.id;
-      document.getElementById('hdrRoleMeta').textContent = `${formatMoney(role.currency || 'NT$', role.monthlySalary)} / 月 · ${role.note || ''}`.replace(/\s+·\s*$/, '');
-
-      const now = Date.now();
-      const monthStart = startOfMonth(now);
-      const monthEnd = endOfMonth(now);
-      const monthRecs = recordsByRole(role.id).filter(r => r.timestamp >= monthStart && r.timestamp < monthEnd);
-      const monthPoopMoney = sum(monthRecs.filter(r => r.type === 'poop').map(r => Number(r.poopValueMoney) || 0));
-      const monthPee = sum(monthRecs.filter(r => r.type === 'pee').map(r => Number(r.peeVolumeCc) || 0));
-      const monthPoop = sum(monthRecs.filter(r => r.type === 'poop').map(r => Number(r.poopWeightG) || 0));
-
-      const elValue = document.getElementById('hdrValue');
-      const elLabel = document.getElementById('hdrValueLabel');
-
-      if (hdrSummaryMode % 3 === 0) {
-        elValue.textContent = formatMoney(role.currency || 'NT$', monthPoopMoney, 0);
-        elLabel.textContent = '本月拉屎薪資';
-      } else if (hdrSummaryMode % 3 === 1) {
-        elValue.textContent = `${Math.round(monthPoop)} g`;
-        elLabel.textContent = '本月屎量';
-      } else {
-        elValue.textContent = `${Math.round(monthPee)} cc`;
-        elLabel.textContent = '本月尿量';
-      }
-    }
-
-    function startHeaderCarousel() {
-      setInterval(() => {
-        hdrSummaryMode++;
-        refreshHeader();
-      }, 3200);
-    }
-
-    // ---- Map UI ----
-    const selectedRoleIds = new Set();
-
-    function refreshRoleChecklist() {
-      const chars = loadJson(LS_KEYS.characters, []);
-      const cur = getRoleById(getCurrentRoleId());
-      const list = document.getElementById('roleCheckList');
-      list.innerHTML = '';
-
-      for (const c of chars) {
-        const wrap = document.createElement('div');
-        wrap.className = 'checkItem';
-
-        const left = document.createElement('div');
-        left.className = 'left';
-
-        const dot = document.createElement('div');
-        dot.className = 'dot';
-        dot.style.background = roleColor(c.id);
-
-        const txt = document.createElement('div');
-        txt.style.minWidth = '0';
-        txt.innerHTML = `<div style="font-weight:900; color:#6B4F3F; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(c.id)}</div>
-                         <div class="small">${escapeHtml(c.note || '')}</div>`;
-
-        left.appendChild(dot);
-        left.appendChild(txt);
-
-        const cb = document.createElement('input');
-        cb.type = 'checkbox';
-        cb.style.width = '20px';
-        cb.style.height = '20px';
-        cb.checked = selectedRoleIds.has(c.id);
-        cb.disabled = c.id === cur.id; // always include current
-
-        cb.addEventListener('change', () => {
-          if (cb.checked) selectedRoleIds.add(c.id);
-          else selectedRoleIds.delete(c.id);
-          refreshMapUI();
-        });
-
-        wrap.appendChild(left);
-        wrap.appendChild(cb);
-        list.appendChild(wrap);
-      }
-    }
-
-    function refreshMapUI() {
-      const cur = getRoleById(getCurrentRoleId());
-      if (!cur) return;
-
-      document.getElementById('mapRoleName').textContent = cur.id;
-
-      // ensure current role always included
-      selectedRoleIds.add(cur.id);
-      refreshRoleChecklist();
-
-      const curCount = computePlaceStats(recordsByRole(cur.id)).size;
-      document.getElementById('mapPointCount').textContent = String(curCount);
-
-      renderMap([...selectedRoleIds]);
-    }
-
-    // ---- Log / Timer ----
-    let logState = {
-      roleId: null,
-      type: null,
-      lat: null,
-      lng: null,
-      locOk: false,
-      startTs: null,
-      elapsedMs: 0,
-      running: false,
-      durationSec: 0
-    };
-
-    function resetLogUi() {
-      document.getElementById('btnTypePee').classList.remove('active');
-      document.getElementById('btnTypePoop').classList.remove('active');
-      document.getElementById('timer').textContent = '00:00';
-      document.getElementById('timerHint').textContent = '選擇類型後開始計時。';
-      document.getElementById('resultArea').style.display = 'none';
-      document.getElementById('saveError').style.display = 'none';
-      document.getElementById('saveOk').style.display = 'none';
-      document.getElementById('nearbyPanel').style.display = 'none';
-      updateTimerButtons();
-    }
-
-    function updateTimerButtons() {
-      const btnStart = document.getElementById('btnTimerStart');
-      const btnPause = document.getElementById('btnTimerPause');
-      const btnEnd = document.getElementById('btnTimerEnd');
-
-      const hasType = !!logState.type;
-      const running = !!logState.running;
-
-      const elapsedMs = (Number(logState.elapsedMs) || 0);
-      const elapsedNow = elapsedMs + (running && logState.startTs ? (Date.now() - logState.startTs) : 0);
-      const hasTime = running || elapsedNow > 0;
-
-      btnStart.classList.toggle('timerActive', running);
-      btnPause.classList.toggle('timerActive', !running && hasTime);
-
-      btnStart.textContent = hasTime ? (running ? '進行中' : '繼續') : '開始';
-      btnPause.textContent = running ? '暫停' : '已暫停';
-
-      btnStart.disabled = !hasType || running;
-      btnPause.disabled = !hasType || !running;
-      btnEnd.disabled = !hasType || (!running && !hasTime);
-    }
-
-    function setType(type) {
-      logState.type = type;
-      document.getElementById('btnTypePee').classList.toggle('active', type === 'pee');
-      document.getElementById('btnTypePoop').classList.toggle('active', type === 'poop');
-      document.getElementById('timerHint').textContent = type === 'pee' ? '尿尿模式：結束後會估算尿量（秒數 × 20cc）' : '大便模式：結束後會算出拉屎薪資與屎量';
-      updateTimerButtons();
-    }
-
-    function fmtMMSS(ms) {
-      const s = Math.floor(ms / 1000);
-      const mm = String(Math.floor(s / 60)).padStart(2, '0');
-      const ss = String(s % 60).padStart(2, '0');
-      return `${mm}:${ss}`;
-    }
-
-    function tickTimer() {
-      if (!logState.running) return;
-      const now = Date.now();
-      const elapsed = logState.elapsedMs + (now - logState.startTs);
-      document.getElementById('timer').textContent = fmtMMSS(elapsed);
-      requestAnimationFrame(tickTimer);
-    }
-
-    function startTimer() {
-      if (!logState.type) {
-        document.getElementById('timerHint').textContent = '先選擇「尿尿」或「大便」再開始。';
-        return;
-      }
-      if (logState.running) return;
-      logState.running = true;
-      logState.startTs = Date.now();
-      updateTimerButtons();
-      tickTimer();
-    }
-
-    function pauseTimer() {
-      if (!logState.running) return;
-      logState.elapsedMs += Date.now() - logState.startTs;
-      logState.running = false;
-      logState.startTs = null;
-      document.getElementById('timer').textContent = fmtMMSS(logState.elapsedMs);
-      updateTimerButtons();
-    }
-
-    function endTimer() {
-      if (logState.running) pauseTimer();
-      const sec = Math.max(0, Math.round(logState.elapsedMs / 1000));
-      logState.durationSec = sec;
-
-      updateTimerButtons();
-
-      if (!logState.type) {
-        document.getElementById('timerHint').textContent = '先選擇「尿尿」或「大便」。';
-        return;
-      }
-
-      renderResult();
-    }
-
-    function resetLogInputsAfterSave() {
-      document.getElementById('manualPlace').value = '';
-      document.getElementById('placeName').value = '';
-      document.getElementById('rating').value = '';
-      document.getElementById('note').value = '';
-      document.getElementById('tag').value = '';
-      document.getElementById('peeCc').value = '';
-      document.getElementById('poopLevel').value = '';
-
-      logState.type = null;
-      logState.running = false;
-      logState.startTs = null;
-      logState.elapsedMs = 0;
-      logState.durationSec = 0;
-      document.getElementById('timer').textContent = '00:00';
-      document.getElementById('timerHint').textContent = '選擇類型後開始計時。';
-      document.getElementById('resultArea').style.display = 'none';
-      document.getElementById('btnTypePee').classList.remove('active');
-      document.getElementById('btnTypePoop').classList.remove('active');
-      document.getElementById('nearbyPanel').style.display = 'none';
-      updateTimerButtons();
-    }
-
-    function haversineMeters(lat1, lng1, lat2, lng2) {
-      const R = 6371000;
-      const toRad = (d) => d * Math.PI / 180;
-      const dLat = toRad(lat2 - lat1);
-      const dLng = toRad(lng2 - lng1);
-      const a = Math.sin(dLat/2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng/2) ** 2;
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-      return R * c;
-    }
-
-    function findNearestSavedPlace(roleId, lat, lng, thresholdMeters = 60) {
-      const recs = loadRecords().filter(r => r.characterId === roleId);
-      let best = null;
-      let bestDist = Infinity;
-      for (const r of recs) {
-        const rLat = Number(r.lat);
-        const rLng = Number(r.lng);
-        if (!Number.isFinite(rLat) || !Number.isFinite(rLng)) continue;
-        const name = String(r.placeName || '').trim();
-        if (!name) continue;
-        const d = haversineMeters(lat, lng, rLat, rLng);
-        if (d < bestDist) {
-          bestDist = d;
-          best = { placeName: name, lat: rLat, lng: rLng, meters: d };
-        }
-      }
-      if (!best || bestDist > thresholdMeters) return null;
-      return best;
-    }
-
-    function showNearbyPrompt(suggestion) {
-      const panel = document.getElementById('nearbyPanel');
-      const txt = document.getElementById('nearbyText');
-      panel.dataset.placeName = suggestion.placeName;
-      panel.style.display = 'block';
-      const m = Math.round(suggestion.meters);
-      txt.textContent = `「${suggestion.placeName}」(約 ${m} 公尺)`;
-    }
-
-    function hideNearbyPrompt() {
-      const panel = document.getElementById('nearbyPanel');
-      panel.style.display = 'none';
-      panel.dataset.placeName = '';
-    }
-
-    function secondsValuePerRole(role) {
-      const monthly = Number(role.monthlySalary) || 0;
-      return monthly / (30*24*60*60);
-    }
-
-    function renderResult() {
-      const sec = logState.durationSec;
-      const role = getRoleById(getCurrentRoleId());
-
-      document.getElementById('resultArea').style.display = 'block';
-      document.getElementById('resSec').textContent = `${sec} 秒`;
-
-      const peeAdjust = document.getElementById('peeAdjust');
-      const poopAmount = document.getElementById('poopAmount');
-
-      if (logState.type === 'pee') {
-        poopAmount.style.display = 'none';
-        peeAdjust.style.display = 'block';
-
-        const cc = sec * 20;
-        document.getElementById('resRightLabel').textContent = '估計尿量';
-        document.getElementById('resRightValue').textContent = `${cc} cc`;
-        document.getElementById('peeCc').value = String(cc);
-      } else {
-        peeAdjust.style.display = 'none';
-        poopAmount.style.display = 'block';
-
-        const v = secondsValuePerRole(role);
-        const money = sec * v;
-        document.getElementById('resRightLabel').textContent = '拉屎薪資';
-        document.getElementById('resRightValue').textContent = formatMoney(role.currency || 'NT$', money, 1);
-      }
-
-      // default place suggestion
-      const manual = document.getElementById('manualPlace').value.trim();
-      const placeInput = document.getElementById('placeName');
-      if (!placeInput.value.trim() && manual) placeInput.value = manual;
-    }
-
-    async function getLocation() {
-      const el = document.getElementById('locStatus');
-      el.textContent = '定位狀態：定位中...';
-
-      if (!navigator.geolocation) {
-        el.textContent = '定位狀態：此瀏覽器不支援定位';
-        return { ok: false };
-      }
-
-      const last = loadJson(LS_KEYS.lastLoc, null);
-
-      const apply = (lat, lng, label) => {
-        logState.lat = lat;
-        logState.lng = lng;
-        logState.locOk = true;
-        saveJson(LS_KEYS.lastLoc, { lat, lng, ts: Date.now() });
-        el.textContent = `${label}（${lat.toFixed(5)}, ${lng.toFixed(5)}）`;
-      };
-
-      // Phase 1: quick cached position
-      try {
-        const pos = await getCurrentPositionPromise({ enableHighAccuracy: false, timeout: 4500, maximumAge: 10 * 60 * 1000 });
-        apply(pos.coords.latitude, pos.coords.longitude, '定位狀態：已定位');
-      } catch (e) {
-        // ignore; try high accuracy
-      }
-
-      // Phase 2: high accuracy
-      try {
-        const pos = await getCurrentPositionPromise({ enableHighAccuracy: true, timeout: 12000, maximumAge: 60 * 1000 });
-        apply(pos.coords.latitude, pos.coords.longitude, '定位狀態：已精準定位');
-        return { ok: true, lat: logState.lat, lng: logState.lng };
-      } catch (err) {
-        if (logState.locOk && Number.isFinite(logState.lat) && Number.isFinite(logState.lng)) {
-          // we already have a quick fix; keep it
-          el.textContent = `定位狀態：已定位（精準定位失敗：${geoErrorText(err)}）`;
-          return { ok: true, lat: logState.lat, lng: logState.lng };
-        }
-
-        logState.locOk = false;
-        if (last && Number.isFinite(last.lat) && Number.isFinite(last.lng)) {
-          el.textContent = `定位狀態：定位失敗（${geoErrorText(err)}；可改用最後一次定位）`;
-        } else {
-          el.textContent = `定位狀態：定位失敗（${geoErrorText(err)}；可手動輸入地點名稱）`;
-        }
-        return { ok: false };
-      }
-    }
-
-    function useLastLocation() {
-      const last = loadJson(LS_KEYS.lastLoc, null);
-      const el = document.getElementById('locStatus');
-      if (!last) {
-        el.textContent = '定位狀態：沒有最後一次定位可用';
-        return;
-      }
-      logState.lat = last.lat;
-      logState.lng = last.lng;
-      logState.locOk = true;
-      el.textContent = `定位狀態：已套用最後一次定位（${last.lat.toFixed(5)}, ${last.lng.toFixed(5)}）`;
-    }
-
-    async function startNewLog() {
-      resetLogUi();
-      logState = {
-        roleId: getCurrentRoleId(),
-        type: null,
-        lat: null,
-        lng: null,
-        locOk: false,
-        startTs: null,
-        elapsedMs: 0,
-        running: false,
-        durationSec: 0
-      };
-
-      await getLocation();
-
-      // Suggest place name if close to a previously saved location
-      try {
-        const placeInput = document.getElementById('placeName');
-        if (logState.locOk && Number.isFinite(logState.lat) && Number.isFinite(logState.lng) && !placeInput.value.trim()) {
-          const sug = findNearestSavedPlace(logState.roleId, logState.lat, logState.lng, 60);
-          if (sug) showNearbyPrompt(sug);
-        }
-      } catch {
-        // ignore
-      }
-    }
-
-    function validateAndSave() {
-      const role = getRoleById(getCurrentRoleId());
-      const type = logState.type;
-      const sec = logState.durationSec;
-
-      const errEl = document.getElementById('saveError');
-      const okEl = document.getElementById('saveOk');
-      errEl.style.display = 'none';
-      okEl.style.display = 'none';
-
-      if (!type) return showSaveError('請先選擇類型（尿尿/大便）');
-      if (!Number.isFinite(sec) || sec <= 0) return showSaveError('請先完成計時（秒數需大於 0）');
-
-      const placeName = document.getElementById('placeName').value.trim();
-      if (!placeName) return showSaveError('地點名稱為必填');
-
-      const rating = Number(document.getElementById('rating').value);
-      if (!Number.isFinite(rating) || rating < 1 || rating > 10) return showSaveError('評分需介於 1.0 ~ 10.0');
-
-      // location: if missing, allow save with NaN but map won't show it
-      const lat = Number(logState.lat);
-      const lng = Number(logState.lng);
-
-      const note = document.getElementById('note').value.trim();
-      const tag = document.getElementById('tag').value;
-
-      const base = {
-        recordId: uid(),
-        characterId: role.id,
-        type,
-        timestamp: Date.now(),
-        durationSec: sec,
-        placeName,
-        rating: Math.round(rating * 10) / 10,
-        note,
-        tag,
-        lat: Number.isFinite(lat) ? lat : NaN,
-        lng: Number.isFinite(lng) ? lng : NaN
-      };
-
-      if (type === 'pee') {
-        const cc = Number(document.getElementById('peeCc').value);
-        if (!Number.isFinite(cc) || cc < 0) return showSaveError('尿量（cc）需為有效數字');
-        base.peeVolumeCc = cc;
-      } else {
-        const grams = Number(document.getElementById('poopLevel').value);
-        if (![150,225,300,350].includes(grams)) return showSaveError('請選擇大便多寡（對應重量）');
-        const money = sec * secondsValuePerRole(role);
-        base.poopWeightG = grams;
-        base.poopValueMoney = Math.round(money * 10) / 10;
-      }
-
-      saveRecord(base);
-
-      okEl.textContent = '儲存成功：你今天又征服了新的馬桶！';
-      okEl.style.display = 'block';
-      showSaveToast('✅ 儲存成功：已清空欄位，可直接開始下一筆。');
-
-      // refresh other pages immediately
-      refreshHeader();
-      refreshMapUI();
-      refreshOverview();
-      refreshRanking();
-
-      // reset timer for next record
-      resetLogInputsAfterSave();
-    }
-
-    function showSaveError(msg) {
-      const errEl = document.getElementById('saveError');
-      errEl.textContent = msg;
-      errEl.style.display = 'block';
-    }
-
-    let _saveToastTimer = null;
-    function showSaveToast(msg) {
-      const el = document.getElementById('saveToast');
-      if (!el) return;
-      el.textContent = msg;
-      el.style.display = 'block';
-      if (_saveToastTimer) clearTimeout(_saveToastTimer);
-      _saveToastTimer = setTimeout(() => {
-        el.style.display = 'none';
-        el.textContent = '';
-      }, 2200);
-    }
-
-    // ---- Overview ----
-    let period = 'month';
-
-    function setPeriod(p) {
-      period = p;
-      document.getElementById('periodWeek').classList.toggle('active', p === 'week');
-      document.getElementById('periodMonth').classList.toggle('active', p === 'month');
-      document.getElementById('periodAll').classList.toggle('active', p === 'all');
-      refreshOverview();
-    }
-
-    function filterByPeriod(recs, p, now) {
-      if (p === 'all') return { current: recs, prev: [] };
-
-      let curStart, curEnd, prevStart, prevEnd;
-      if (p === 'week') {
-        curStart = startOfWeek(now);
-        curEnd = endOfWeek(now);
-        prevEnd = curStart;
-        prevStart = prevEnd - 7*24*60*60*1000;
-      } else {
-        curStart = startOfMonth(now);
-        curEnd = endOfMonth(now);
-        prevEnd = curStart;
-        prevStart = startOfMonth(prevEnd - 24*60*60*1000);
-      }
-
-      const current = recs.filter(r => r.timestamp >= curStart && r.timestamp < curEnd);
-      const prev = recs.filter(r => r.timestamp >= prevStart && r.timestamp < prevEnd);
-      return { current, prev };
-    }
-
-    function refreshOverview() {
-      const role = getRoleById(getCurrentRoleId());
-      const now = Date.now();
-      const recsAll = recordsByRole(role.id);
-      const { current, prev } = filterByPeriod(recsAll, period, now);
-
-      // totals
-      const pee = sum(current.filter(r => r.type === 'pee').map(r => Number(r.peeVolumeCc) || 0));
-      const poop = sum(current.filter(r => r.type === 'poop').map(r => Number(r.poopWeightG) || 0));
-      const money = sum(current.filter(r => r.type === 'poop').map(r => Number(r.poopValueMoney) || 0));
-
-      document.getElementById('kpiPee').textContent = `${Math.round(pee).toLocaleString('en-US')} cc`;
-      document.getElementById('kpiPoop').textContent = `${(poop/1000).toFixed(1)} kg`;
-      document.getElementById('kpiMoney').textContent = formatMoney(role.currency || 'NT$', money, 0);
-
-      // territory growth
-      const areaCur = computeHullAreaForRole(role.id, current);
-      const areaPrev = computeHullAreaForRole(role.id, prev);
-      let growthText = '—';
-      if (areaCur <= 0) {
-        growthText = '0%';
-      } else if (areaPrev <= 0) {
-        growthText = '+100%';
-      } else {
-        const pct = ((areaCur - areaPrev) / areaPrev) * 100;
-        const sign = pct >= 0 ? '+' : '';
-        growthText = `${sign}${pct.toFixed(0)}%`;
-      }
-      document.getElementById('kpiTerritory').textContent = growthText;
-
-      // fun hint (simple)
-      const hints = [
-        '你今天又征服了新的馬桶！',
-        '注意補水：尿量王就是你。',
-        '拉屎薪資累積中，老闆不會知道。'
-      ];
-      document.getElementById('funHint').textContent = hints[Math.floor(now / 10000) % hints.length];
-    }
-
-    // ---- Ranking ----
-    function refreshRanking() {
-      const role = getRoleById(getCurrentRoleId());
-      const sort = document.getElementById('rankSort').value;
-      const type = document.getElementById('rankType').value;
-
-      let recs = recordsByRole(role.id);
-      if (type !== 'all') recs = recs.filter(r => r.type === type);
-
-      const grouped = new Map();
-      for (const r of recs) {
-        const name = (r.placeName || '未命名地點').trim();
-        const key = name;
-        const prev = grouped.get(key) || { placeName: name, avgRating: 0, ratingSum: 0, ratingCount: 0, visits: 0, lastTs: 0, tag: '' };
-        prev.visits += 1;
-        prev.lastTs = Math.max(prev.lastTs, r.timestamp);
-        const rating = Number(r.rating);
-        if (Number.isFinite(rating)) {
-          prev.ratingSum += rating;
-          prev.ratingCount += 1;
-        }
-        prev.tag = prev.tag || (r.tag || '');
-        grouped.set(key, prev);
-      }
-
-      const items = [...grouped.values()].map(it => ({
-        ...it,
-        avgRating: it.ratingCount ? it.ratingSum / it.ratingCount : NaN
-      }));
-
-      if (!items.length) {
-        document.getElementById('rankList').innerHTML = '';
-        document.getElementById('rankEmpty').style.display = 'block';
-        return;
-      }
-
-      document.getElementById('rankEmpty').style.display = 'none';
-
-      items.sort((a,b) => {
-        if (sort === 'visits') return b.visits - a.visits;
-        if (sort === 'recent') return b.lastTs - a.lastTs;
-        // rating
-        const ar = Number.isFinite(a.avgRating) ? a.avgRating : -1;
-        const br = Number.isFinite(b.avgRating) ? b.avgRating : -1;
-        if (br !== ar) return br - ar;
-        return b.lastTs - a.lastTs;
-      });
-
-      const list = document.getElementById('rankList');
-      list.innerHTML = '';
-
-      items.forEach((it, idx) => {
-        const el = document.createElement('div');
-        el.className = 'rankItem';
-        const last = new Date(it.lastTs).toLocaleString();
-        const avg = Number.isFinite(it.avgRating) ? it.avgRating.toFixed(1) : '—';
-        const tag = it.tag ? ` · ${escapeHtml(it.tag)}` : '';
-
-        el.innerHTML = `
-          <div class="badge">${idx+1}</div>
-          <div>
-            <div class="rankTitle">${escapeHtml(it.placeName)}</div>
-            <div class="rankMeta">平均評分：<b>${avg}</b> · 次數：<b>${it.visits}</b> · 最近：<b>${escapeHtml(last)}</b>${tag}</div>
-          </div>
-        `;
-        list.appendChild(el);
-      });
-
-      const wrap = document.getElementById('recentWrap');
-      if (wrap && wrap.style.display !== 'none') refreshRecentRecords();
-    }
-
-    function renderRecordValue(role, r) {
-      if (r.type === 'pee') {
-        const cc = Math.round(Number(r.peeVolumeCc) || 0);
-        return `尿量 ${cc.toLocaleString('en-US')} cc`;
-      }
-      const grams = Math.round(Number(r.poopWeightG) || 0);
-      const money = Number(r.poopValueMoney) || 0;
-      return `屎量 ${grams.toLocaleString('en-US')} g · 薪資 ${formatMoney(role.currency || 'NT$', money, 1)}`;
-    }
-
-    function deleteRecord(recordId) {
-      if (!recordId) {
-        showSaveToast('刪除失敗：找不到這筆紀錄的 ID（請重新整理頁面）。');
-        return;
-      }
-      const all = loadRecords();
-      const next = all.filter(r => r.recordId !== recordId);
-      saveJson(LS_KEYS.records, next);
-      refreshHeader();
-      refreshMapUI();
-      refreshOverview();
-      refreshRanking();
-      refreshRoleTab();
-    }
-
-    function refreshRecentRecords() {
-      const list = document.getElementById('recentList');
-      const empty = document.getElementById('recentEmpty');
-      if (!list || !empty) return;
-
-      const wrap = document.getElementById('recentWrap');
-      if (wrap && wrap.style.display === 'none') return;
-
-      const role = getRoleById(getCurrentRoleId());
-      const type = document.getElementById('rankType')?.value || 'all';
-
-      let recs = recordsByRole(role.id);
-      if (type !== 'all') recs = recs.filter(r => r.type === type);
-      recs = recs.slice().sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0));
-      const top = recs.slice(0, 20);
-
-      list.innerHTML = '';
-      if (!top.length) {
-        empty.style.display = 'block';
-        return;
-      }
-      empty.style.display = 'none';
-
-      for (const r of top) {
-        const item = document.createElement('div');
-        item.className = 'recItem';
-
-        const place = String(r.placeName || '未命名地點').trim() || '未命名地點';
-        const when = new Date(r.timestamp).toLocaleString();
-        const value = renderRecordValue(role, r);
-        const rating = Number(r.rating);
-        const ratingText = Number.isFinite(rating) ? `評分 ${rating.toFixed(1)}` : '未評分';
-        const ico = r.type === 'pee' ? '💧' : '💩';
-
-        const left = document.createElement('div');
-        left.innerHTML = `
-          <div class="recTitle">${ico} ${escapeHtml(place)}</div>
-          <div class="recMeta">${escapeHtml(when)} · ${escapeHtml(value)} · ${escapeHtml(ratingText)}</div>
-        `;
-
-        const btn = document.createElement('button');
-        btn.className = 'btn btnDanger';
-        btn.textContent = '刪除';
-        btn.style.width = '92px';
-        btn.addEventListener('click', () => {
-          const msg = `確定要刪除這筆紀錄嗎？\n\n${place}\n${when}\n${value}`;
-          if (!confirm(msg)) return;
-          deleteRecord(r.recordId);
-          showSaveToast('已刪除一筆紀錄。');
-        });
-
-        item.appendChild(left);
-        item.appendChild(btn);
-        list.appendChild(item);
-      }
-    }
-
-    // ---- Role tab ----
-    function deleteRoleAndData(roleId) {
-      const chars = loadJson(LS_KEYS.characters, []);
-      const remaining = chars.filter(c => c.id !== roleId);
-
-      if (!remaining.length) {
-        alert('至少要留一位角色，否則誰來扛屎？');
+    // ================================================================ map
+    let map = null, mapLayers = null, mapFailed = false;
+    let mapNeedsFit = true, lastAutoLocate = 0;
+    let selectedRoles = new Set();
+    let markerIndex = [];
+    const pinCache = new Map();
+
+    function initMap() {
+      if (map) return true;
+      if (mapFailed) return false;
+      if (!window.L || !L.map) {
+        mapFailed = true;
+        $('#map').innerHTML = `<div class="map-fail"><div><b>地圖載入失敗</b>
+          請確認網路可以連到 unpkg.com 與地圖圖磚伺服器。<br>其他分頁都還能正常使用。</div></div>`;
         return false;
       }
-
-      // delete records of this role
-      const allRecs = loadRecords();
-      const keptRecs = allRecs.filter(r => r.characterId !== roleId);
-      saveJson(LS_KEYS.records, keptRecs);
-      saveJson(LS_KEYS.characters, remaining);
-
-      // if current role deleted, switch to first remaining
-      const curId = getCurrentRoleId();
-      if (curId === roleId) {
-        setCurrentRoleId(remaining[0].id);
-        selectedRoleIds.clear();
-        selectedRoleIds.add(remaining[0].id);
-      }
-
-      refreshHeader();
-      refreshMapUI();
-      refreshOverview();
-      refreshRanking();
-      refreshRoleTab();
-
+      map = L.map('map', { zoomControl: false }).setView([25.033, 121.5654], 12);
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(map);
+      mapLayers = { hulls: L.layerGroup().addTo(map), markers: L.layerGroup().addTo(map), me: L.layerGroup().addTo(map) };
       return true;
     }
 
-    function refreshRoleTab() {
-      const chars = loadJson(LS_KEYS.characters, []);
-      const curId = getCurrentRoleId();
-      const list = document.getElementById('roleList');
-      list.innerHTML = '';
+    function pinIcon(color) {
+      if (!pinCache.has(color)) {
+        pinCache.set(color, L.divIcon({
+          className: 'hs-pin',
+          html: `<span class="pin" style="--c:${color}">${HS.mascot()}</span>`,
+          iconSize: [36, 42], iconAnchor: [18, 42], popupAnchor: [0, -40]
+        }));
+      }
+      return pinCache.get(color);
+    }
 
-      for (const c of chars) {
-        const row = document.createElement('div');
-        row.className = 'roleRow';
+    function popupHtml(p, r) {
+      return `<div class="pop">
+        <div class="pop-name">${esc(p.name)}</div>
+        <div class="pop-role"><i style="--c:${r.color}"></i>${esc(r.id)}</div>
+        <dl class="pop-stats">
+          <div><dt>最高分</dt><dd class="num">${Number.isFinite(p.bestRating) ? p.bestRating.toFixed(1) : '—'}</dd></div>
+          <div><dt>去過</dt><dd class="num">${p.visits} 次</dd></div>
+          <div><dt>最近</dt><dd>${HS.relTime(p.lastTs)}</dd></div>
+        </dl>
+      </div>`;
+    }
 
-        const left = document.createElement('div');
-        left.className = 'left';
+    function placesWithCoords(recs) {
+      return HS.groupPlaces(recs.filter(HS.hasLatLng)).filter(p => p.lat !== null);
+    }
 
-        const ava = document.createElement('div');
-        ava.className = 'avatar';
-        ava.style.width = '40px';
-        ava.style.height = '40px';
-        ava.textContent = c.avatar || '🧑';
-        ava.style.borderColor = roleColor(c.id);
-        ava.style.background = 'rgba(255,255,255,1)';
+    function renderMapView() {
+      const all = HS.getRecords();
+      const roles = HS.getCharacters();
+      selectedRoles = new Set([...selectedRoles].filter(id => roles.some(r => r.id === id)));
+      selectedRoles.add(role.id);
 
-        const txt = document.createElement('div');
-        txt.style.minWidth = '0';
-        txt.innerHTML = `
-          <div style="font-weight:1000; color:#6B4F3F; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(c.id)}${c.id === curId ? '（目前）' : ''}</div>
-          <div class="small">${formatMoney(c.currency || 'NT$', c.monthlySalary)} / 月 · ${escapeHtml(c.note || '')}</div>
-        `;
+      const mine = placesWithCoords(HS.recordsOf(role.id, all));
+      $('#mapTitle').textContent = `${role.id}的勢力範圍`;
+      $('#mapCount').textContent = `共 ${mine.length} 個點`;
+      const badge = $('#layersBadge');
+      badge.hidden = selectedRoles.size < 2;
+      badge.textContent = selectedRoles.size;
+      $('#mapEmpty').hidden = mine.length > 0;
 
-        left.appendChild(ava);
-        left.appendChild(txt);
+      const shown = roles.filter(r => selectedRoles.has(r.id));
+      $('#mapLegend').innerHTML = shown.length > 1
+        ? shown.map(r => `<span class="legend-item"><i style="--c:${r.color}"></i>${esc(r.id)}</span>`).join('')
+        : '';
 
-        const right = document.createElement('div');
-        right.className = 'roleActions';
+      if (!initMap()) return;
+      requestAnimationFrame(() => map.invalidateSize());
 
-        const btnSwitch = document.createElement('button');
-        btnSwitch.className = 'btn btnGhost';
-        btnSwitch.textContent = '切換';
-        btnSwitch.disabled = c.id === curId;
-
-        btnSwitch.addEventListener('click', () => {
-          setCurrentRoleId(c.id);
-          selectedRoleIds.clear();
-          selectedRoleIds.add(c.id);
-          refreshHeader();
-          refreshMapUI();
-          refreshOverview();
-          refreshRanking();
-          showTab('map');
-        });
-
-        const btnDel = document.createElement('button');
-        btnDel.className = 'btn btnDanger';
-        btnDel.textContent = '刪除';
-
-        btnDel.addEventListener('click', () => {
-          const msg = `妳要讓「${c.id}」的屎前功盡棄嗎？\n\n刪除後：\n- 角色會消失\n- 他的所有紀錄/勢力範圍也會一起蒸發\n\n確定要刪除？`;
-          if (!confirm(msg)) return;
-          deleteRoleAndData(c.id);
-        });
-
-        right.appendChild(btnSwitch);
-        right.appendChild(btnDel);
-
-        row.appendChild(left);
-        row.appendChild(right);
-        list.appendChild(row);
+      mapLayers.hulls.clearLayers();
+      mapLayers.markers.clearLayers();
+      markerIndex = [];
+      const bounds = [];
+      // Current role last so its pins sit on top.
+      const order = shown.slice().sort((a, b) => (a.id === role.id) - (b.id === role.id));
+      for (const r of order) {
+        const places = placesWithCoords(HS.recordsOf(r.id, all));
+        for (const p of places) {
+          bounds.push([p.lat, p.lng]);
+          const m = L.marker([p.lat, p.lng], { icon: pinIcon(r.color), title: p.name, zIndexOffset: r.id === role.id ? 500 : 0 })
+            .bindPopup(popupHtml(p, r), { className: 'hs-popup', closeButton: false })
+            .addTo(mapLayers.markers);
+          markerIndex.push({ roleId: r.id, name: p.name, lat: p.lat, lng: p.lng, marker: m });
+        }
+        if (places.length >= 3) {
+          const hull = HS.convexHull(places.map(p => ({ ...HS.mercator(p.lat, p.lng), lat: p.lat, lng: p.lng })));
+          L.polygon(hull.map(h => [h.lat, h.lng]), { color: r.color, weight: 2, fillColor: r.color, fillOpacity: 0.14, interactive: false }).addTo(mapLayers.hulls);
+        } else if (places.length === 2) {
+          L.polyline(places.map(p => [p.lat, p.lng]), { color: r.color, weight: 3, opacity: 0.5, interactive: false }).addTo(mapLayers.hulls);
+        }
+      }
+      if (mapNeedsFit && bounds.length) {
+        map.fitBounds(L.latLngBounds(bounds).pad(0.3), { maxZoom: 17 });
+        mapNeedsFit = false;
       }
     }
 
-    // ---- Overview KPI ranking modal ----
-    function getPeriodRecsForRole(roleId, now) {
-      const recs = recordsByRole(roleId);
-      return filterByPeriod(recs, period, now).current;
+    function showMe(p, fly) {
+      mapLayers.me.clearLayers();
+      if (p.acc && p.acc < 1500) {
+        L.circle([p.lat, p.lng], { radius: p.acc, color: '#2F6FD6', weight: 1, fillOpacity: 0.08, interactive: false }).addTo(mapLayers.me);
+      }
+      L.circleMarker([p.lat, p.lng], { radius: 8, color: '#fff', weight: 3, fillColor: '#2F6FD6', fillOpacity: 1 }).addTo(mapLayers.me);
+      if (fly) map.flyTo([p.lat, p.lng], Math.max(map.getZoom(), 16), { duration: 0.8 });
     }
 
-    function uniquePlaceCount(recs) {
-      return computePlaceStats(recs).size;
-    }
-
-    function kpiValueForRole(role, metric, now) {
-      const recs = getPeriodRecsForRole(role.id, now);
-      if (metric === 'territory') return uniquePlaceCount(recs);
-      if (metric === 'money') return sum(recs.filter(r => r.type === 'poop').map(r => Number(r.poopValueMoney) || 0));
-      if (metric === 'poop') return sum(recs.filter(r => r.type === 'poop').map(r => Number(r.poopWeightG) || 0));
-      if (metric === 'pee') return sum(recs.filter(r => r.type === 'pee').map(r => Number(r.peeVolumeCc) || 0));
-      return 0;
-    }
-
-    function openKpiModal(metric) {
-      const now = Date.now();
-      const roles = loadJson(LS_KEYS.characters, []);
-      const curId = getCurrentRoleId();
-      const curRole = getRoleById(curId);
-      if (!curRole) return;
-
-      const top3Copy = {
-        territory: {
-          one: (n) => `🥇 ${n}：地盤王本人。馬桶地政事務所已蓋章。`,
-          two: (n) => `🥈 ${n}：再多征服一間廁所就要封侯。`,
-          three: (n) => `🥉 ${n}：地圖上那一塊，是你屎勢力的起點。`
-        },
-        money: {
-          one: (n) => `🥇 ${n}：把薪水帶進廁所的人，才懂人生。`,
-          two: (n) => `🥈 ${n}：老闆看不到，但馬桶看得到你的 KPI。`,
-          three: (n) => `🥉 ${n}：每一次坐下，都是財富自由的練習。`
-        },
-        poop: {
-          one: (n) => `🥇 ${n}：重磅選手登場。馬桶承重已警報。`,
-          two: (n) => `🥈 ${n}：穩定輸出，才是真正的核心競爭力。`,
-          three: (n) => `🥉 ${n}：量不在大，氣勢要到位。`
-        },
-        pee: {
-          one: (n) => `🥇 ${n}：水庫開閘王。補水做得跟課表一樣滿。`,
-          two: (n) => `🥈 ${n}：尿量穩健成長，腎臟給你按讚。`,
-          three: (n) => `🥉 ${n}：小溪也能成江河，繼續沖。`
-        }
-      };
-
-      const rank1Copy = {
-        territory: '你是地盤第一名：每間廁所都在你的版圖裡。',
-        money: '你是薪資第一名：把摸魚時間榨成現金的王者。',
-        poop: '你是屎量第一名：輸出最強，馬桶都尊敬你。',
-        pee: '你是尿量第一名：補水之神，水循環為你工作。'
-      };
-
-      const titleMap = {
-        territory: '勢力範圍（地點數）排名',
-        money: '拉屎薪資排名',
-        poop: '屎量排名',
-        pee: '尿量排名'
-      };
-
-      const unitMap = {
-        territory: '個地點',
-        money: curRole.currency || 'NT$',
-        poop: 'g',
-        pee: 'cc'
-      };
-
-      const items = roles.map(r => ({
-        role: r,
-        value: kpiValueForRole(r, metric, now)
-      })).sort((a,b) => (b.value - a.value));
-
-      const total = items.length;
-      const idx = items.findIndex(x => x.role.id === curRole.id);
-      const rank = idx >= 0 ? idx + 1 : total;
-      const myVal = idx >= 0 ? items[idx].value : 0;
-
-      const modal = document.getElementById('kpiModal');
-      modal.classList.add('active');
-      modal.setAttribute('aria-hidden', 'false');
-
-      document.getElementById('kpiModalTitle').textContent = titleMap[metric] || '排名';
-      document.getElementById('kpiModalSub').textContent = `統計期間：${period === 'week' ? '本週' : period === 'month' ? '本月' : '全部'} · 角色數：${total}`;
-
-      const rankEl = document.getElementById('kpiModalRank');
-      const gapEl = document.getElementById('kpiModalGap');
-
-      const fmtValue = (v) => {
-        if (metric === 'money') return formatMoney(curRole.currency || 'NT$', v, 0);
-        if (metric === 'poop') return `${Math.round(v).toLocaleString('en-US')} g`;
-        if (metric === 'pee') return `${Math.round(v).toLocaleString('en-US')} cc`;
-        return `${Math.round(v).toLocaleString('en-US')} 個地點`;
-      };
-
-      rankEl.textContent = `第 ${rank} 名 / ${total}（你目前：${fmtValue(myVal)}）`;
-
-      if (rank === 1) {
-        gapEl.textContent = rank1Copy[metric] || '你已經是第一名：馬桶對你鞠躬。';
+    async function locateOnMap(fly) {
+      if (!initMap()) return;
+      const btn = $('#btnLocate');
+      btn.classList.add('is-busy');
+      const res = await HS.locate(p => showMe(p, fly));
+      btn.classList.remove('is-busy');
+      if (res.ok || !fly) return;
+      const last = HS.lastLocation();
+      if (last) {
+        showMe(last, true);
+        HS.toast(`定位失敗，先帶你到上次的位置（${HS.relTime(last.ts)}）`);
       } else {
-        const ahead = items[rank - 2];
-        const delta = Math.max(0, (ahead?.value ?? 0) - myVal);
-        const aheadName = ahead?.role?.id ?? '上一名';
+        HS.toast(`定位失敗：${HS.geoErrorText(res.error)}`);
+      }
+    }
 
-        if (metric === 'territory') {
-          const need = Math.ceil(delta);
-          gapEl.textContent = `距離晉升（超越「${aheadName}」）還差：${need} 個新地點。\n小提示：換間廁所拉一波，勢力才會長。`;
-        } else if (metric === 'poop') {
-          const needG = Math.ceil(delta);
-          gapEl.textContent = `距離晉升（超越「${aheadName}」）還差：${needG.toLocaleString('en-US')} g。\n（是的…你需要更多屎。）`;
-        } else if (metric === 'money') {
-          const needMoney = Math.ceil(delta);
-          // convert money gap to grams using your average money per gram (fallback to 0)
-          const myRecs = getPeriodRecsForRole(curRole.id, now);
-          const myMoney = sum(myRecs.filter(r => r.type === 'poop').map(r => Number(r.poopValueMoney) || 0));
-          const myPoopG = sum(myRecs.filter(r => r.type === 'poop').map(r => Number(r.poopWeightG) || 0));
-          const moneyPerGram = (myMoney > 0 && myPoopG > 0) ? (myMoney / myPoopG) : 0;
-          const grams = moneyPerGram > 0 ? Math.ceil(needMoney / moneyPerGram) : null;
-          gapEl.textContent = grams
-            ? `距離晉升（超越「${aheadName}」）還差：${formatMoney(curRole.currency || 'NT$', needMoney, 0)}。\n換算成屎量約：${grams.toLocaleString('en-US')} g（以你本期屎/薪資表現估算）。`
-            : `距離晉升（超越「${aheadName}」）還差：${formatMoney(curRole.currency || 'NT$', needMoney, 0)}。\n換算屎量需要更多樣本：多拉幾次我再幫你算得更準。`;
+    function onMapShown() {
+      if (!map) return;
+      setTimeout(() => map.invalidateSize(), 60);
+      if (Date.now() - lastAutoLocate > 45000) {
+        lastAutoLocate = Date.now();
+        // Only move the camera when there is no territory to look at yet.
+        locateOnMap(placesWithCoords(HS.recordsOf(role.id)).length === 0);
+      }
+    }
+
+    function flyToPlace(name, lat, lng) {
+      showTab('map');
+      if (!map) return;
+      map.flyTo([lat, lng], 17, { duration: 0.8 });
+      const hit = markerIndex.find(m => m.roleId === role.id && m.name === name && m.lat === lat && m.lng === lng);
+      if (hit) map.once('moveend', () => hit.marker.openPopup());
+    }
+
+    function openLayers() {
+      const all = HS.getRecords();
+      $('#layersList').innerHTML = HS.getCharacters().map(r => {
+        const n = placesWithCoords(HS.recordsOf(r.id, all)).length;
+        const isMe = r.id === role.id;
+        return `<label class="layer-row">
+          <span class="avatar" style="--role:${r.color}">${r.avatar || '🧑'}</span>
+          <span class="layer-main"><b>${esc(r.id)}${isMe ? '（你）' : ''}</b><span class="muted small">${n} 個點</span></span>
+          <input type="checkbox" class="switch" value="${esc(r.id)}" ${selectedRoles.has(r.id) ? 'checked' : ''} ${isMe ? 'disabled' : ''} aria-label="顯示 ${esc(r.id)}" />
+        </label>`;
+      }).join('');
+      HS.openSheet($('#layersSheet'));
+    }
+
+    function setLayers(ids) {
+      selectedRoles = new Set(ids);
+      mapNeedsFit = true;
+      renderMapView();
+    }
+
+    // ================================================================ log
+    // session: { roleId, type, startedAt, startTs, elapsedMs, running, stage: 'timing'|'details', durationSec, draft }
+    let session = HS.loadJson(HS.KEYS.session, null);
+    let loc = { state: 'idle', lat: null, lng: null, acc: null, area: null, ts: 0, error: null };
+    let locPromise = null;
+    let tickRaf = 0, lastPaint = 0, wakeLock = null;
+    let level = 225, tag = '';
+    const viewLog = $('#view-log');
+    const RING_C = 2 * Math.PI * 104;
+
+    function saveSession() {
+      if (session) HS.saveJson(HS.KEYS.session, session); else HS.removeKey(HS.KEYS.session);
+      $('.tab-btn[data-tab="log"]').classList.toggle('is-live', !!session && session.stage === 'timing');
+    }
+
+    function elapsedMs() {
+      if (!session) return 0;
+      return session.elapsedMs + (session.running ? Date.now() - session.startTs : 0);
+    }
+
+    function onLogShown() {
+      ensureLocation();
+    }
+
+    // ---------- location
+    function ensureLocation(force = false) {
+      if (locPromise) return locPromise;
+      if (!force && loc.state === 'ok' && Date.now() - loc.ts < 2 * 60 * 1000) return Promise.resolve();
+      loc = { ...loc, state: 'locating' };
+      renderLocPill();
+      locPromise = HS.locate(p => {
+        loc = { state: 'ok', lat: p.lat, lng: p.lng, acc: p.acc, area: loc.area, ts: Date.now(), error: null };
+        renderLocPill();
+        HS.reverseGeocode(p.lat, p.lng).then(name => {
+          if (name && loc.lat === p.lat) { loc.area = name; renderLocPill(); }
+        });
+      }).then(res => {
+        if (res.ok) return;
+        const last = HS.lastLocation();
+        if (last && Date.now() - last.ts < 30 * 60 * 1000) {
+          loc = { state: 'fallback', lat: last.lat, lng: last.lng, acc: null, area: null, ts: last.ts, error: res.error };
         } else {
-          const needCc = Math.ceil(delta);
-          const myRecs = getPeriodRecsForRole(curRole.id, now);
-          const peeRecs = myRecs.filter(r => r.type === 'pee');
-          const avg = peeRecs.length ? (sum(peeRecs.map(r => Number(r.peeVolumeCc) || 0)) / peeRecs.length) : 0;
-          const needTimes = avg > 0 ? Math.ceil(needCc / avg) : null;
-          gapEl.textContent = needTimes
-            ? `距離晉升（超越「${aheadName}」）還差：${needCc.toLocaleString('en-US')} cc。\n約等於再尿 ${needTimes} 次（以你本期平均估算）。`
-            : `距離晉升（超越「${aheadName}」）還差：${needCc.toLocaleString('en-US')} cc。\n（這是尿量榜，不是屎量榜，但我懂你想努力的心。）`;
+          loc = { state: 'fail', lat: null, lng: null, acc: null, area: null, ts: 0, error: res.error };
+        }
+        renderLocPill();
+      }).finally(() => {
+        locPromise = null;
+        if (session?.stage === 'details') renderSuggestions();
+      });
+      return locPromise;
+    }
+
+    function useLastLocation() {
+      const last = HS.lastLocation();
+      if (!last) return;
+      loc = { state: 'fallback', lat: last.lat, lng: last.lng, acc: null, area: null, ts: last.ts, error: null };
+      renderLocPill();
+      if (session?.stage === 'details') renderSuggestions();
+    }
+
+    function renderLocPill() {
+      const pill = $('#locPill');
+      pill.dataset.state = loc.state;
+      const retry = $('#btnLocRetry'), alt = $('#btnLocAlt');
+      retry.hidden = loc.state === 'locating' || loc.state === 'ok';
+      retry.textContent = loc.state === 'idle' ? '定位' : '重試';
+      alt.hidden = !(loc.state === 'fail' && HS.lastLocation());
+      let text = '尚未定位';
+      if (loc.state === 'locating') text = '定位中…';
+      if (loc.state === 'ok') text = loc.area ? `已定位：${loc.area}` : `已定位（誤差約 ${Math.round(loc.acc || 0)} 公尺）`;
+      if (loc.state === 'fallback') text = `沿用上次位置（${HS.relTime(loc.ts)}）`;
+      if (loc.state === 'fail') text = `定位失敗：${HS.geoErrorText(loc.error)}`;
+      $('#locText').textContent = text;
+      $('#locText').title = text;
+    }
+
+    function hasLoc() { return (loc.state === 'ok' || loc.state === 'fallback') && loc.lat !== null; }
+
+    // ---------- stages
+    function renderLog() {
+      const stage = session ? session.stage : 'idle';
+      $$('[data-stage]', viewLog).forEach(el => { el.hidden = el.dataset.stage !== stage; });
+      viewLog.dataset.type = session?.type || '';
+      if (stage === 'idle') renderIdle();
+      if (stage === 'timing') renderTiming();
+      if (stage === 'details') renderDetails();
+      renderLocPill();
+    }
+
+    function renderIdle() {
+      $('#poopRate').textContent = `每秒 ${HS.money(role.currency, CALC.salaryPerSecond(role.monthlySalary), 3)}`;
+      const today = HS.recordsOf(role.id).filter(r => r.timestamp >= HS.startOfDay(Date.now()));
+      const pee = today.filter(r => r.type === 'pee').length;
+      const poop = today.length - pee;
+      $('#todayLine').textContent = today.length ? `今天已經尿了 ${pee} 次、大了 ${poop} 次。` : '今天還沒開張。';
+    }
+
+    function startSession(type) {
+      const now = Date.now();
+      session = { roleId: role.id, type, startedAt: now, startTs: now, elapsedMs: 0, running: true, stage: 'timing', durationSec: 0, draft: null };
+      saveSession();
+      HS.haptic(25);
+      ensureLocation();
+      requestWakeLock();
+      renderLog();
+    }
+
+    function renderTiming() {
+      const isPee = session.type === 'pee';
+      $('#timingLabel').innerHTML = `${isPee ? '尿尿中' : '大便中'}<small>${session.running ? '慢慢來，計時器會一直跑' : '已暫停'}</small>`;
+      $('#btnPause').innerHTML = session.running ? `${HS.icon('pause')}暫停` : `${HS.icon('play')}繼續`;
+      $('#btnEnd').innerHTML = `${HS.icon('stop')}結束`;
+      $('.timing').classList.toggle('is-paused', !session.running);
+      paint();
+      cancelAnimationFrame(tickRaf);
+      if (session.running) {
+        const loop = (t) => {
+          if (!session || session.stage !== 'timing' || !session.running) return;
+          if (t - lastPaint > 200) { lastPaint = t; paint(); }
+          tickRaf = requestAnimationFrame(loop);
+        };
+        tickRaf = requestAnimationFrame(loop);
+      }
+    }
+
+    function paint() {
+      if (!session) return;
+      const sec = elapsedMs() / 1000;
+      const isPee = session.type === 'pee';
+      $('#clock').textContent = HS.clock(sec * 1000);
+      $('#liveValue').textContent = isPee
+        ? `約 ${HS.int(CALC.peeCc(sec))} cc`
+        : `已入帳 ${HS.money(role.currency, CALC.poopMoney(sec, role.monthlySalary), 2)}`;
+      // Ring sweeps once a minute like a stopwatch; the water rises with total time.
+      const ring = $('#ring');
+      ring.style.strokeDasharray = RING_C;
+      ring.style.strokeDashoffset = RING_C * (1 - (sec % 60) / 60);
+      const ref = isPee ? 45 : 300;
+      const lvl = Math.min(0.88, 0.06 + (sec / ref) * 0.82);
+      $('#liquid').setAttribute('transform', `translate(0 ${202 - lvl * 184})`);
+    }
+
+    function togglePause() {
+      if (!session) return;
+      if (session.running) {
+        session.elapsedMs += Date.now() - session.startTs;
+        session.running = false;
+        session.startTs = null;
+        releaseWakeLock();
+      } else {
+        session.running = true;
+        session.startTs = Date.now();
+        requestWakeLock();
+      }
+      saveSession();
+      HS.haptic();
+      renderTiming();
+    }
+
+    function endSession() {
+      if (!session) return;
+      const ms = elapsedMs();
+      const sec = Math.round(ms / 1000);
+      if (sec < 1) { HS.toast('也太快了吧？至少計時 1 秒'); return; }
+      session.elapsedMs = ms;
+      session.running = false;
+      session.startTs = null;
+      session.durationSec = sec;
+      session.stage = 'details';
+      session.draft = null;
+      saveSession();
+      releaseWakeLock();
+      HS.haptic(30);
+      renderLog();
+      window.scrollTo(0, 0);
+    }
+
+    async function discardSession(isDetails) {
+      const ok = await HS.confirm({
+        title: isDetails ? '捨棄這次紀錄？' : '取消這次計時？',
+        body: '這次的時間和填寫內容都不會被保存。',
+        okText: isDetails ? '捨棄' : '取消計時',
+        cancelText: '繼續',
+        danger: true,
+        mood: 'sad'
+      });
+      if (!ok) return;
+      session = null;
+      saveSession();
+      releaseWakeLock();
+      renderLog();
+    }
+
+    async function requestWakeLock() {
+      try { wakeLock = await navigator.wakeLock?.request('screen'); } catch { /* not allowed */ }
+    }
+    function releaseWakeLock() {
+      try { wakeLock?.release(); } catch { /* ignore */ }
+      wakeLock = null;
+    }
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && session?.stage === 'timing' && session.running) {
+        requestWakeLock();
+        paint();
+      }
+    });
+
+    // ---------- details form
+    const RATING_WORDS = [[3, '🤢', '人間地獄'], [5, '😣', '能用而已'], [7, '😐', '普普通通'], [8.5, '🙂', '蹲得舒服'], [11, '🤩', '神級廁所']];
+
+    function syncRating(v, from) {
+      v = Math.round(HS.clamp(Number(v) || 1, 1, 10) * 10) / 10;
+      if (from !== 'num') $('#ratingNum').value = v.toFixed(1);
+      $('#ratingRange').value = v;
+      $('#ratingRange').style.setProperty('--p', `${((v - 1) / 9) * 100}%`);
+      const [, face, word] = RATING_WORDS.find(([max]) => v < max);
+      $('#ratingFace').textContent = face;
+      $('#ratingWord').textContent = word;
+    }
+
+    function renderLevels() {
+      $('#levels').innerHTML = CALC.POOP_LEVELS.map(l => `
+        <button type="button" class="level" role="radio" aria-checked="${l.grams === level}" data-g="${l.grams}" style="--s:${l.scale}">
+          ${HS.mascot()}<b>${l.label}</b><span class="num">${l.grams} g</span>
+        </button>`).join('');
+    }
+
+    function renderTags() {
+      $('#tagChips').innerHTML = TAGS.map(t =>
+        `<button type="button" class="chip" data-tag="${t}" aria-pressed="${t === tag}">${t}</button>`).join('');
+    }
+
+    function updatePeeSummary() {
+      $('#sumValue').textContent = `${HS.int($('#peeCc').value)} cc`;
+    }
+
+    function renderDetails() {
+      const s = session;
+      const isPee = s.type === 'pee';
+      const d = s.draft || {};
+      $('#sumArt').innerHTML = isPee ? dropArt() : HS.mascot({ mood: 'proud' });
+      $('#sumTitle').textContent = `${isPee ? '尿尿' : '大便'} ${HS.duration(s.durationSec)}`;
+      $('#sumLabel').textContent = isPee ? '估計尿量' : '本次拉屎薪資';
+      $('#fieldPee').hidden = !isPee;
+      $('#fieldPoop').hidden = isPee;
+
+      if (isPee) {
+        $('#peeCc').value = d.peeCc ?? CALC.peeCc(s.durationSec);
+        updatePeeSummary();
+      } else {
+        $('#sumValue').textContent = HS.money(role.currency, CALC.poopMoney(s.durationSec, role.monthlySalary), 1);
+        level = d.grams ?? 225;
+        renderLevels();
+      }
+
+      $('#placeName').value = d.place ?? '';
+      $('#placeName').removeAttribute('aria-invalid');
+      $('#placeErr').hidden = true;
+      $('#ratingErr').hidden = true;
+      syncRating(d.rating ?? 7);
+      tag = d.tag ?? '';
+      renderTags();
+      $('#recNote').value = d.note ?? '';
+
+      const names = [...new Set(HS.recordsOf(role.id).sort((a, b) => b.timestamp - a.timestamp).map(r => (r.placeName || '').trim()).filter(Boolean))];
+      $('#placeList').innerHTML = names.map(n => `<option value="${esc(n)}"></option>`).join('');
+      renderSuggestions();
+    }
+
+    function renderSuggestions() {
+      const box = $('#placeSuggest');
+      if (!session || session.stage !== 'details') return;
+      const recs = HS.recordsOf(role.id);
+      let items = [], label = '';
+      if (hasLoc()) {
+        items = placesWithCoords(recs)
+          .map(p => ({ p, d: HS.haversine(loc.lat, loc.lng, p.lat, p.lng) }))
+          .filter(x => x.d <= 80)
+          .sort((a, b) => a.d - b.d)
+          .slice(0, 3)
+          .map(x => ({ name: x.p.name, sub: `${Math.round(x.d)} m`, tag: x.p.tag }));
+        if (items.length) label = '你是不是在這裡？';
+      }
+      if (!items.length) {
+        const seen = new Set();
+        for (const r of recs.slice().sort((a, b) => b.timestamp - a.timestamp)) {
+          const n = (r.placeName || '').trim();
+          if (n && !seen.has(n)) { seen.add(n); items.push({ name: n, sub: '', tag: r.tag || '' }); }
+          if (items.length >= 3) break;
+        }
+        if (items.length) label = '最近去過';
+      }
+      box.innerHTML = items.length
+        ? `<span class="suggest-label">${label}</span>` + items.map(i =>
+            `<button type="button" class="chip" data-place="${esc(i.name)}" data-ptag="${esc(i.tag)}">${esc(i.name)}${i.sub ? ` <small class="num">${i.sub}</small>` : ''}</button>`).join('')
+        : '';
+      $('#placeName').placeholder = loc.area ? `例如：${loc.area}某間咖啡廳` : '例如：公司 7F 靠窗那間';
+    }
+
+    function saveDraft() {
+      if (!session || session.stage !== 'details') return;
+      session.draft = {
+        peeCc: $('#peeCc').value,
+        grams: level,
+        place: $('#placeName').value,
+        rating: Number($('#ratingNum').value),
+        tag,
+        note: $('#recNote').value
+      };
+      saveSession();
+    }
+
+    function fieldError(id, inputId, msg) {
+      const box = $(`#${id}`);
+      box.textContent = msg;
+      box.hidden = false;
+      const input = $(`#${inputId}`);
+      input.setAttribute('aria-invalid', 'true');
+      input.focus();
+      input.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }
+
+    function saveDetails(e) {
+      e.preventDefault();
+      const s = session;
+      if (!s) return;
+      $('#placeErr').hidden = true;
+      $('#ratingErr').hidden = true;
+
+      const place = $('#placeName').value.trim();
+      if (!place) return fieldError('placeErr', 'placeName', '幫這間廁所取個名字，下次才認得出來。');
+      const rating = Number($('#ratingNum').value);
+      if (!Number.isFinite(rating) || rating < 1 || rating > 10) return fieldError('ratingErr', 'ratingNum', '評分要介於 1.0 到 10.0。');
+
+      const rec = {
+        characterId: role.id,
+        type: s.type,
+        timestamp: s.startedAt || Date.now(),
+        durationSec: s.durationSec,
+        placeName: place,
+        rating: Math.round(rating * 10) / 10,
+        note: $('#recNote').value.trim(),
+        tag,
+        lat: hasLoc() ? loc.lat : null,
+        lng: hasLoc() ? loc.lng : null
+      };
+      if (s.type === 'pee') {
+        const cc = Number($('#peeCc').value);
+        if (!Number.isFinite(cc) || cc < 0) return HS.toast('尿量要是 0 以上的數字');
+        rec.peeVolumeCc = Math.round(cc);
+      } else {
+        rec.poopWeightG = level;
+        rec.poopValueMoney = Math.round(CALC.poopMoney(s.durationSec, role.monthlySalary) * 10) / 10;
+      }
+
+      const isNewPlace = !HS.recordsOf(role.id).some(r => (r.placeName || '').trim() === place);
+      const before = monthTotals();
+      if (!HS.addRecord(rec)) return;
+
+      session = null;
+      saveSession();
+      mapNeedsFit = true;
+      invalidate('log');
+      renderLog();
+      celebrate(rec, isNewPlace, before);
+    }
+
+    function celebrate(rec, isNew, before) {
+      const after = monthTotals();
+      const cur = role.currency;
+      let body;
+      if (rec.type === 'poop') {
+        const crossed = [100, 500, 1000, 2000, 5000, 10000].filter(m => before.money < m && after.money >= m).pop();
+        body = `帶薪蹲了 ${HS.duration(rec.durationSec)}，賺進 ${HS.money(cur, rec.poopValueMoney, 1)}。\n`
+          + (crossed ? `本月拉屎薪資已突破 ${HS.money(cur, crossed)}！` : `本月累計 ${HS.money(cur, after.money)}。`);
+      } else {
+        body = `這次約 ${HS.int(rec.peeVolumeCc)} cc。\n本月累積 ${HS.int(after.peeCc)} cc，差不多 ${(after.peeCc / 700).toFixed(1)} 杯手搖飲。`;
+      }
+      if (rec.lat === null) body += '\n這筆沒有定位，所以不會出現在地圖上。';
+      HS.alert({ title: isNew ? '你今天又征服了新的馬桶！' : `「${rec.placeName}」，老地方見`, body, mood: 'proud', okText: '好耶' });
+    }
+
+    function dropArt() {
+      return `<svg viewBox="0 0 100 100" aria-hidden="true">
+        <path d="M50 8C38 28 22 44 22 62a28 28 0 0 0 56 0C78 44 62 28 50 8z" fill="#1F9A90"/>
+        <path d="M36 62a14 14 0 0 0 10 13" stroke="#fff" stroke-opacity=".6" stroke-width="5" fill="none" stroke-linecap="round"/>
+        <circle cx="41" cy="58" r="3.6" fill="#0F3B37"/><circle cx="59" cy="58" r="3.6" fill="#0F3B37"/>
+        <path d="M45 66q5 4 10 0" stroke="#0F3B37" stroke-width="3" fill="none" stroke-linecap="round"/>
+      </svg>`;
+    }
+
+    // ================================================================ overview
+    let period = 'month';
+    const WEEKDAYS = ['一', '二', '三', '四', '五', '六', '日'];
+    const SLOTS = [
+      { label: '清晨', range: '5–8 點', test: h => h >= 5 && h < 8 },
+      { label: '上午', range: '8–11 點', test: h => h >= 8 && h < 11 },
+      { label: '中午', range: '11–14 點', test: h => h >= 11 && h < 14 },
+      { label: '下午', range: '14–18 點', test: h => h >= 14 && h < 18 },
+      { label: '晚上', range: '18–23 點', test: h => h >= 18 && h < 23 },
+      { label: '深夜', range: '23–5 點', test: h => h >= 23 || h < 5 }
+    ];
+
+    function moneyCompare(currency, amount) {
+      if (currency !== 'NT$') return null;
+      const items = [['杯珍奶', 65], ['個便當', 110], ['張電影票', 320], ['片 Switch 遊戲', 1490], ['副 AirPods', 5990]];
+      const fit = items.filter(([, p]) => amount >= p).pop();
+      if (!fit) return amount > 0 ? `再 ${HS.money(currency, 65 - amount)} 就能換一杯珍奶` : null;
+      const n = amount / fit[1];
+      return `約等於 ${n < 10 ? n.toFixed(1) : Math.floor(n)} ${fit[0]}`;
+    }
+
+    function periodDays(R, recs, now) {
+      if (period === 'all') {
+        const first = Math.min(...recs.map(r => r.timestamp));
+        return Math.max(1, Math.floor((HS.startOfDay(now) - HS.startOfDay(first)) / HS.DAY) + 1);
+      }
+      return Math.max(1, Math.floor((HS.startOfDay(now) - R.start) / HS.DAY) + 1);
+    }
+
+    function renderOverview() {
+      $$('#periodSeg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.p === period)));
+      const now = Date.now();
+      const R = HS.periodRange(period, now);
+      const mine = HS.recordsOf(role.id);
+      const cur = mine.filter(r => HS.inRange(r, R.start, R.end));
+      const prev = R.prevStart !== null ? mine.filter(r => HS.inRange(r, R.prevStart, R.prevEnd)) : [];
+
+      $('#ovEmpty').hidden = cur.length > 0;
+      $('#ovBody').hidden = cur.length === 0;
+      if (!cur.length) {
+        $('#ovEmptyArt').innerHTML = HS.mascot({ mood: 'sad' });
+        $('#ovEmptyText').textContent = mine.length ? `${R.label}還沒有紀錄。蹲一次，數據就會長出來。` : '還沒有任何紀錄。蹲完第一次，這裡就會長出數據。';
+        return;
+      }
+
+      const poops = cur.filter(r => r.type === 'poop');
+      const pees = cur.filter(r => r.type === 'pee');
+      const money = sum(poops.map(r => Number(r.poopValueMoney) || 0));
+      const poopG = sum(poops.map(r => Number(r.poopWeightG) || 0));
+      const peeCc = sum(pees.map(r => Number(r.peeVolumeCc) || 0));
+      const poopSec = sum(poops.map(r => Number(r.durationSec) || 0));
+
+      // hero
+      $('#heroLabel').textContent = period === 'all' ? '累積拉屎薪資' : `${R.label}拉屎薪資`;
+      $('#heroValue').textContent = HS.money(role.currency, money);
+      const cmp = moneyCompare(role.currency, money);
+      $('#heroSub').textContent = poopSec
+        ? `帶薪蹲了 ${HS.duration(poopSec)}${cmp ? `，${cmp}` : ''}。`
+        : '這段期間還沒有大便紀錄，薪水還沒入帳。';
+
+      // territory
+      const curPlaces = placesWithCoords(cur);
+      const area = HS.hullAreaM2(curPlaces);
+      const areaText = area >= 10000 ? `${(area / 1e6).toFixed(2)} km²` : area > 0 ? `${HS.int(area)} m²` : `${curPlaces.length} 個點`;
+      $('#tTerritory').textContent = areaText;
+      const ts = $('#tTerritoryS');
+      ts.className = 'tile-s';
+      if (period === 'all') {
+        ts.textContent = `共征服 ${HS.groupPlaces(cur, { byName: true }).length} 個地點`;
+      } else if (area <= 0) {
+        ts.textContent = '3 個地點以上才能圍出版圖';
+      } else {
+        const prevArea = HS.hullAreaM2(placesWithCoords(prev));
+        if (prevArea <= 0) {
+          ts.textContent = `${R.prevLabel}沒有版圖，全是新地盤`;
+        } else {
+          const pct = Math.round(((area - prevArea) / prevArea) * 100);
+          ts.textContent = `${pct >= 0 ? '▲' : '▼'} 比${R.prevLabel}${pct >= 0 ? '多' : '少'} ${Math.abs(pct)}%`;
+          ts.classList.add(pct >= 0 ? 'up' : 'down');
         }
       }
 
-      const top3 = items.slice(0, 3);
-      const lines = [];
-      const copy = top3Copy[metric] || top3Copy.territory;
-      if (top3[0]) lines.push(copy.one(top3[0].role.id));
-      if (top3[1]) lines.push(copy.two(top3[1].role.id));
-      if (top3[2]) lines.push(copy.three(top3[2].role.id));
-      if (!lines.length) lines.push('目前沒有角色可以排名。');
-      document.getElementById('kpiModalTop3').innerHTML = lines.map(x => escapeHtml(x)).join('<br>');
+      // count
+      const days = periodDays(R, cur, now);
+      $('#tCount').textContent = `${cur.length} 次`;
+      $('#tCountS').textContent = `平均每天 ${(cur.length / days).toFixed(1)} 次`;
+
+      // poop & pee
+      $('#tPoop').textContent = poopG >= 1000 ? `${(poopG / 1000).toFixed(1)} kg` : `${HS.int(poopG)} g`;
+      $('#tPoopS').textContent = !poopG ? '還沒有大便紀錄'
+        : poopG >= 4500 ? `約 ${(poopG / 4500).toFixed(1)} 隻貓的重量` : `約 ${Math.max(1, Math.round(poopG / 200))} 顆蘋果的重量`;
+      $('#tPee').textContent = `${HS.int(peeCc)} cc`;
+      $('#tPeeS').textContent = peeCc ? `約 ${(peeCc / 700).toFixed(1)} 杯手搖飲` : '還沒有尿尿紀錄';
+
+      renderDailyChart(cur, R, now);
+      renderHabits(cur);
     }
 
-    function closeKpiModal() {
-      const modal = document.getElementById('kpiModal');
-      modal.classList.remove('active');
-      modal.setAttribute('aria-hidden', 'true');
+    function dailyBuckets(cur, R, now) {
+      const out = [];
+      if (period === 'week' || period === 'month') {
+        const n = period === 'week' ? 7 : Math.round((R.end - R.start) / HS.DAY);
+        for (let i = 0; i < n; i++) {
+          const start = HS.addDays(R.start, i);
+          const d = new Date(start);
+          out.push({
+            start, end: HS.addDays(start, 1),
+            label: period === 'week' ? WEEKDAYS[i] : String(i + 1),
+            showLabel: period === 'week' || i === 0 || (i + 1) % 5 === 0,
+            tip: `${d.getMonth() + 1}/${d.getDate()}（${WEEKDAYS[(d.getDay() + 6) % 7]}）`,
+            today: start === HS.startOfDay(now)
+          });
+        }
+        $('#dailyTitle').textContent = '每天上幾次';
+      } else {
+        const ws = HS.startOfWeek(now);
+        for (let i = 11; i >= 0; i--) {
+          const start = HS.addDays(ws, -7 * i);
+          const d = new Date(start);
+          out.push({ start, end: HS.addDays(start, 7), label: `${d.getMonth() + 1}/${d.getDate()}`, showLabel: i % 3 === 0, tip: `${d.getMonth() + 1}/${d.getDate()} 那一週`, today: i === 0 });
+        }
+        $('#dailyTitle').textContent = '最近 12 週，每週上幾次';
+      }
+      for (const b of out) {
+        const recs = cur.filter(r => r.timestamp >= b.start && r.timestamp < b.end);
+        b.values = [recs.filter(r => r.type === 'pee').length, recs.filter(r => r.type === 'poop').length];
+      }
+      return out;
+    }
+
+    function renderDailyChart(cur, R, now) {
+      const mine = period === 'all' ? HS.recordsOf(role.id) : cur;
+      const buckets = dailyBuckets(mine, R, now);
+      columnChart($('#chartDaily'), buckets, {
+        colors: () => ['var(--pee)', 'var(--poop)'],
+        names: ['尿尿', '大便'],
+        title: '每段時間的尿尿與大便次數'
+      });
+    }
+
+    function renderHabits(cur) {
+      const poops = cur.filter(r => r.type === 'poop');
+      const byDay = WEEKDAYS.map(() => 0);
+      const bySlot = SLOTS.map(() => 0);
+      for (const r of poops) {
+        const d = new Date(r.timestamp);
+        byDay[(d.getDay() + 6) % 7]++;
+        bySlot[SLOTS.findIndex(s => s.test(d.getHours()))]++;
+      }
+      const maxDay = Math.max(...byDay), maxSlot = Math.max(...bySlot);
+      const dayIdx = byDay.indexOf(maxDay), slotIdx = bySlot.indexOf(maxSlot);
+      $('#habitInsight').textContent = poops.length
+        ? `你最常在星期${WEEKDAYS[dayIdx]}的${SLOTS[slotIdx].label}報到。`
+        : '這段期間還沒有大便紀錄，習慣分析等你第一坨。';
+
+      columnChart($('#chartWeekday'), WEEKDAYS.map((w, i) => ({
+        label: w, showLabel: true, values: [byDay[i]], tip: `星期${w}`
+      })), {
+        colors: (i) => [byDay[i] === maxDay && maxDay > 0 ? 'var(--poop)' : '#E6D3C2'],
+        names: ['大便'],
+        labelMax: true,
+        height: 130,
+        title: '星期一到星期日的大便次數'
+      });
+
+      $('#chartSlots').innerHTML = SLOTS.map((s, i) => `
+        <div class="hbar ${bySlot[i] === maxSlot && maxSlot > 0 ? 'is-max' : ''}">
+          <span class="hbar-l">${s.label}<small>${s.range}</small></span>
+          <span class="hbar-track"><span class="hbar-fill" style="display:block;width:${maxSlot ? (bySlot[i] / maxSlot) * 100 : 0}%"></span></span>
+          <span class="hbar-n num">${bySlot[i]}</span>
+        </div>`).join('');
+    }
+
+    function topRoundedRect(x, y, w, h, r) {
+      r = Math.min(r, h, w / 2);
+      return `M${x},${y + h}V${y + r}Q${x},${y} ${x + r},${y}H${x + w - r}Q${x + w},${y} ${x + w},${y + r}V${y + h}Z`;
+    }
+
+    // Stacked (or single) columns from one baseline, 2px surface gap between segments,
+    // 4px rounded cap on the top segment, tap/hover tooltip per column.
+    function columnChart(el, buckets, { colors, names, labelMax = false, height = 170, title = '' }) {
+      const W = Math.max(240, el.clientWidth || 300);
+      const H = height, padL = 26, padT = labelMax ? 20 : 10, padB = 22;
+      const plotH = H - padT - padB;
+      const totals = buckets.map(b => sum(b.values));
+      const max = Math.max(1, ...totals);
+      const step = max <= 4 ? 1 : Math.ceil(max / 3);
+      const top = Math.ceil(max / step) * step;
+      const ticks = [];
+      for (let v = 0; v <= top; v += step) ticks.push(v);
+      const band = (W - padL) / buckets.length;
+      const bw = Math.max(3, Math.min(24, band * 0.62));
+      const y = (v) => padT + plotH * (1 - v / top);
+      const base = y(0);
+
+      let svg = `<svg viewBox="0 0 ${W} ${H}" height="${H}" role="img" aria-label="${esc(title)}">`;
+      for (const t of ticks) {
+        svg += `<line class="grid" x1="${padL}" x2="${W}" y1="${y(t)}" y2="${y(t)}"/>`;
+        svg += `<text class="axis-t num" x="${padL - 8}" y="${y(t) + 4}" text-anchor="end">${t}</text>`;
+      }
+      buckets.forEach((b, i) => {
+        const x = padL + i * band + (band - bw) / 2;
+        const cols = colors(i);
+        let yCursor = base;
+        const nonZero = b.values.map((v, s) => ({ v, s })).filter(o => o.v > 0);
+        nonZero.forEach((o, k) => {
+          const h = (plotH * o.v) / top;
+          const gap = k > 0 ? 2 : 0;
+          const yTop = yCursor - gap - h;
+          const isTop = k === nonZero.length - 1;
+          svg += isTop
+            ? `<path d="${topRoundedRect(x, yTop, bw, h, 4)}" style="fill:${cols[o.s]}"/>`
+            : `<rect x="${x}" y="${yTop}" width="${bw}" height="${h}" style="fill:${cols[o.s]}"/>`;
+          yCursor = yTop;
+        });
+        if (labelMax && totals[i] === max && totals[i] > 0) {
+          svg += `<text class="val-t num" x="${x + bw / 2}" y="${yCursor - 6}" text-anchor="middle">${totals[i]}</text>`;
+        }
+        if (b.showLabel) {
+          svg += `<text class="axis-t num ${b.today ? 'is-today' : ''}" x="${x + bw / 2}" y="${H - 5}" text-anchor="middle">${esc(b.label)}</text>`;
+        }
+        svg += `<rect class="hit" data-i="${i}" x="${padL + i * band}" y="${padT}" width="${band}" height="${plotH}"/>`;
+      });
+      svg += `</svg>`;
+
+      // Screen-reader table mirrors the chart.
+      const table = `<table class="sr-only"><caption>${esc(title)}</caption><tr><th>時間</th>${names.map(n => `<th>${n}</th>`).join('')}</tr>${
+        buckets.map(b => `<tr><td>${esc(b.tip)}</td>${b.values.map(v => `<td>${v}</td>`).join('')}</tr>`).join('')}</table>`;
+
+      el.innerHTML = svg + table + '<div class="chart-tip" hidden></div>';
+      const tip = $('.chart-tip', el);
+      const svgEl = $('svg', el);
+      let hovered = null;
+      const show = (rect) => {
+        hovered?.classList.remove('is-hover');
+        hovered = rect;
+        rect.classList.add('is-hover');
+        const i = Number(rect.dataset.i);
+        const b = buckets[i];
+        const cols = colors(i);
+        tip.innerHTML = `<b>${esc(b.tip)}</b>` + b.values.map((v, s) => `<span><i style="--c:${cols[s]}"></i>${names[s]} ${v} 次</span>`).join('<br>');
+        tip.hidden = false;
+        const scale = svgEl.getBoundingClientRect().width / W;
+        const cx = (Number(rect.getAttribute('x')) + band / 2) * scale;
+        const half = tip.offsetWidth / 2;
+        tip.style.left = `${HS.clamp(cx, half, el.clientWidth - half)}px`;
+        tip.style.top = `${padT * scale - 4}px`;
+      };
+      const hide = () => { hovered?.classList.remove('is-hover'); hovered = null; tip.hidden = true; };
+      svgEl.addEventListener('pointerover', (e) => { if (e.target.classList.contains('hit')) show(e.target); });
+      svgEl.addEventListener('pointerdown', (e) => { if (e.target.classList.contains('hit')) show(e.target); });
+      svgEl.addEventListener('pointerleave', hide);
+    }
+
+    // ---------- cross-role ranking sheet
+    const METRICS = {
+      money: { title: '拉屎薪資排行', value: recs => sum(recs.filter(r => r.type === 'poop').map(r => Number(r.poopValueMoney) || 0)), fmt: (v, r) => HS.money(r.currency, v) },
+      territory: { title: '勢力範圍排行（地點數）', value: recs => HS.groupPlaces(recs, { byName: true }).length, fmt: v => `${v} 個地點` },
+      count: { title: '上廁所次數排行', value: recs => recs.length, fmt: v => `${v} 次` },
+      poop: { title: '屎量排行', value: recs => sum(recs.filter(r => r.type === 'poop').map(r => Number(r.poopWeightG) || 0)), fmt: v => `${HS.int(v)} g` },
+      pee: { title: '尿量排行', value: recs => sum(recs.filter(r => r.type === 'pee').map(r => Number(r.peeVolumeCc) || 0)), fmt: v => `${HS.int(v)} cc` }
+    };
+
+    const TOP3 = {
+      territory: [n => `🥇 ${n}：地盤王本人。馬桶地政事務所已蓋章。`, n => `🥈 ${n}：再多征服一間廁所就要封侯。`, n => `🥉 ${n}：地圖上那一塊，是你屎勢力的起點。`],
+      money: [n => `🥇 ${n}：把薪水帶進廁所的人，才懂人生。`, n => `🥈 ${n}：老闆看不到，但馬桶看得到你的 KPI。`, n => `🥉 ${n}：每一次坐下，都是財富自由的練習。`],
+      poop: [n => `🥇 ${n}：重磅選手登場。馬桶承重已警報。`, n => `🥈 ${n}：穩定輸出，才是真正的核心競爭力。`, n => `🥉 ${n}：量不在大，氣勢要到位。`],
+      pee: [n => `🥇 ${n}：水庫開閘王。補水做得跟課表一樣滿。`, n => `🥈 ${n}：尿量穩健成長，腎臟給你按讚。`, n => `🥉 ${n}：小溪也能成江河，繼續沖。`],
+      count: [n => `🥇 ${n}：全勤獎得主，馬桶都認得你了。`, n => `🥈 ${n}：穩定報到，腸道作息比上班還準時。`, n => `🥉 ${n}：細水長流，每一次都算數。`]
+    };
+
+    const RANK1 = {
+      territory: '你是地盤第一名：每間廁所都在你的版圖裡。',
+      money: '你是薪資第一名：把摸魚時間榨成現金的王者。',
+      poop: '你是屎量第一名：輸出最強，馬桶都尊敬你。',
+      pee: '你是尿量第一名：補水之神，水循環為你工作。',
+      count: '你是出勤第一名：馬桶打卡王就是你。'
+    };
+
+    function gapText(metric, ahead, delta, myRecs) {
+      const who = `距離超越「${ahead.role.id}」還差`;
+      if (metric === 'territory') return `${who} ${Math.ceil(delta)} 個新地點。\n換間廁所拉一波，勢力才會長。`;
+      if (metric === 'count') return `${who} ${Math.ceil(delta)} 次。\n多喝水、多吃纖維，機會就是你的。`;
+      if (metric === 'poop') return `${who} ${HS.int(Math.ceil(delta))} g。\n（是的……你需要更多屎。）`;
+      if (metric === 'money') {
+        const poops = myRecs.filter(r => r.type === 'poop');
+        const m = sum(poops.map(r => Number(r.poopValueMoney) || 0));
+        const g = sum(poops.map(r => Number(r.poopWeightG) || 0));
+        const grams = m > 0 && g > 0 ? Math.ceil(delta / (m / g)) : null;
+        return `${who} ${HS.money(role.currency, Math.ceil(delta))}。\n` + (grams ? `換算成屎量約 ${HS.int(grams)} g（以你這段期間的表現估算）。` : '多拉幾次，我才能幫你換算成屎量。');
+      }
+      const pees = myRecs.filter(r => r.type === 'pee');
+      const avg = pees.length ? sum(pees.map(r => Number(r.peeVolumeCc) || 0)) / pees.length : 0;
+      return `${who} ${HS.int(Math.ceil(delta))} cc。\n` + (avg > 0 ? `大約再尿 ${Math.ceil(delta / avg)} 次（以你的平均估算）。` : '先喝杯水，再來挑戰。');
+    }
+
+    function openKpi(metric) {
+      const M = METRICS[metric];
+      const R = HS.periodRange(period);
+      const all = HS.getRecords();
+      const recsOf = (id) => HS.recordsOf(id, all).filter(r => HS.inRange(r, R.start, R.end));
+      const items = HS.getCharacters()
+        .map(r => ({ role: r, value: M.value(recsOf(r.id)) }))
+        .sort((a, b) => b.value - a.value);
+      const idx = items.findIndex(x => x.role.id === role.id);
+      const max = Math.max(1, ...items.map(x => x.value));
+
+      $('#kpiTitle').textContent = M.title;
+      $('#kpiSub').textContent = `統計期間：${R.label}，共 ${items.length} 位角色`;
+      $('#kpiRank').textContent = `你是第 ${idx + 1} 名`;
+      $('#kpiGap').textContent = idx === 0 ? RANK1[metric] : gapText(metric, items[idx - 1], Math.max(0, items[idx - 1].value - items[idx].value), recsOf(role.id));
+      $('#kpiRows').innerHTML = items.map((x, i) => `
+        <li class="kpi-row ${x.role.id === role.id ? 'is-me' : ''}">
+          <span class="n num">${i + 1}</span>
+          <span class="avatar" style="--role:${x.role.color}">${x.role.avatar || '🧑'}</span>
+          <div>
+            <div class="nm"><b>${esc(x.role.id)}</b><span class="num">${M.fmt(x.value, x.role)}</span></div>
+            <div class="bar"><i style="--c:${x.role.color};width:${(x.value / max) * 100}%"></i></div>
+          </div>
+        </li>`).join('');
+      $('#kpiCheer').innerHTML = items.slice(0, 3).map((x, i) => esc(TOP3[metric][i](x.role.id))).join('<br>');
+      HS.openSheet($('#kpiSheet'));
+    }
+
+    // ================================================================ rank
+    let rankSort = 'rating', rankType = 'all', rankTag = '';
+    const openPlaces = new Set();
+
+    function scoreClass(v) {
+      if (!Number.isFinite(v)) return '';
+      if (v >= 8.5) return 's-top';
+      if (v >= 7) return 's-good';
+      if (v < 5) return 's-bad';
+      return '';
+    }
+
+    function recValue(r) {
+      if (r.type === 'pee') return `${HS.int(r.peeVolumeCc)} cc`;
+      return `${HS.int(r.poopWeightG)} g，${HS.money(role.currency, Number(r.poopValueMoney) || 0, 1)}`;
+    }
+
+    function recItem(r, withPlace) {
+      const rating = Number(r.rating);
+      return `<li class="rec">
+        <span class="rec-ico" aria-hidden="true">${r.type === 'pee' ? '💧' : '💩'}</span>
+        <span class="rec-main">
+          <b>${withPlace ? esc(r.placeName || '未命名地點') : HS.dateTime(r.timestamp)}</b>
+          <span class="num">${withPlace ? `${HS.dateTime(r.timestamp)}，` : ''}${HS.duration(Number(r.durationSec) || 0)}，${recValue(r)}${Number.isFinite(rating) ? `，${rating.toFixed(1)} 分` : ''}</span>
+        </span>
+        <button type="button" class="icon-btn" data-del="${esc(r.recordId)}" aria-label="刪除這筆紀錄">${HS.icon('trash')}</button>
+      </li>`;
+    }
+
+    function rankedPlaces() {
+      let recs = HS.recordsOf(role.id);
+      if (rankType !== 'all') recs = recs.filter(r => r.type === rankType);
+      if (rankTag) recs = recs.filter(r => r.tag === rankTag);
+      const places = HS.groupPlaces(recs, { byName: true });
+      places.sort((a, b) => {
+        if (rankSort === 'visits') return b.visits - a.visits || b.lastTs - a.lastTs;
+        if (rankSort === 'recent') return b.lastTs - a.lastTs;
+        const ar = Number.isFinite(a.avgRating) ? a.avgRating : -1;
+        const br = Number.isFinite(b.avgRating) ? b.avgRating : -1;
+        return br - ar || b.visits - a.visits;
+      });
+      return places;
+    }
+
+    function renderRank() {
+      $$('#rankSort button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.sort === rankSort)));
+      const mine = HS.recordsOf(role.id);
+      const tags = [...new Set(mine.map(r => r.tag).filter(Boolean))];
+      if (rankTag && !tags.includes(rankTag)) rankTag = '';
+      $('#rankFilter').innerHTML = [['all', '全部'], ['poop', '💩 大便'], ['pee', '💧 尿尿']]
+        .map(([v, l]) => `<button type="button" class="chip" data-type="${v}" aria-pressed="${rankType === v}">${l}</button>`).join('')
+        + tags.map(t => `<button type="button" class="chip" data-ftag="${esc(t)}" aria-pressed="${rankTag === t}">#${esc(t)}</button>`).join('');
+
+      const places = rankedPlaces();
+      $('#rankEmpty').hidden = places.length > 0;
+      $('#btnShare').hidden = !places.length;
+      if (!places.length) {
+        $('#rankEmptyArt').innerHTML = HS.mascot({ mood: 'wow' });
+        const filtered = mine.length > 0;
+        $('#rankEmptyTitle').textContent = filtered ? '沒有符合條件的廁所' : '還沒有上榜的廁所';
+        $('#rankEmptyText').textContent = filtered ? '換個篩選條件看看。' : '每次紀錄都會幫地點評分，分數最高的就是你的必拉聖地。';
+        $('[data-goto]', $('#rankEmpty')).hidden = filtered;
+      }
+
+      $('#rankList').innerHTML = places.map((p, i) => {
+        const key = `${p.name}|${p.lat}|${p.lng}`;
+        const open = openPlaces.has(key);
+        const recs = p.records.slice().sort((a, b) => b.timestamp - a.timestamp).slice(0, 6);
+        return `<li class="place">
+          <button type="button" class="place-row" data-key="${esc(key)}" aria-expanded="${open}">
+            <span class="medal num ${i < 3 ? `m${i + 1}` : ''}">${i + 1}</span>
+            <span class="place-main">
+              <span class="place-name">${esc(p.name)}</span>${p.tag ? `<span class="tag">${esc(p.tag)}</span>` : ''}
+              <span class="place-meta" style="display:block">去過 ${p.visits} 次，最近一次：${HS.relTime(p.lastTs)}</span>
+            </span>
+            <span class="score num ${scoreClass(p.avgRating)}" aria-label="平均 ${Number.isFinite(p.avgRating) ? p.avgRating.toFixed(1) : '無'} 分">${Number.isFinite(p.avgRating) ? p.avgRating.toFixed(1) : '—'}</span>
+          </button>
+          <div class="place-detail" ${open ? '' : 'hidden'}>
+            <ul class="rec-list">${recs.map(r => recItem(r, false)).join('')}</ul>
+            ${p.lat !== null ? `<div class="place-actions"><button type="button" class="btn btn-secondary btn-sm" data-fly="${p.lat},${p.lng}" data-name="${esc(p.name)}">${HS.icon('map')}在地圖上看</button></div>` : ''}
+          </div>
+        </li>`;
+      }).join('');
+
+      const recent = mine.slice().sort((a, b) => b.timestamp - a.timestamp).slice(0, 20);
+      $('#recentBox').hidden = !recent.length;
+      $('#recentList').innerHTML = recent.map(r => recItem(r, true)).join('');
+    }
+
+    async function deleteRecordFlow(id) {
+      const r = HS.getRecords().find(x => x.recordId === id);
+      if (!r) return;
+      const ok = await HS.confirm({
+        title: '刪除這筆紀錄？',
+        body: `${r.placeName || '未命名地點'}\n${HS.dateTime(r.timestamp)}，${recValue(r)}`,
+        okText: '刪除', danger: true, mood: 'sad'
+      });
+      if (!ok) return;
+      HS.deleteRecord(id);
+      mapNeedsFit = true;
+      invalidate();
+      HS.toast('已刪除一筆紀錄');
+    }
+
+    async function shareRank() {
+      const places = rankedPlaces().slice(0, 5);
+      if (!places.length) return;
+      const text = `${role.id}的必拉榜 🚽\n`
+        + places.map((p, i) => `${i + 1}. ${p.name}：${Number.isFinite(p.avgRating) ? p.avgRating.toFixed(1) : '—'} 分（去過 ${p.visits} 次）`).join('\n')
+        + '\n— 來自 Happy Shit 屎地圖';
+      try {
+        if (navigator.share) { await navigator.share({ title: '我的必拉榜', text }); return; }
+        await navigator.clipboard.writeText(text);
+        HS.toast('已複製必拉榜，可以貼給朋友了');
+      } catch (e) {
+        if (e?.name !== 'AbortError') HS.toast('這個瀏覽器不支援分享');
+      }
+    }
+
+    // ================================================================ role
+    function renderRoleView() {
+      const all = HS.getRecords();
+      const mine = HS.recordsOf(role.id, all);
+      const money = sum(mine.filter(r => r.type === 'poop').map(r => Number(r.poopValueMoney) || 0));
+      $('#meCard').innerHTML = `
+        <div class="avatar avatar-xl" style="--role:${role.color}">${role.avatar || '🧑'}</div>
+        <div class="me-name">${esc(role.id)}</div>
+        <div class="me-sub num">${HS.money(role.currency, role.monthlySalary)} / 月${role.note ? `，${esc(role.note)}` : ''}</div>
+        <dl class="me-stats">
+          <div><dt>紀錄</dt><dd class="num">${mine.length} 次</dd></div>
+          <div><dt>征服地點</dt><dd class="num">${HS.groupPlaces(mine, { byName: true }).length} 個</dd></div>
+          <div><dt>累積薪資</dt><dd class="num">${HS.money(role.currency, money)}</dd></div>
+        </dl>
+        <div class="me-rate">每蹲 1 秒入帳 ${HS.money(role.currency, CALC.salaryPerSecond(role.monthlySalary), 4)}</div>
+        <div class="me-actions">
+          <button class="btn btn-secondary" data-edit="${esc(role.id)}">${HS.icon('edit')}編輯</button>
+          <button class="btn btn-danger" data-delrole="${esc(role.id)}">${HS.icon('trash')}刪除</button>
+        </div>`;
+
+      const others = HS.getCharacters().filter(r => r.id !== role.id);
+      $('#roleList').innerHTML = others.length ? others.map(r => {
+        const n = HS.recordsOf(r.id, all).length;
+        return `<li class="role-row">
+          <span class="avatar" style="--role:${r.color}">${r.avatar || '🧑'}</span>
+          <span class="info"><b>${esc(r.id)}</b><span class="num">${n} 筆紀錄</span></span>
+          <button class="icon-btn" data-edit="${esc(r.id)}" aria-label="編輯 ${esc(r.id)}">${HS.icon('edit')}</button>
+          <button class="icon-btn" data-delrole="${esc(r.id)}" aria-label="刪除 ${esc(r.id)}">${HS.icon('trash')}</button>
+          <button class="btn btn-secondary btn-sm" data-switch="${esc(r.id)}">切換</button>
+        </li>`;
+      }).join('') : '<li class="muted small">目前只有你一個角色。</li>';
+    }
+
+    async function switchRole(id) {
+      if (session) {
+        const ok = await HS.confirm({ title: '正在紀錄中', body: '切換角色會取消這次還沒存的紀錄。', okText: '取消紀錄並切換', cancelText: '先不要', danger: true });
+        if (!ok) return;
+        session = null;
+        saveSession();
+      }
+      setRole(id);
+      HS.toast(`切換為「${role.id}」`);
+      showTab('map');
+    }
+
+    async function deleteRoleFlow(id) {
+      const roles = HS.getCharacters();
+      if (roles.length <= 1) {
+        await HS.alert({ title: '至少要留一位角色', body: '不然誰來扛屎？', mood: 'wow' });
+        return;
+      }
+      const n = HS.recordsOf(id).length;
+      const ok = await HS.confirm({
+        title: `刪除「${id}」？`,
+        body: `這個角色的 ${n} 筆紀錄和勢力範圍會一起刪除，無法復原。`,
+        okText: '刪除角色', danger: true, mood: 'sad'
+      });
+      if (!ok) return;
+      const wasMe = id === role.id;
+      if (wasMe && session) { session = null; saveSession(); }
+      HS.deleteRole(id);
+      if (wasMe) setRole(HS.getCharacters()[0].id);
+      else invalidate();
+      HS.toast(`已刪除「${id}」`);
+    }
+
+    function editRole(id) {
+      const r = HS.getRole(id);
+      if (!r) return;
+      HS.openRoleEditor({
+        role: r,
+        onDone(updated) {
+          if (id === role.id) {
+            if (session && session.roleId === id) { session.roleId = updated.id; saveSession(); }
+            HS.setLastRoleId(updated.id);
+            const url = new URL(location.href);
+            url.searchParams.set('role', updated.id);
+            history.replaceState(null, '', url);
+            resolveRole();
+            selectedRoles.delete(id);
+            selectedRoles.add(updated.id);
+          } else if (selectedRoles.delete(id)) {
+            selectedRoles.add(updated.id);
+          }
+          invalidate();
+          HS.toast('角色已更新');
+        }
+      });
     }
 
     function exportJson() {
-      const payload = {
-        characters: loadJson(LS_KEYS.characters, []),
-        records: loadJson(LS_KEYS.records, []),
-        exportedAt: new Date().toISOString()
-      };
+      const payload = { app: 'happy-shit', version: 2, exportedAt: new Date().toISOString(), characters: HS.getCharacters(), records: HS.getRecords() };
       const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'happyshit-export.json';
+      a.download = `happyshit-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
       a.click();
-      URL.revokeObjectURL(url);
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      HS.toast('備份已下載');
     }
 
-    // ---- Wiring ----
-    function init() {
-      ensureSeed();
-
-      const roleId = getCurrentRoleId();
-      const role = getRoleById(roleId);
-      if (!role) {
-        location.href = 'index.html';
+    async function importJson(file) {
+      let data;
+      try { data = JSON.parse(await file.text()); } catch { data = null; }
+      if (!data || !Array.isArray(data.characters) || !Array.isArray(data.records)) {
+        HS.alert({ title: '讀不懂這個檔案', body: '請選擇從「匯出備份」下載的 JSON 檔。', mood: 'sad' });
         return;
       }
-      setCurrentRoleId(role.id);
-
-      selectedRoleIds.clear();
-      selectedRoleIds.add(role.id);
-
-      refreshHeader();
-      startHeaderCarousel();
-
-      // Tab events
-      document.querySelectorAll('.tabBtn').forEach(btn => {
-        btn.addEventListener('click', () => showTab(btn.dataset.tab));
+      const chars = HS.getCharacters();
+      const recs = HS.getRecords();
+      const newChars = data.characters.filter(c => c && typeof c.id === 'string' && c.id && !chars.some(x => x.id === c.id));
+      const ids = new Set(recs.map(r => r.recordId));
+      const newRecs = data.records.filter(r => r && typeof r.characterId === 'string' && !(r.recordId && ids.has(r.recordId)));
+      if (!newChars.length && !newRecs.length) {
+        HS.alert({ title: '沒有新資料', body: '備份裡的角色和紀錄都已經在這裡了。', mood: 'happy' });
+        return;
+      }
+      const ok = await HS.confirm({
+        title: '匯入備份？',
+        body: `會新增 ${newChars.length} 個角色、${newRecs.length} 筆紀錄。已存在的資料不會被覆蓋。`,
+        okText: '匯入'
       });
+      if (!ok) return;
+      HS.saveCharacters(chars.concat(newChars.map(c => ({ ...c, color: null }))));
+      HS.saveRecords(recs.concat(newRecs));
+      HS.getCharacters(); // assigns colors to imported roles
+      HS.getRecords();    // normalizes ids and coordinates
+      mapNeedsFit = true;
+      invalidate();
+      HS.toast('匯入完成');
+    }
 
-      // default tab (after wiring; even if map fails, other tabs still work)
-      showTab('map');
+    // ================================================================ wiring
+    function wire() {
+      $$('.tab-ico').forEach(el => { el.innerHTML = HS.icon(el.dataset.ico); });
+      $$('[data-ico-btn]').forEach(el => { el.innerHTML = HS.icon(el.dataset.icoBtn); });
+      $('#icoLayers').innerHTML = HS.icon('layers');
+      $('#btnLocate').innerHTML = HS.icon('locate');
+      $('#fabArt').innerHTML = HS.mascot();
+      $('#mapEmptyArt').innerHTML = HS.mascot({ mood: 'wow' });
+      $('#artPee').innerHTML = dropArt();
+      $('#artPoop').innerHTML = HS.mascot();
+      $('#heroArt').innerHTML = HS.mascot({ mood: 'proud' });
+      $('#heroChevron').innerHTML = HS.icon('chevron');
+      $$('.tile .chev').forEach(el => { el.innerHTML = HS.icon('chevron'); });
+      $('#btnShare').innerHTML = HS.icon('share');
+      $('#recentChevron').innerHTML = HS.icon('chevron');
+      $('#btnAddRole').innerHTML = `${HS.icon('plus')}新增角色`;
+      $('#icoExport').innerHTML = HS.icon('download');
+      $('#icoImport').innerHTML = HS.icon('upload');
+      $('#icoLogout').innerHTML = HS.icon('logout');
 
-      // Map role panel
-      const rolePanel = document.getElementById('rolePanel');
-      document.getElementById('btnToggleRolePanel').addEventListener('click', () => {
-        rolePanel.style.display = rolePanel.style.display === 'none' ? 'block' : 'none';
+      $$('.tab-btn').forEach(b => b.addEventListener('click', () => showTab(b.dataset.tab)));
+      $$('[data-goto]').forEach(b => b.addEventListener('click', () => showTab(b.dataset.goto)));
+      $('#btnWho').addEventListener('click', () => showTab('role'));
+      $('#ticker').addEventListener('click', advanceTicker);
+
+      // map
+      $('#btnLayers').addEventListener('click', openLayers);
+      $('#btnLocate').addEventListener('click', () => locateOnMap(true));
+      $('#btnFab').addEventListener('click', () => showTab('log'));
+      HS.wireSheet($('#layersSheet'));
+      $('#layersList').addEventListener('change', (e) => {
+        const cb = e.target.closest('input[type="checkbox"]');
+        if (!cb) return;
+        const next = new Set(selectedRoles);
+        if (cb.checked) next.add(cb.value); else next.delete(cb.value);
+        setLayers(next);
       });
+      $('#btnLayersMe').addEventListener('click', () => { setLayers([role.id]); HS.closeSheet($('#layersSheet')); });
+      $('#btnLayersAll').addEventListener('click', () => { setLayers(HS.getCharacters().map(r => r.id)); HS.closeSheet($('#layersSheet')); });
 
-      document.getElementById('btnCenterMe').addEventListener('click', centerMapOnMe);
+      // log
+      $$('[data-start]').forEach(b => b.addEventListener('click', () => startSession(b.dataset.start)));
+      $('#btnPause').addEventListener('click', togglePause);
+      $('#btnEnd').addEventListener('click', endSession);
+      $('#btnDiscard').addEventListener('click', () => discardSession(false));
+      $('#btnDrop').addEventListener('click', () => discardSession(true));
+      $('#btnLocRetry').addEventListener('click', () => ensureLocation(true));
+      $('#btnLocAlt').addEventListener('click', useLastLocation);
 
-      // Log events
-      document.getElementById('btnStartNew').addEventListener('click', startNewLog);
-      document.getElementById('btnUseLastLoc').addEventListener('click', useLastLocation);
-
-      document.getElementById('btnTypePee').addEventListener('click', () => setType('pee'));
-      document.getElementById('btnTypePoop').addEventListener('click', () => setType('poop'));
-
-      document.getElementById('btnTimerStart').addEventListener('click', startTimer);
-      document.getElementById('btnTimerPause').addEventListener('click', pauseTimer);
-      document.getElementById('btnTimerEnd').addEventListener('click', endTimer);
-
-      document.getElementById('btnSave').addEventListener('click', validateAndSave);
-
-      document.getElementById('btnNearbyYes').addEventListener('click', () => {
-        const panel = document.getElementById('nearbyPanel');
-        const name = String(panel.dataset.placeName || '').trim();
-        if (name) {
-          document.getElementById('placeName').value = name;
-          document.getElementById('manualPlace').value = name;
-          hideNearbyPrompt();
-          document.getElementById('rating').focus();
+      const form = $('#detailForm');
+      form.addEventListener('submit', saveDetails);
+      form.addEventListener('input', saveDraft);
+      $('#ratingRange').addEventListener('input', (e) => syncRating(e.target.value, 'range'));
+      $('#ratingNum').addEventListener('input', (e) => { if (e.target.value !== '') syncRating(e.target.value, 'num'); });
+      $('#ratingNum').addEventListener('blur', (e) => syncRating(e.target.value));
+      $('#peeCc').addEventListener('input', updatePeeSummary);
+      $('#placeName').addEventListener('input', () => { $('#placeErr').hidden = true; $('#placeName').removeAttribute('aria-invalid'); });
+      form.addEventListener('click', (e) => {
+        const cc = e.target.closest('[data-cc]');
+        if (cc) {
+          const v = Math.max(0, (Number($('#peeCc').value) || 0) + Number(cc.dataset.cc));
+          $('#peeCc').value = v;
+          updatePeeSummary();
+          saveDraft();
+          HS.haptic();
+        }
+        const lv = e.target.closest('[data-g]');
+        if (lv) {
+          level = Number(lv.dataset.g);
+          $$('.level', form).forEach(b => b.setAttribute('aria-checked', String(Number(b.dataset.g) === level)));
+          saveDraft();
+          HS.haptic();
+        }
+        const tg = e.target.closest('[data-tag]');
+        if (tg) {
+          tag = tag === tg.dataset.tag ? '' : tg.dataset.tag;
+          renderTags();
+          saveDraft();
+        }
+        const pl = e.target.closest('[data-place]');
+        if (pl) {
+          $('#placeName').value = pl.dataset.place;
+          $('#placeErr').hidden = true;
+          $('#placeName').removeAttribute('aria-invalid');
+          if (pl.dataset.ptag && !tag) { tag = pl.dataset.ptag; renderTags(); }
+          saveDraft();
+          HS.haptic();
         }
       });
 
-      document.getElementById('btnNearbyNo').addEventListener('click', () => {
-        hideNearbyPrompt();
-        document.getElementById('placeName').focus();
+      // overview
+      $('#periodSeg').addEventListener('click', (e) => {
+        const b = e.target.closest('[data-p]');
+        if (!b || b.dataset.p === period) return;
+        period = b.dataset.p;
+        renderOverview();
+      });
+      $$('[data-kpi]').forEach(b => b.addEventListener('click', () => openKpi(b.dataset.kpi)));
+      HS.wireSheet($('#kpiSheet'));
+      let resizeT = 0;
+      window.addEventListener('resize', () => {
+        clearTimeout(resizeT);
+        resizeT = setTimeout(() => { if (current === 'overview') renderOverview(); else dirty.add('overview'); }, 150);
       });
 
-      document.getElementById('placeName').addEventListener('input', () => {
-        if (document.getElementById('placeName').value.trim()) hideNearbyPrompt();
+      // rank
+      $('#rankSort').addEventListener('click', (e) => {
+        const b = e.target.closest('[data-sort]');
+        if (!b) return;
+        rankSort = b.dataset.sort;
+        renderRank();
       });
-
-      // Overview toggle
-      document.getElementById('periodWeek').addEventListener('click', () => setPeriod('week'));
-      document.getElementById('periodMonth').addEventListener('click', () => setPeriod('month'));
-      document.getElementById('periodAll').addEventListener('click', () => setPeriod('all'));
-
-      // Ranking controls
-      document.getElementById('rankSort').addEventListener('change', refreshRanking);
-      document.getElementById('rankType').addEventListener('change', refreshRanking);
-
-      // Recent records collapsible
-      const btnToggleRecent = document.getElementById('btnToggleRecent');
-      const recentWrap = document.getElementById('recentWrap');
-      if (btnToggleRecent && recentWrap) {
-        btnToggleRecent.addEventListener('click', () => {
-          const open = recentWrap.style.display === 'none';
-          recentWrap.style.display = open ? 'block' : 'none';
-          btnToggleRecent.textContent = open ? '收起' : '展開';
-          if (open) refreshRecentRecords();
-        });
-      }
-
-      // Role buttons
-      document.getElementById('btnGoIndex').addEventListener('click', () => location.href = 'index.html');
-      document.getElementById('btnExport').addEventListener('click', exportJson);
-
-      // KPI click -> ranking modal
-      document.querySelectorAll('#view-overview .kpi .box').forEach(box => {
-        box.addEventListener('click', () => openKpiModal(box.dataset.kpi));
-        box.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter' || e.key === ' ') openKpiModal(box.dataset.kpi);
-        });
+      $('#rankFilter').addEventListener('click', (e) => {
+        const t = e.target.closest('[data-type]');
+        const f = e.target.closest('[data-ftag]');
+        if (t) rankType = t.dataset.type;
+        if (f) rankTag = rankTag === f.dataset.ftag ? '' : f.dataset.ftag;
+        if (t || f) renderRank();
       });
-
-      document.getElementById('btnCloseKpiModal').addEventListener('click', closeKpiModal);
-      document.getElementById('kpiModal').addEventListener('click', (e) => {
-        if (e.target && e.target.id === 'kpiModal') closeKpiModal();
+      $('#view-rank').addEventListener('click', (e) => {
+        const row = e.target.closest('.place-row');
+        if (row) {
+          const key = row.dataset.key;
+          const open = !openPlaces.has(key);
+          if (open) openPlaces.add(key); else openPlaces.delete(key);
+          row.setAttribute('aria-expanded', String(open));
+          row.nextElementSibling.hidden = !open;
+          return;
+        }
+        const del = e.target.closest('[data-del]');
+        if (del) return deleteRecordFlow(del.dataset.del);
+        const fly = e.target.closest('[data-fly]');
+        if (fly) {
+          const [lat, lng] = fly.dataset.fly.split(',').map(Number);
+          flyToPlace(fly.dataset.name, lat, lng);
+        }
       });
+      $('#btnShare').addEventListener('click', shareRank);
 
-      // start log with location attempt
-      startNewLog();
-
-      // render map now
-      refreshMapUI();
-      refreshOverview();
-      refreshRanking();
-
-      updateTimerButtons();
+      // role
+      $('#view-role').addEventListener('click', (e) => {
+        const sw = e.target.closest('[data-switch]');
+        if (sw) return switchRole(sw.dataset.switch);
+        const ed = e.target.closest('[data-edit]');
+        if (ed) return editRole(ed.dataset.edit);
+        const dr = e.target.closest('[data-delrole]');
+        if (dr) return deleteRoleFlow(dr.dataset.delrole);
+      });
+      $('#btnAddRole').addEventListener('click', () => HS.openRoleEditor({
+        onDone(r) { invalidate(); HS.toast(`「${r.id}」加入戰局，可以在這裡切換`); }
+      }));
+      $('#btnExport').addEventListener('click', exportJson);
+      $('#btnImport').addEventListener('click', () => $('#importFile').click());
+      $('#importFile').addEventListener('change', (e) => {
+        const f = e.target.files?.[0];
+        e.target.value = '';
+        if (f) importJson(f);
+      });
+      $('#btnLogout').addEventListener('click', () => { location.href = 'index.html'; });
     }
 
-    init();
+    // ================================================================ init
+    HS.ensureSeed();
+    resolveRole();
+    if (!role) { location.replace('index.html'); return; }
+    HS.setLastRoleId(role.id);
+    selectedRoles = new Set([role.id]);
+    if (session && (session.roleId !== role.id || !['timing', 'details'].includes(session.stage))) session = null;
+    saveSession();
+
+    wire();
+    renderHeader();
+    renderLog();
+    dirty.delete('log');
+    showTab(location.hash.slice(1) || (session ? 'log' : 'map'));
+    HS.registerSW();
+  })();
   </script>
 </body>
 </html>

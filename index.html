@@ -2,777 +2,423 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Happy Shit | 登入</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#FFF7E9" />
+  <meta name="description" content="屎地圖 Happy Shit：記錄每一次上廁所，把蹲馬桶的時間換算成薪水。" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="屎地圖" />
+  <title>Happy Shit 屎地圖</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="assets/icon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" />
+  <link rel="stylesheet" href="assets/hs-base.css" />
   <style>
-    :root {
-      --primary: #6B4F3F;
-      --bg: #FFF7E9;
-      --accent: #FFD166;
-      --mint: #4ECDC4;
-      --text: #1f1f1f;
-      --muted: #8A8A8A;
-      --card: #ffffff;
-      --shadow: 0 10px 30px rgba(0,0,0,0.08);
-      --radius: 18px;
-    }
-
-    * { box-sizing: border-box; }
     body {
-      margin: 0;
-      font-family: ui-sans-serif, system-ui, -apple-system, "Inter", "Noto Sans TC", "SF Pro Text", "Segoe UI", Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      min-height: 100dvh;
+      /* faint ripple texture, like the surface of a just-flushed bowl */
+      background-color: var(--cream);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' fill='none' stroke='%236B4F3F' stroke-opacity='.05' stroke-width='1.5'%3E%3Ccircle cx='30' cy='30' r='8'/%3E%3Ccircle cx='30' cy='30' r='16'/%3E%3Ccircle cx='90' cy='90' r='6'/%3E%3Ccircle cx='90' cy='90' r='13'/%3E%3C/svg%3E");
     }
 
     .app {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: stretch;
-    }
-
-    header {
-      padding: 18px 18px 8px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .brand {
-      font-weight: 800;
-      letter-spacing: 0.2px;
-      color: var(--primary);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .pill {
-      font-size: 12px;
-      color: var(--primary);
-      background: rgba(107, 79, 63, 0.12);
-      padding: 6px 10px;
-      border-radius: 999px;
-      user-select: none;
-    }
-
-    main {
-      flex: 1;
-      padding: 0 18px 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
       max-width: 520px;
-      width: 100%;
       margin: 0 auto;
-    }
-
-    .card {
-      background: var(--card);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 16px;
-    }
-
-    .animWrap {
-      height: 220px;
-      display: grid;
-      place-items: center;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .toilet {
-      width: 210px;
-      height: 110px;
-      border-radius: 22px;
-      background: linear-gradient(180deg, #ffffff, #f2f2f2);
-      border: 2px solid rgba(0,0,0,0.06);
-      position: absolute;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      box-shadow: 0 18px 40px rgba(0,0,0,0.10);
-      cursor: pointer;
-      user-select: none;
-    }
-
-    .toilet:active {
-      transform: translateX(-50%) scale(0.99);
-    }
-
-    .toilet:before {
-      content: "";
-      position: absolute;
-      left: 50%;
-      top: 16px;
-      transform: translateX(-50%);
-      width: 150px;
-      height: 62px;
-      border-radius: 999px;
-      background: #fff;
-      border: 2px solid rgba(0,0,0,0.05);
-      box-shadow: inset 0 8px 18px rgba(0,0,0,0.06);
-    }
-
-    .poop {
-      width: 84px;
-      height: 84px;
-      border-radius: 26px;
-      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.35), rgba(255,255,255,0) 40%),
-        linear-gradient(180deg, #7a5643, #5e4032);
-      position: absolute;
-      left: 50%;
-      top: 84px;
-      transform: translateX(-50%);
-      display: grid;
-      place-items: center;
-    }
-
-    .poop.dropIn {
-      animation: drop 1.6s ease-in-out forwards;
-    }
-
-    .poop .face {
-      width: 48px;
-      height: 26px;
+      padding: calc(14px + var(--safe-t)) 20px calc(24px + var(--safe-b));
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-top: 6px;
+      flex-direction: column;
+      min-height: 100dvh;
     }
 
-    .eye {
-      width: 10px;
-      height: 10px;
-      background: rgba(0,0,0,0.55);
-      border-radius: 999px;
-    }
+    .top { display: flex; align-items: center; justify-content: space-between; }
+    .wordmark { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 18px; letter-spacing: -0.02em; color: var(--brown); }
+    .wordmark .mascot { width: 28px; height: 28px; }
+    .wordmark small { font-weight: 700; font-size: 13px; color: var(--muted); letter-spacing: 0; }
 
-    .smile {
-      width: 22px;
-      height: 10px;
-      border-bottom: 3px solid rgba(0,0,0,0.50);
-      border-radius: 0 0 16px 16px;
-      margin: 0 auto;
+    /* ---------- Stage: poop drops onto the toilet ---------- */
+    .stage {
+      position: relative;
+      height: 200px;
+      margin: 8px auto 0;
+      width: 220px;
     }
+    .toilet {
+      position: absolute;
+      left: 0; bottom: 0;
+      width: 220px; height: 150px;
+      cursor: pointer;
+      border: 0; padding: 0; background: none;
+    }
+    .toilet svg { width: 100%; height: 100%; display: block; }
+    .poop {
+      position: absolute;
+      left: 50%;
+      top: 53px;
+      width: 88px; height: 88px;
+      margin-left: -44px;
+      padding: 0; border: 0; background: none;
+      transform-origin: 50% 90%;
+      cursor: pointer;
+    }
+    .poop .mascot { width: 100%; height: 100%; }
+    .poop.is-dropping { animation: drop 1.05s cubic-bezier(0.5, 0, 0.6, 1) both; }
+    .poop.is-dropping .m-eyes,
+    .poop.is-dropping .mascot > path:last-child { animation: face-in 0.35s 1s both; }
+    .poop.is-hopping { animation: hop 0.5s var(--ease-out); }
+    .poop.is-wiggling { animation: wiggle 0.5s ease; }
 
     @keyframes drop {
-      0% { top: -120px; transform: translateX(-50%) scale(0.9); }
-      65% { top: 88px; transform: translateX(-50%) scale(1.02); }
-      78% { top: 70px; transform: translateX(-50%) scale(0.98); }
-      100% { top: 84px; transform: translateX(-50%) scale(1.0); }
+      0% { transform: translateY(-190px) scale(0.92, 1.08); }
+      62% { transform: translateY(0) scale(0.92, 1.08); }
+      72% { transform: translateY(0) scale(1.18, 0.78); }
+      84% { transform: translateY(-14px) scale(0.96, 1.05); }
+      100% { transform: translateY(0) scale(1); }
     }
-
-    .poop.hop {
-      animation: hop 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
-    }
-
+    @keyframes face-in { from { opacity: 0; transform: translateY(4px); } }
     @keyframes hop {
-      0% { transform: translateX(-50%) translateY(0) scale(1); }
-      45% { transform: translateX(-50%) translateY(-22px) scale(1.04); }
-      75% { transform: translateX(-50%) translateY(0) scale(0.98); }
-      100% { transform: translateX(-50%) translateY(0) scale(1); }
+      0% { transform: scale(1.12, 0.84); }
+      40% { transform: translateY(-34px) scale(0.94, 1.08); }
+      75% { transform: translateY(0) scale(1.1, 0.9); }
+      100% { transform: none; }
+    }
+    @keyframes wiggle {
+      20% { transform: rotate(-9deg); }
+      45% { transform: rotate(8deg); }
+      70% { transform: rotate(-4deg); }
+      100% { transform: none; }
     }
 
-    .fadeIn {
+    .splash { position: absolute; left: 50%; top: 128px; pointer-events: none; }
+    .splash i {
+      position: absolute;
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      background: var(--mint);
       opacity: 0;
-      transform: translateY(8px);
-      transition: opacity 320ms ease, transform 320ms ease;
     }
-    .fadeIn.ready {
-      opacity: 1;
-      transform: translateY(0);
+    .splash.go i { animation: splash 0.6s ease-out both; }
+    .splash i:nth-child(1) { --dx: -62px; --dy: -26px; }
+    .splash i:nth-child(2) { --dx: -36px; --dy: -46px; background: var(--yellow); }
+    .splash i:nth-child(3) { --dx: 40px; --dy: -44px; }
+    .splash i:nth-child(4) { --dx: 64px; --dy: -22px; background: var(--yellow); }
+    @keyframes splash {
+      0% { opacity: 1; transform: translate(-50%, 0) scale(0.6); }
+      100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), var(--dy)) scale(1); }
     }
 
-    .sectionTitle {
+    .bubble {
+      position: absolute;
+      left: 50%;
+      top: 4px;
+      transform: translateX(-50%);
+      padding: 6px 12px;
+      border-radius: 14px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      font-size: 13px;
       font-weight: 800;
-      color: var(--primary);
-      margin: 0 0 10px;
-      font-size: 16px;
+      color: var(--brown);
+      white-space: nowrap;
+      animation: pop-in 0.22s var(--ease-out);
+    }
+    .bubble::after {
+      content: "";
+      position: absolute; left: 50%; bottom: -6px;
+      width: 12px; height: 12px; margin-left: -6px;
+      background: var(--surface);
+      transform: rotate(45deg);
+      border-radius: 2px;
     }
 
-    .muted { color: var(--muted); font-size: 13px; }
+    /* ---------- Picker ---------- */
+    .picker { margin-top: 18px; }
+    .picker.is-waiting { opacity: 0; transform: translateY(10px); }
+    .picker { transition: opacity 0.4s ease, transform 0.4s var(--ease-out); }
+
+    .greet { font-size: 26px; letter-spacing: -0.01em; text-align: center; }
+    .lead { text-align: center; color: var(--muted); margin-top: 6px; font-size: 14px; }
 
     .carousel {
-      position: relative;
-      overflow: hidden;
-      padding: 12px 0 4px;
-    }
-
-    .track {
       display: flex;
       gap: 12px;
-      touch-action: pan-y;
-      will-change: transform;
-    }
-
-    .roleCard {
-      flex: 0 0 76%;
-      background: #fff;
-      border-radius: 20px;
-      padding: 14px;
-      box-shadow: 0 10px 24px rgba(0,0,0,0.10);
-      border: 2px solid rgba(107, 79, 63, 0.10);
-      transform: scale(0.94);
-      transition: transform 200ms ease, border-color 200ms ease;
-    }
-
-    .roleCard.active {
-      transform: scale(1);
-      border-color: rgba(78, 205, 196, 0.65);
-    }
-
-    .roleTop {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .avatar {
-      width: 54px;
-      height: 54px;
-      border-radius: 16px;
-      background: rgba(78, 205, 196, 0.18);
-      display: grid;
-      place-items: center;
-      font-size: 28px;
-      border: 2px solid rgba(78,205,196,0.35);
-      user-select: none;
-    }
-
-    .roleName {
-      font-weight: 900;
-      font-size: 16px;
-      line-height: 1.2;
-    }
-
-    .salary {
-      font-variant-numeric: tabular-nums;
-      color: rgba(107,79,63,0.85);
-      font-weight: 700;
-      margin-top: 4px;
-    }
-
-    .actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 12px;
-    }
-
-    button {
-      border: 0;
-      border-radius: 14px;
-      padding: 12px 14px;
-      font-weight: 900;
-      font-size: 14px;
-      cursor: pointer;
-      width: 100%;
-      min-height: 44px;
-    }
-
-    .btnPrimary {
-      background: var(--accent);
-      color: #2b231c;
-      box-shadow: 0 10px 22px rgba(255, 209, 102, 0.45);
-    }
-
-    .btnGhost {
-      background: transparent;
-      color: var(--primary);
-      border: 2px solid rgba(107,79,63,0.25);
-    }
-
-    .sheet {
-      position: fixed;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      transform: translateY(110%);
-      transition: transform 240ms ease;
-      background: rgba(255, 247, 233, 0.98);
-      border-top-left-radius: 22px;
-      border-top-right-radius: 22px;
-      box-shadow: 0 -18px 40px rgba(0,0,0,0.15);
-      padding: 14px 18px 18px;
-      max-width: 520px;
-      margin: 0 auto;
-    }
-
-    .sheet.open { transform: translateY(0); }
-
-    .sheetHeader {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      padding-bottom: 10px;
-    }
-
-    .sheetHeader .title {
-      font-weight: 900;
-      color: var(--primary);
-    }
-
-    .xBtn {
-      width: 44px;
-      height: 44px;
-      border-radius: 14px;
-      background: rgba(107,79,63,0.10);
-      color: var(--primary);
-      font-weight: 900;
-    }
-
-    .gridAvatars {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 10px;
-      margin: 10px 0 12px;
-    }
-
-    .avaPick {
-      height: 52px;
-      border-radius: 16px;
-      background: #fff;
-      border: 2px solid rgba(0,0,0,0.06);
-      display: grid;
-      place-items: center;
-      font-size: 26px;
-      cursor: pointer;
-      user-select: none;
-    }
-
-    .avaPick.selected {
-      border-color: rgba(78,205,196,0.9);
-      box-shadow: 0 10px 22px rgba(78,205,196,0.25);
-    }
-
-    label { display: block; font-size: 12px; color: var(--muted); margin-top: 10px; }
-    input, select, textarea {
-      width: 100%;
-      padding: 12px 12px;
-      border-radius: 14px;
-      border: 2px solid rgba(0,0,0,0.08);
-      background: #fff;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      padding: 18px 12% 14px;
+      margin: 0 -20px;
       outline: none;
-      min-height: 44px;
-      font-size: 14px;
     }
+    .carousel::-webkit-scrollbar { display: none; }
 
-    .row {
+    .role-card {
+      flex: 0 0 76%;
+      scroll-snap-align: center;
+      padding: 18px;
+      border-radius: var(--r-card);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      transform: scale(0.93);
+      opacity: 0.62;
+      transition: transform 0.25s var(--ease-out), opacity 0.25s ease, box-shadow 0.25s ease;
+      cursor: pointer;
+      user-select: none;
+      text-align: left;
+      border: 0;
+      color: inherit;
+    }
+    .role-card.is-active {
+      transform: none;
+      opacity: 1;
+      box-shadow: inset 0 0 0 3px var(--role), var(--shadow);
+    }
+    .role-head { display: flex; align-items: center; gap: 14px; }
+    .role-name { font-size: 18px; font-weight: 800; color: var(--brown); line-height: 1.25; overflow-wrap: anywhere; }
+    .role-salary { font-weight: 700; color: var(--ink); margin-top: 2px; }
+    .role-note { font-size: 13px; color: var(--muted); }
+    .role-stats {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1.5px dashed var(--line-strong);
     }
+    .role-stats dt { font-size: 12px; color: var(--muted); }
+    .role-stats dd { margin: 2px 0 0; font-weight: 800; font-size: 17px; color: var(--brown); }
 
-    .hint { font-size: 12px; color: var(--muted); margin-top: 8px; }
-    .error { font-size: 12px; color: #b00020; margin-top: 8px; }
-
-    .footerSafe {
-      padding: 10px 18px 20px;
-      text-align: center;
-      color: var(--muted);
-      font-size: 12px;
+    .dots { display: flex; justify-content: center; gap: 2px; }
+    .dots button {
+      width: 24px; height: 24px;
+      border: 0; padding: 0;
+      background: none;
+      display: grid; place-items: center;
     }
-
-    @media (max-width: 420px) {
-      .roleCard { flex-basis: 84%; }
-      .gridAvatars { grid-template-columns: repeat(4, 1fr); }
+    .dots button::after {
+      content: "";
+      width: 7px; height: 7px;
+      border-radius: 99px;
+      background: var(--line-strong);
+      transition: width 0.2s ease, background-color 0.2s ease;
     }
+    .dots button[aria-current="true"]::after { width: 20px; background: var(--brown); }
+
+    .cta { display: grid; gap: 10px; margin-top: auto; padding-top: 18px; }
+    .cta .btn-primary { min-height: 56px; font-size: 17px; }
+    .foot { text-align: center; font-size: 12.5px; color: var(--muted); margin-top: 14px; }
   </style>
 </head>
 <body>
   <div class="app">
-    <header>
-      <div class="brand">
-        <span style="font-size:18px;">💩</span>
-        <span>Happy Shit</span>
+    <header class="top">
+      <div class="wordmark" aria-label="Happy Shit 屎地圖">
+        <span id="markMascot"></span>Happy Shit <small>屎地圖</small>
       </div>
-      <div class="pill">屎地圖 v0</div>
     </header>
 
-    <main>
-      <section class="card animWrap">
-        <div class="poop dropIn" id="poop" aria-label="poop animation">
-          <div class="face">
-            <div class="eye"></div>
-            <div class="eye"></div>
-          </div>
-          <div class="smile"></div>
-        </div>
-        <div class="toilet" id="toilet" aria-label="tap toilet"></div>
-      </section>
+    <div class="stage" aria-hidden="true">
+      <button class="toilet" id="toilet" tabindex="-1" aria-label="馬桶">
+        <svg viewBox="0 0 220 150">
+          <ellipse cx="110" cy="144" rx="72" ry="6" fill="#6B4F3F" fill-opacity=".12" />
+          <rect x="58" y="6" width="104" height="58" rx="16" fill="#fff" stroke="#E6D6BF" stroke-width="3" />
+          <rect x="98" y="17" width="24" height="8" rx="4" fill="#E6D6BF" />
+          <path d="M28 74c4 34 38 48 64 50l-6 18h48l-6-18c26-2 60-16 64-50z" fill="#fff" stroke="#E6D6BF" stroke-width="3" stroke-linejoin="round" />
+          <path d="M60 110c14 8 34 12 50 12" stroke="#E6D6BF" stroke-width="3" fill="none" stroke-linecap="round" />
+          <ellipse cx="110" cy="72" rx="86" ry="17" fill="#fff" stroke="#E6D6BF" stroke-width="3" />
+          <ellipse cx="110" cy="70" rx="66" ry="10" fill="#FFF7E9" />
+        </svg>
+      </button>
+      <div class="splash" id="splash"><i></i><i></i><i></i><i></i></div>
+      <button class="poop is-dropping" id="poop" tabindex="-1" aria-label="便便"></button>
+    </div>
 
-      <section id="roleSection" class="card fadeIn">
-        <p class="sectionTitle">選擇角色</p>
-        <p class="muted" style="margin:0 0 10px;">左右滑動卡片，畫面中央的角色會被選取。</p>
+    <main class="picker is-waiting" id="picker">
+      <h1 class="greet">今天輪到誰上場？</h1>
+      <p class="lead">左右滑動挑角色，中間那位就是你。</p>
 
-        <div class="carousel" id="carousel">
-          <div class="track" id="track"></div>
-        </div>
-
-        <div class="actions">
-          <button class="btnPrimary" id="btnLogin">以此角色登入</button>
-          <button class="btnGhost" id="btnNew">新增角色</button>
-        </div>
-        <div class="hint" id="hint"></div>
-      </section>
+      <div class="carousel" id="carousel" tabindex="0" role="listbox" aria-label="角色列表"></div>
+      <div class="dots" id="dots" aria-label="切換角色"></div>
     </main>
 
-    <div class="footerSafe">資料儲存在本機 LocalStorage；清除瀏覽器資料會消失。</div>
-
-    <section class="sheet" id="sheet" aria-hidden="true">
-      <div class="sheetHeader">
-        <div class="title">新增角色</div>
-        <button class="xBtn" id="btnClose" aria-label="close">✕</button>
-      </div>
-
-      <div>
-        <div class="muted">步驟 1：選擇頭像</div>
-        <div class="gridAvatars" id="avatarGrid"></div>
-
-        <div class="muted" style="margin-top:8px;">步驟 2：輸入基本資料</div>
-        <label for="roleId">角色 ID（必填）</label>
-        <input id="roleId" placeholder="例如：社畜小王" maxlength="20" />
-
-        <div class="row">
-          <div>
-            <label for="salary">月薪（必填）</label>
-            <input id="salary" type="number" inputmode="numeric" placeholder="45000" min="0" />
-          </div>
-          <div>
-            <label for="currency">幣別</label>
-            <select id="currency">
-              <option value="NT$">NT$</option>
-              <option value="$">$</option>
-              <option value="¥">¥</option>
-              <option value="€">€</option>
-            </select>
-          </div>
-        </div>
-
-        <label for="note">備註（選填）</label>
-        <input id="note" placeholder="例如：咖啡社畜" maxlength="30" />
-
-        <div class="error" id="formError" style="display:none;"></div>
-        <div style="margin-top:12px;">
-          <button class="btnPrimary" id="btnCreate">完成建立</button>
-        </div>
-        <div class="hint">建立後會回到角色輪播列表。</div>
-      </div>
-    </section>
+    <div class="cta">
+      <button class="btn btn-primary btn-block" id="btnLogin">以此角色登入</button>
+      <button class="btn btn-secondary btn-block" id="btnNew"></button>
+      <p class="foot">紀錄只存在這台裝置的瀏覽器裡，清除瀏覽資料就會消失。</p>
+    </div>
   </div>
 
+  <script src="assets/hs-core.js"></script>
   <script>
-    const LS_KEYS = {
-      characters: 'happyshit.characters.v1',
-      records: 'happyshit.records.v1',
-      lastRole: 'happyshit.lastRoleId.v1'
-    };
+    const { $, $$, escapeHtml } = HS;
 
-    const AVATARS = ['🧑\u200d💼','🧑\u200d🎓','🧑\u200d🦾','🧑\u200d🍳','🧑\u200d💻','🧑\u200d🚀','🧑\u200d🎨','🧑\u200d🏃','🧑\u200d🌾','🧑\u200d🔧'];
+    const elCarousel = $('#carousel');
+    const elDots = $('#dots');
+    const elLogin = $('#btnLogin');
+    const elPoop = $('#poop');
 
-    function nowTs() { return Date.now(); }
-    function uid() { return Math.random().toString(16).slice(2) + '-' + Date.now().toString(16); }
+    let roles = [];
+    let active = 0;
 
-    function loadJson(key, fallback) {
-      try {
-        const raw = localStorage.getItem(key);
-        if (!raw) return fallback;
-        return JSON.parse(raw);
-      } catch {
-        return fallback;
+    // ---------- stage ----------
+    $('#markMascot').innerHTML = HS.mascot();
+    elPoop.innerHTML = HS.mascot({ mood: 'happy' });
+
+    elPoop.addEventListener('animationend', (e) => {
+      if (e.animationName === 'drop') {
+        elPoop.classList.remove('is-dropping');
+        $('#splash').classList.add('go');
       }
-    }
+      if (e.animationName === 'hop') elPoop.classList.remove('is-hopping');
+      if (e.animationName === 'wiggle') elPoop.classList.remove('is-wiggling');
+    });
 
-    function saveJson(key, value) {
-      localStorage.setItem(key, JSON.stringify(value));
-    }
-
-    function formatMoney(currency, amount) {
-      const num = Number(amount);
-      if (!Number.isFinite(num)) return `${currency} 0`;
-      const rounded = Math.round(num);
-      return `${currency} ${rounded.toLocaleString('en-US')}`;
-    }
-
-    function ensureSeed() {
-      let characters = loadJson(LS_KEYS.characters, null);
-      if (Array.isArray(characters) && characters.length) return;
-
-      characters = [
-        { id: '社畜小王', avatar: '🧑\u200d💼', monthlySalary: 45000, currency: 'NT$', note: '咖啡社畜', createdAt: nowTs() },
-        { id: '健身小美', avatar: '🧑\u200d🦾', monthlySalary: 52000, currency: 'NT$', note: '健身少女', createdAt: nowTs() },
-        { id: '學生阿哲', avatar: '🧑\u200d🎓', monthlySalary: 12000, currency: 'NT$', note: '被期末追殺', createdAt: nowTs() }
-      ];
-      saveJson(LS_KEYS.characters, characters);
-      saveJson(LS_KEYS.records, []);
-      localStorage.setItem(LS_KEYS.lastRole, characters[0].id);
-    }
-
-    const elRoleSection = document.getElementById('roleSection');
-    const elTrack = document.getElementById('track');
-    const elHint = document.getElementById('hint');
-    const elSheet = document.getElementById('sheet');
-
-    const elBtnLogin = document.getElementById('btnLogin');
-    const elBtnNew = document.getElementById('btnNew');
-    const elBtnClose = document.getElementById('btnClose');
-
-    const elAvatarGrid = document.getElementById('avatarGrid');
-    const elRoleId = document.getElementById('roleId');
-    const elSalary = document.getElementById('salary');
-    const elCurrency = document.getElementById('currency');
-    const elNote = document.getElementById('note');
-    const elBtnCreate = document.getElementById('btnCreate');
-    const elFormError = document.getElementById('formError');
-
-    const elToilet = document.getElementById('toilet');
-    const elPoop = document.getElementById('poop');
-
-    let characters = [];
-    let selectedIndex = 0;
-    let isDragging = false;
-    let dragStartX = 0;
-    let dragStartTranslate = 0;
-    let currentTranslate = 0;
-
-    function hopPoop() {
-      if (!elPoop) return;
-      elPoop.classList.remove('hop');
-      // force reflow so animation can restart
+    function replay(cls) {
+      if (elPoop.classList.contains('is-dropping')) return;
+      elPoop.classList.remove('is-hopping', 'is-wiggling');
       void elPoop.offsetWidth;
-      elPoop.classList.add('hop');
+      elPoop.classList.add(cls);
+      HS.haptic();
     }
 
-    if (elToilet) {
-      elToilet.addEventListener('click', hopPoop);
+    const LINES = ['噗！', '別戳我啦', '今天也要順暢喔', '我是有質感的便便', '沖水前記得紀錄'];
+    let bubbleTimer = null;
+    function say() {
+      $('.stage .bubble')?.remove();
+      const b = document.createElement('div');
+      b.className = 'bubble';
+      b.textContent = LINES[Math.floor(Math.random() * LINES.length)];
+      $('.stage').appendChild(b);
+      clearTimeout(bubbleTimer);
+      bubbleTimer = setTimeout(() => b.remove(), 1500);
     }
 
-    if (elPoop) {
-      elPoop.addEventListener('animationend', (e) => {
-        if (e.animationName === 'hop') elPoop.classList.remove('hop');
-        if (e.animationName === 'drop') elPoop.classList.remove('dropIn');
-      });
+    $('#toilet').addEventListener('click', () => replay('is-hopping'));
+    elPoop.addEventListener('click', () => { replay('is-wiggling'); say(); });
+
+    // ---------- carousel ----------
+    function monthStats(roleId, all) {
+      const start = HS.startOfMonth(Date.now());
+      const recs = HS.recordsOf(roleId, all).filter(r => r.timestamp >= start);
+      return {
+        count: recs.length,
+        money: HS.sum(recs.filter(r => r.type === 'poop').map(r => Number(r.poopValueMoney) || 0))
+      };
     }
 
-    function openSheet() {
-      elSheet.classList.add('open');
-      elSheet.setAttribute('aria-hidden', 'false');
-      elFormError.style.display = 'none';
-      elRoleId.value = '';
-      elSalary.value = '';
-      elCurrency.value = 'NT$';
-      elNote.value = '';
-      selectAvatar(AVATARS[0]);
-    }
+    function render() {
+      roles = HS.getCharacters();
+      const all = HS.getRecords();
+      const lastId = HS.getLastRoleId();
+      active = Math.max(0, roles.findIndex(r => r.id === lastId));
 
-    function closeSheet() {
-      elSheet.classList.remove('open');
-      elSheet.setAttribute('aria-hidden', 'true');
-    }
-
-    let selectedAvatar = AVATARS[0];
-    function selectAvatar(ava) {
-      selectedAvatar = ava;
-      [...elAvatarGrid.querySelectorAll('.avaPick')].forEach(btn => {
-        btn.classList.toggle('selected', btn.dataset.ava === ava);
-      });
-    }
-
-    function renderAvatarPicker() {
-      elAvatarGrid.innerHTML = '';
-      for (const ava of AVATARS) {
-        const btn = document.createElement('div');
-        btn.className = 'avaPick' + (ava === selectedAvatar ? ' selected' : '');
-        btn.textContent = ava;
-        btn.dataset.ava = ava;
-        btn.addEventListener('click', () => selectAvatar(ava));
-        elAvatarGrid.appendChild(btn);
-      }
-    }
-
-    function renderCarousel() {
-      elTrack.innerHTML = '';
-      characters = loadJson(LS_KEYS.characters, []);
-      const lastRoleId = localStorage.getItem(LS_KEYS.lastRole);
-      selectedIndex = Math.max(0, characters.findIndex(c => c.id === lastRoleId));
-      if (selectedIndex < 0) selectedIndex = 0;
-
-      for (const c of characters) {
-        const card = document.createElement('div');
-        card.className = 'roleCard';
-        card.innerHTML = `
-          <div class="roleTop">
-            <div class="avatar" aria-hidden="true">${c.avatar}</div>
-            <div>
-              <div class="roleName">${escapeHtml(c.id)}</div>
-              <div class="salary">${formatMoney(c.currency || 'NT$', c.monthlySalary)} / 月</div>
-              <div class="muted" style="margin-top:6px;">${escapeHtml(c.note || '')}</div>
+      elCarousel.innerHTML = roles.map((r, i) => {
+        const s = monthStats(r.id, all);
+        return `
+          <div class="role-card" role="option" data-i="${i}" style="--role:${r.color}" aria-selected="false">
+            <div class="role-head">
+              <div class="avatar avatar-lg" style="--role:${r.color}">${r.avatar || '🧑'}</div>
+              <div style="min-width:0">
+                <div class="role-name">${escapeHtml(r.id)}</div>
+                <div class="role-salary num">${HS.money(r.currency, r.monthlySalary)} / 月</div>
+                ${r.note ? `<div class="role-note">${escapeHtml(r.note)}</div>` : ''}
+              </div>
             </div>
-          </div>
-        `;
-        elTrack.appendChild(card);
-      }
+            <dl class="role-stats">
+              <div><dt>本月蹲了</dt><dd class="num">${s.count} 次</dd></div>
+              <div><dt>本月拉屎薪資</dt><dd class="num">${HS.money(r.currency, s.money)}</dd></div>
+            </dl>
+          </div>`;
+      }).join('');
 
-      snapToIndex(selectedIndex, true);
-      updateActiveCard();
+      elDots.innerHTML = roles.map((r, i) =>
+        `<button type="button" data-i="${i}" aria-label="${escapeHtml(r.id)}"></button>`).join('');
+
+      requestAnimationFrame(() => scrollToIndex(active, false));
+      setActive(active);
     }
 
-    function escapeHtml(s) {
-      return String(s)
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#039;');
-    }
-
-    function carouselWidth() {
-      const carousel = document.getElementById('carousel');
-      return carousel.getBoundingClientRect().width;
-    }
-
-    function cardStride() {
-      const first = elTrack.querySelector('.roleCard');
-      if (!first) return 0;
-      const style = getComputedStyle(elTrack);
-      const gap = parseFloat(style.columnGap || style.gap || '12') || 12;
-      return first.getBoundingClientRect().width + gap;
-    }
-
-    function snapToIndex(idx, immediate = false) {
-      const stride = cardStride();
-      const viewport = carouselWidth();
-      const offsetToCenter = (viewport * 0.5) - (stride * 0.5);
-      currentTranslate = offsetToCenter - idx * stride;
-
-      elTrack.style.transition = immediate ? 'none' : 'transform 220ms ease';
-      elTrack.style.transform = `translateX(${currentTranslate}px)`;
-      if (immediate) {
-        requestAnimationFrame(() => { elTrack.style.transition = 'transform 220ms ease'; });
-      }
-
-      selectedIndex = idx;
-      updateActiveCard();
-      const role = characters[selectedIndex];
-      if (role) {
-        localStorage.setItem(LS_KEYS.lastRole, role.id);
-        elHint.textContent = `目前選取：${role.id}`;
-      }
-    }
-
-    function updateActiveCard() {
-      const cards = [...elTrack.querySelectorAll('.roleCard')];
-      cards.forEach((card, idx) => card.classList.toggle('active', idx === selectedIndex));
-    }
-
-    function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
-
-    function onPointerDown(e) {
-      if (!characters.length) return;
-      isDragging = true;
-      elTrack.style.transition = 'none';
-      dragStartX = (e.touches ? e.touches[0].clientX : e.clientX);
-      dragStartTranslate = currentTranslate;
-    }
-
-    function onPointerMove(e) {
-      if (!isDragging) return;
-      const x = (e.touches ? e.touches[0].clientX : e.clientX);
-      const dx = x - dragStartX;
-      currentTranslate = dragStartTranslate + dx;
-      elTrack.style.transform = `translateX(${currentTranslate}px)`;
-      e.preventDefault?.();
-    }
-
-    function onPointerUp() {
-      if (!isDragging) return;
-      isDragging = false;
-
-      const stride = cardStride();
-      const viewport = carouselWidth();
-      const offsetToCenter = (viewport * 0.5) - (stride * 0.5);
-      const rawIdx = (offsetToCenter - currentTranslate) / stride;
-      const idx = clamp(Math.round(rawIdx), 0, Math.max(0, characters.length - 1));
-      snapToIndex(idx);
-    }
-
-    function createCharacter() {
-      const id = elRoleId.value.trim();
-      const salary = Number(elSalary.value);
-      const currency = elCurrency.value || 'NT$';
-      const note = elNote.value.trim();
-
-      if (!id) return showError('角色 ID 不能空白');
-      if (id.length < 2) return showError('角色 ID 太短（至少 2 個字）');
-      if (!Number.isFinite(salary) || salary <= 0) return showError('月薪需為大於 0 的數字');
-
-      const existing = loadJson(LS_KEYS.characters, []);
-      if (existing.some(c => c.id === id)) return showError('角色 ID 已存在，請換一個');
-
-      existing.push({
-        id,
-        avatar: selectedAvatar,
-        monthlySalary: salary,
-        currency,
-        note,
-        createdAt: nowTs()
+    function setActive(i) {
+      active = HS.clamp(i, 0, roles.length - 1);
+      $$('.role-card', elCarousel).forEach((c, idx) => {
+        c.classList.toggle('is-active', idx === active);
+        c.setAttribute('aria-selected', String(idx === active));
       });
-
-      saveJson(LS_KEYS.characters, existing);
-      localStorage.setItem(LS_KEYS.lastRole, id);
-      closeSheet();
-      renderCarousel();
+      $$('button', elDots).forEach((d, idx) => d.setAttribute('aria-current', String(idx === active)));
+      const role = roles[active];
+      elLogin.textContent = role ? `以「${role.id}」登入` : '以此角色登入';
+      elLogin.disabled = !role;
     }
 
-    function showError(msg) {
-      elFormError.textContent = msg;
-      elFormError.style.display = 'block';
+    function scrollToIndex(i, smooth = true) {
+      const card = elCarousel.children[i];
+      if (!card) return;
+      const left = card.offsetLeft - (elCarousel.clientWidth - card.offsetWidth) / 2;
+      elCarousel.scrollTo({ left, behavior: smooth ? 'smooth' : 'auto' });
     }
 
-    function loginSelected() {
-      const role = characters[selectedIndex];
+    let scrollRaf = 0;
+    elCarousel.addEventListener('scroll', () => {
+      cancelAnimationFrame(scrollRaf);
+      scrollRaf = requestAnimationFrame(() => {
+        const mid = elCarousel.scrollLeft + elCarousel.clientWidth / 2;
+        let best = 0, bestD = Infinity;
+        [...elCarousel.children].forEach((c, i) => {
+          const d = Math.abs(c.offsetLeft + c.offsetWidth / 2 - mid);
+          if (d < bestD) { bestD = d; best = i; }
+        });
+        if (best !== active) { setActive(best); HS.haptic(6); }
+      });
+    }, { passive: true });
+
+    elCarousel.addEventListener('click', (e) => {
+      const card = e.target.closest('.role-card');
+      if (!card) return;
+      const i = Number(card.dataset.i);
+      if (i === active) login(); else { setActive(i); scrollToIndex(i); }
+    });
+
+    elCarousel.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') { e.preventDefault(); setActive(active + 1); scrollToIndex(active); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); setActive(active - 1); scrollToIndex(active); }
+      if (e.key === 'Enter') login();
+    });
+
+    elDots.addEventListener('click', (e) => {
+      const b = e.target.closest('button');
+      if (!b) return;
+      setActive(Number(b.dataset.i));
+      scrollToIndex(active);
+    });
+
+    window.addEventListener('resize', () => scrollToIndex(active, false));
+
+    function login() {
+      const role = roles[active];
       if (!role) return;
-      localStorage.setItem(LS_KEYS.lastRole, role.id);
+      HS.setLastRoleId(role.id);
       location.href = `HappyShit.html?role=${encodeURIComponent(role.id)}`;
     }
 
-    function setupCarouselEvents() {
-      const carousel = document.getElementById('carousel');
-      carousel.addEventListener('mousedown', onPointerDown);
-      carousel.addEventListener('mousemove', onPointerMove);
-      window.addEventListener('mouseup', onPointerUp);
+    // ---------- init ----------
+    HS.ensureSeed();
+    render();
 
-      carousel.addEventListener('touchstart', onPointerDown, { passive: false });
-      carousel.addEventListener('touchmove', onPointerMove, { passive: false });
-      carousel.addEventListener('touchend', onPointerUp);
-      carousel.addEventListener('touchcancel', onPointerUp);
+    $('#btnNew').innerHTML = `${HS.icon('plus')}新增角色`;
+    $('#btnNew').addEventListener('click', () => HS.openRoleEditor({
+      onDone(role) {
+        HS.setLastRoleId(role.id);
+        render();
+        HS.toast(`「${role.id}」加入戰局`);
+      }
+    }));
+    elLogin.addEventListener('click', login);
 
-      window.addEventListener('resize', () => snapToIndex(selectedIndex, true));
-    }
+    // Reveal the picker once the poop has landed (one orchestrated entrance).
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    setTimeout(() => $('#picker').classList.remove('is-waiting'), reduce ? 0 : 900);
 
-    function init() {
-      ensureSeed();
-      renderAvatarPicker();
-      renderCarousel();
-      setupCarouselEvents();
-
-      elBtnNew.addEventListener('click', openSheet);
-      elBtnClose.addEventListener('click', closeSheet);
-      elBtnCreate.addEventListener('click', createCharacter);
-      elBtnLogin.addEventListener('click', loginSelected);
-
-      // show role UI after animation settles
-      setTimeout(() => elRoleSection.classList.add('ready'), 1200);
-
-      // If already have a last role and want quick enter
-      const lastRole = localStorage.getItem(LS_KEYS.lastRole);
-      if (lastRole) elHint.textContent = `上次使用：${lastRole}`;
-    }
-
-    init();
+    HS.registerSW();
   </script>
 </body>
 </html>

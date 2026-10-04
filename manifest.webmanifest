@@ -1,0 +1,15 @@
+{
+  "name": "Happy Shit 屎地圖",
+  "short_name": "屎地圖",
+  "description": "記錄每一次上廁所，把蹲馬桶的時間換算成薪水。",
+  "lang": "zh-Hant",
+  "start_url": "index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FFF7E9",
+  "theme_color": "#FFF7E9",
+  "icons": [
+    { "src": "assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
